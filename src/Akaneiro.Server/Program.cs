@@ -43,5 +43,5 @@ if (options.WebLogin)
 
 app.Logger.LogInformation("Akaneiro server: web service on {Address}:{Http}, game port {Game} (clients connect to {Public}), data in {Data}, client assets {Assets}{WebLogin}",
     httpAddress, options.HttpPort, options.GamePort, options.PublicHost, dataDir, assetsDir,
-    options.WebLogin ? ", web login (client.php) enabled" : "");
+    options.WebLogin ? ", web login (client.php + /register.html) enabled" : "");
 app.Run();

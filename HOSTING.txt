@@ -183,8 +183,11 @@ How it works:
 
    (Keep the mw.angry-red.com line as well if Steam players use the same server.)
 
-3. Create accounts. The client's register button only opens the old website, so accounts are
-   created against the server directly:
+3. Create accounts. Open the registration page the server serves for this feature:
+
+       http://localhost/register.html
+
+   Or create them against the endpoint directly:
 
        curl.exe -X POST "http://localhost/client.php?mod=register" -d "email=you@example.com&password=***&game=akaneiro"
 
