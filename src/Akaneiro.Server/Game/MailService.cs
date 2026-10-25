@@ -21,18 +21,20 @@ namespace Akaneiro.Server.Game
             "The Order of Akane thanks you for your contribution through Kickstarter";
 
         /// <summary>
-        /// The Kickstarter unique items, as their low-level row in uniqueItem.rare
-        /// (item id, prefab, item level, gem, enchant) - Little Red's Hooded Cloak (9000),
-        /// The Clever Huntsman's Axe (9005), Engraved Akane Signet Ring (9010),
-        /// Wolf's Granny Cap (9015). The client rebuilds name, icon and tooltip from these
-        /// numbers (ItemDeployInfo.GetItemObject), so the attachment looks like the original's.
+        /// The Kickstarter unique items. The uniqueItem.rare rows (9000/9005/9010/9015) are
+        /// catalog entries, not items: the client resolves every SItemInfo by its item id in
+        /// Props.General (ItemDeployInfo.SetTypeID), so we must send the row's TypeID with the
+        /// row's prefab/gem/enchant/level - 2010 cloak, 1002 axe, 3001 ring, 2001 helm. The
+        /// marketing names ("Clever Huntsman's", "Akane Signet", ...) come from the enchant
+        /// prefix combined with the type name; unknown ids render as null refs in the mailbox
+        /// and as iconless "unknown" items in the bag.
         /// </summary>
         private static readonly (int ItemId, int PrefabId, int Level, int Gem, int Enchant)[] KickstarterRewards =
         {
-            (9000, 101, 4, 905, 800),  // hooded cloak: "Red Cap's" regen below 8% HP
-            (9005, 101, 6, 1005, 800), // axe: "Swift and True" speed on full energy
-            (9010, 101, 8, 1105, 800), // ring: "Balance Seeker" raises the lowest stat
-            (9015, 1002, 10, 805, 821) // GWOLF cap: "Blend in with the Pack" stealth
+            (2010, 101, 4, 905, 800),  // Little Red's Hooded Cloak: regen below 8% HP
+            (1002, 101, 6, 1005, 800), // The Clever Huntsman's Axe: speed on full energy
+            (3001, 101, 8, 1105, 800), // Engraved Akane Signet Ring: raises the lowest stat
+            (2001, 1002, 10, 805, 821) // Wolf's Granny Cap (GWOLF): stealth
         };
 
         private readonly Session _s;

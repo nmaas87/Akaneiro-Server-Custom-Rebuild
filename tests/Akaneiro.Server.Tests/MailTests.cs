@@ -42,9 +42,11 @@ public sealed class MailTests
         using var player = new TestPlayer(_output).LoginNewCharacter();
 
         SMailInfo mail = OnlyMail(player);
-        // uniqueItem.rare, low-level variant of each reward; the client rebuilds name and icon
-        // from these numbers (ItemDeployInfo.GetItemObject).
-        var expected = new[] { (9000, 4, 905, 800), (9005, 6, 1005, 800), (9010, 8, 1105, 800), (9015, 10, 805, 821) };
+        // uniqueItem.rare rows 9000/9005/9010/9015, mapped to the real item ids they sell
+        // (Props.General type ids) with the row's prefab/gem/enchant/level - the client
+        // resolves every attachment through ItemDeployInfo.GetItemObject, which only knows
+        // Props.General ids; the catalog row number itself would render as a null item.
+        var expected = new[] { (2010, 4, 905, 800), (1002, 6, 1005, 800), (3001, 8, 1105, 800), (2001, 10, 805, 821) };
         Assert.Equal(expected.Length, mail.itemVec.Count);
         int index = 0;
         foreach (SItemInfo item in mail.itemVec.Cast<SItemInfo>())
@@ -84,7 +86,7 @@ public sealed class MailTests
             player.Take("On_GetMailAllItemsResult").Arg<EServerErrorType>(1).Get());
 
         Assert.Equal(4, player.Character.Bag.Count);
-        Assert.Equal(new[] { 9000, 9005, 9010, 9015 }, player.Character.Bag.Select(i => i.ItemId).OrderBy(id => id));
+        Assert.Equal(new[] { 1002, 2001, 2010, 3001 }, player.Character.Bag.Select(i => i.ItemId).OrderBy(id => id));
         // The client was told about each bag slot it now has to draw.
         Assert.Equal(4, player.TakeAll("On_NotifyItemUpdate").Count);
     }
@@ -98,13 +100,13 @@ public sealed class MailTests
         player.Send(ProtocolGame_SendRequest.GetMailItem(mail.id, 1)); // the axe
         Assert.Equal(EServerErrorType.eSuccess,
             player.Take("On_GetMailItemResult").Arg<EServerErrorType>(0).Get());
-        Assert.Equal(9005, Assert.Single(player.Character.Bag).ItemId);
+        Assert.Equal(1002, Assert.Single(player.Character.Bag).ItemId);
 
         // The client shifts its remaining icons down; the mailbox has to agree.
         SMailInfo after = OnlyMail(player);
         Assert.Equal(3, after.itemVec.Count);
         Assert.Equal(new uint[] { 0, 1, 2 }, after.itemVec.Cast<SItemInfo>().Select(i => i.slot));
-        Assert.Equal(new[] { 9000, 9010, 9015 }, after.itemVec.Cast<SItemInfo>().Select(i => i.ID));
+        Assert.Equal(new[] { 2010, 3001, 2001 }, after.itemVec.Cast<SItemInfo>().Select(i => i.ID));
     }
 
     [Fact]
