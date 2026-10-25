@@ -55,6 +55,10 @@ same level. Its online side was social and asynchronous, and none of it exists o
   level 1 (100 karma every 15 minutes).
 - Steam login checks. The server does not verify Steam tickets or DLC ownership; every login is
   accepted. Fine on your own PC or LAN, unsafe on the open internet (see HOSTING.txt).
+- The web login of the old "client ver" build (email + password at client.php) is implemented
+  (HOSTING.txt, "Web login"); its account service is this server, tokens live only in memory and
+  there is no password-recovery mail. The browser-based WebPlayer variant (WebLoginCtrl, a GET
+  with ip:port answer) is not implemented: it needs the actual WebPlayer build plus a host page.
 
 Several players can use one server at the same time, but each plays in their own world and they
 never meet.

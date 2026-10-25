@@ -162,6 +162,45 @@ the exe or on the command line:
     Akaneiro.Server.exe --Akaneiro:DataDir=C:\Akaneiro\data --Akaneiro:ClientAssetsDir=C:\Akaneiro\Akaneiro-Server-Custom-Rebuild-master\client-source
 
 
+WEB LOGIN (THE "CLIENT VER" BUILD, OPTIONAL)
+---------------------------------------------
+
+Before Steam, Akaneiro also had a plain account login: the "client ver" standalone build asks for
+email and password and checks them at http://spicyworld.spicyhorse.com/client.php?mod=login.
+That login path is implemented here as well; the Steam login is not affected by it in any way.
+
+How it works:
+
+1. Turn it on in appsettings.json (or on the command line with --Akaneiro:WebLogin=true):
+
+       "WebLogin": true
+
+   The server line then ends with "... web login (client.php) enabled".
+
+2. Hosts file: the client ver talks to spicyworld.spicyhorse.com, so point that name here too:
+
+       127.0.0.1 spicyworld.spicyhorse.com
+
+   (Keep the mw.angry-red.com line as well if Steam players use the same server.)
+
+3. Create accounts. The client's register button only opens the old website, so accounts are
+   created against the server directly:
+
+       curl.exe -X POST "http://localhost/client.php?mod=register" -d "email=you@example.com&password=***&game=akaneiro"
+
+   Accounts live in data/webusers.json (passwords as salted SHA-256 hashes, never in clear text).
+
+4. Start the client ver build and log in with that email and password. The server answers with
+   its uid, the game address and a gameCode; the client connects to the game port and logs in
+   with uid + gameCode. Your characters, karma and saves hang under that uid, exactly like a
+   Steam account does under a Steam ID.
+
+Notes: gameCode tokens live 12 hours in memory (a reconnect within that time works; after a
+server restart, log in through the client again). A web uid cannot log in without its gameCode,
+and a Steam ID never goes through the web check - the two paths cannot be confused. Like the
+Steam login, this is only safe where you trust everyone who can connect.
+
+
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK
 -------------------------------------------
 

@@ -29,5 +29,12 @@ namespace Akaneiro.Server
 
         /// <summary>Log every packet (name only) in both directions.</summary>
         public bool LogPackets { get; set; } = true;
+
+        /// <summary>
+        /// Serve the web login of the "client ver" build: POST /client.php?mod=login with email and
+        /// password, answered from data/webusers.json. The Steam login does not use this; enabling it
+        /// only adds the second login path (see Http/WebLoginService.cs).
+        /// </summary>
+        public bool WebLogin { get; set; } = false;
     }
 }

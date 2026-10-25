@@ -26,6 +26,7 @@ if (!Directory.Exists(assetsDir))
     throw new DirectoryNotFoundException($"Client assets not found at '{assetsDir}' (setting Akaneiro:ClientAssetsDir)");
 
 builder.Services.AddSingleton(new AccountStore(dataDir));
+builder.Services.AddSingleton(new WebUserStore(dataDir));
 builder.Services.AddSingleton(new GameData(assetsDir, Path.Combine(AppContext.BaseDirectory, "GameData")));
 builder.Services.AddSingleton<World>();
 builder.Services.AddHostedService<GameListener>();
@@ -37,7 +38,10 @@ builder.WebHost.ConfigureKestrel(k => k.Listen(httpAddress, options.HttpPort));
 
 var app = builder.Build();
 SteamWebService.Map(app);
+if (options.WebLogin)
+    WebLoginService.Map(app);
 
-app.Logger.LogInformation("Akaneiro server: web service on {Address}:{Http}, game port {Game} (clients connect to {Public}), data in {Data}, client assets {Assets}",
-    httpAddress, options.HttpPort, options.GamePort, options.PublicHost, dataDir, assetsDir);
+app.Logger.LogInformation("Akaneiro server: web service on {Address}:{Http}, game port {Game} (clients connect to {Public}), data in {Data}, client assets {Assets}{WebLogin}",
+    httpAddress, options.HttpPort, options.GamePort, options.PublicHost, dataDir, assetsDir,
+    options.WebLogin ? ", web login (client.php) enabled" : "");
 app.Run();

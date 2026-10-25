@@ -22,6 +22,28 @@ namespace Akaneiro.Server.Game
 
         public override void UserLogin(string account, EUserType userType, EClientType clientType, string password, string tocken)
         {
+            // Web login ("client ver"): client.php handed out a gameCode for this uid; it arrives
+            // here as the token. This runs before the Steam path and only activates for tokens this
+            // server issued through WebLoginService, so Steam logins take exactly the old branch.
+            if (_s.World.Options.WebLogin && _s.World.WebUsers.ValidateToken(tocken, account, _s.World.Clock.UtcNow))
+            {
+                _s.Account = _s.World.Accounts.LoadOrCreate(account);
+                if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
+                    _s.SaveAccount();
+                _s.Log.LogInformation("   web login: uid {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
+                _s.Send(GameResponses.UserLoginOK(false, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
+                return;
+            }
+
+            // A uid that belongs to a web account must not be usable without its gameCode; every
+            // other account string (Steam IDs and anything the editor path sends) keeps behaving as before.
+            if (_s.World.Options.WebLogin && _s.World.WebUsers.IsWebUid(account))
+            {
+                _s.Log.LogInformation("   web login uid {Account} rejected: no valid gameCode", account);
+                _s.Send(GameResponses.UserLoginFailed(Proto.Error(EServerErrorType.eWrongAccountOrPwd)));
+                return;
+            }
+
             // Steam builds send the Steam ID as account and the web-service token; nothing is verified locally.
             if (string.IsNullOrWhiteSpace(account))
                 account = "local";
