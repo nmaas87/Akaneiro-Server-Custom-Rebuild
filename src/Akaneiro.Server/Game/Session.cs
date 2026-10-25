@@ -46,6 +46,9 @@ namespace Akaneiro.Server.Game
         /// <summary>The craftsman's upgrades.</summary>
         public Crafting Crafting { get; }
 
+        /// <summary>The character's mailbox.</summary>
+        public MailService Mail { get; }
+
         public World World { get; }
         public ILogger Log { get; }
 
@@ -206,6 +209,7 @@ namespace Akaneiro.Server.Game
             Well = new Well(this);
             Spirits = new Spirits(this);
             Crafting = new Crafting(this);
+            Mail = new MailService(this);
         }
 
         public void HandlePacket(byte[] body)

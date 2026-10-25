@@ -68,6 +68,13 @@ namespace Akaneiro.Server.Data
             return false;
         }
 
+        public int NewMailId()
+        {
+            int id = _state.NextMailId++;
+            SaveState();
+            return id;
+        }
+
         private void SaveState() => WriteAtomic(_statePath, JsonSerializer.Serialize(_state, Json));
 
         private string AccountPath(string account)

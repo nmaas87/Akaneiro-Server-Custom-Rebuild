@@ -94,6 +94,7 @@ namespace Akaneiro.Server.Game
                 CreatedUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
             StarterLoadout.Grant(character, _s.World.Data);
+            _s.Mail.GrantKickstarterMail(character); // the "Kickstarter Exclusives" thank-you letter
             _s.Account.Characters.Add(character);
             _s.SaveAccount();
             _s.Log.LogInformation("   created character #{Id} '{Name}'", character.Id, character.Name);
@@ -122,6 +123,7 @@ namespace Akaneiro.Server.Game
             }
 
             StarterLoadout.Grant(character, _s.World.Data); // characters created before starter gear existed
+            _s.Mail.GrantKickstarterMail(character); // and before the Kickstarter letter existed
             Trainer.GrantStarterMasteries(character);
             _s.Character = character;
             _s.ActiveBuffs.Clear(); // food eaten by another character of this login
@@ -397,28 +399,47 @@ namespace Akaneiro.Server.Game
         public override void GetGiftReq(string key) =>
             _s.Send(GameResponses.GetGiftAck(Proto.New<SGift>(), Proto.Error(EServerErrorType.eUnknownError)));
 
-        // The mailbox is always empty (GetPlayerMail), so every mail action finds nothing.
-        public override void DeleteMail(int mailID) =>
-            _s.Send(GameResponses.DeleteMailResult(Proto.Error(EServerErrorType.eUnknownError), new vectorInt()));
+        // The mailbox holds the reward letters (see MailService); the client polls it every minute.
+        public override void DeleteMail(int mailID) => _s.Mail.Delete(mailID);
 
-        public override void GetMailItem(int mailID, int itemSlotID) =>
-            _s.Send(GameResponses.GetMailItemResult(Proto.Error(EServerErrorType.eUnknownError), mailID, itemSlotID));
+        public override void GetMailItem(int mailID, int itemSlotID)
+        {
+            if (_s.Character != null)
+                _s.Mail.GetItem(mailID, itemSlotID);
+        }
 
         public override void GetMailPet(int mailID, int petSlotID) =>
             _s.Send(GameResponses.GetMailPetResult(Proto.Error(EServerErrorType.eUnknownError), mailID, petSlotID));
 
-        public override void GetMailKarma(int mailID) =>
-            _s.Send(GameResponses.GetMailKarmaResult(mailID, Proto.Error(EServerErrorType.eUnknownError)));
+        public override void GetMailKarma(int mailID)
+        {
+            if (_s.Character != null)
+                _s.Mail.GetKarma(mailID);
+        }
 
-        public override void GetMailCrystal(int mailID) =>
-            _s.Send(GameResponses.GetMailCrystalResult(mailID, Proto.Error(EServerErrorType.eUnknownError)));
+        public override void GetMailCrystal(int mailID)
+        {
+            if (_s.Character != null)
+                _s.Mail.GetCrystal(mailID);
+        }
 
-        public override void GetMailAll(int mailID) =>
-            _s.Send(GameResponses.GetMailAllItemsResult(mailID, Proto.Error(EServerErrorType.eUnknownError)));
+        public override void GetMailAll(int mailID)
+        {
+            if (_s.Character != null)
+                _s.Mail.GetAll(mailID);
+        }
 
+        /// <summary>Opening a letter marks it read (the unread badge on the HUD drops); no answer.</summary>
         public override void OpenMail(int mailID)
         {
+            if (_s.Character != null)
+                _s.Mail.Open(mailID);
         }
+
+        /// <summary>Player to player mail needs the recipient's account loaded; not supported here.</summary>
+        public override void SendMail(SMailInfo mailInfo, vectorInt itemSlotVec) =>
+            _s.Send(GameResponses.SendMailResult(Proto.Error(EServerErrorType.eMailError_MailPlayerNotExist),
+                Proto.New<SMailInfo>()));
 
         // ---- vendors -----------------------------------------------------------------------
 
@@ -536,8 +557,10 @@ namespace Akaneiro.Server.Game
 
         public override void GetPlayerMail()
         {
-            // No mail system yet (the original sent rewards and gifts this way).
-            _s.Send(GameResponses.GetPlayerMailResult(new vectorMailInfos()));
+            if (_s.Character == null)
+                _s.Send(GameResponses.GetPlayerMailResult(new vectorMailInfos()));
+            else
+                _s.Mail.SendMailbox(); // thanks to the Kickstarter backers, and friend gifts
         }
 
         // ---- missions -----------------------------------------------------------------------

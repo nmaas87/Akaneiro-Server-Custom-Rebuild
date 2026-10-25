@@ -85,6 +85,9 @@ namespace Akaneiro.Server.Data
         /// <summary>Set once the two masteries of the character's discipline were handed out.</summary>
         public bool StarterMasteriesGranted { get; set; }
 
+        /// <summary>Set once the "Kickstarter Exclusives" thank-you mail was put into the mailbox.</summary>
+        public bool KickstarterMailGranted { get; set; }
+
         /// <summary>The mastery level being trained (EquipMastery id) and when it is done; null when none.</summary>
         public MasteryTraining Training { get; set; }
 
@@ -93,6 +96,32 @@ namespace Akaneiro.Server.Data
 
         /// <summary>What the village vendor offers until the stock changes (every 12 hours).</summary>
         public ShopStock Shop { get; set; }
+
+        /// <summary>Mails in the character's mailbox, oldest first.</summary>
+        public List<MailData> Mail { get; set; } = new List<MailData>();
+    }
+
+    /// <summary>
+    /// One mail in a mailbox. <see cref="TimeoutUnix"/> 0 means "Forever" (the client's
+    /// MailSystem shows exactly that for a timeout of 0). Attached items keep their index in
+    /// <see cref="Items"/> in <see cref="ItemData.Slot"/>; the client addresses them by that
+    /// index when claiming (GetMailItem) and renumbers the rest itself.
+    /// </summary>
+    public sealed class MailData
+    {
+        public int Id { get; set; }
+        public string SenderName { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Content { get; set; } = "";
+        public int Karma { get; set; }
+        public int Crystal { get; set; }
+        public long TimeUnix { get; set; }
+        public long TimeoutUnix { get; set; }
+
+        /// <summary>0 = unread, 1 = read (EMailState).</summary>
+        public int State { get; set; }
+
+        public List<ItemData> Items { get; set; } = new List<ItemData>();
     }
 
     public sealed class SpiritRental
@@ -169,5 +198,6 @@ namespace Akaneiro.Server.Data
     {
         public int NextAccountId { get; set; } = 1;
         public int NextCharacterId { get; set; } = 1;
+        public int NextMailId { get; set; } = 1;
     }
 }
