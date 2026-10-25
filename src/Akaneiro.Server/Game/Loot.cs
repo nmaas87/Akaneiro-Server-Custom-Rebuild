@@ -89,6 +89,8 @@ namespace Akaneiro.Server.Game
         /// <summary>
         /// A crafting material (Props.General): enchantment materials (6001-6009) are the most common,
         /// gems (7001-7009) and element cores (8001-8004) rarer, the Karma Core (9001) the rarest.
+        /// PrefabId is the client's icon index, not a model variant (ItemType.IsModelIndex): the
+        /// crafting panel and material lists build these as GetItemObject(id, 1, 0, 0, 0, 1).
         /// </summary>
         public static ItemData RollMaterial(Random rng)
         {
@@ -97,7 +99,7 @@ namespace Akaneiro.Server.Game
                 : roll < 80 ? 7001 + rng.Next(9)
                 : roll < 97 ? 8001 + rng.Next(4)
                 : 9001;
-            return new ItemData { ItemId = itemId, PrefabId = 0, Level = 1, Count = 1 };
+            return new ItemData { ItemId = itemId, PrefabId = 1, Level = 1, Count = 1 };
         }
 
         /// <summary>Picks how many items drop; the entries are weights, not percentages.</summary>
@@ -185,7 +187,9 @@ namespace Akaneiro.Server.Game
                 return null;
 
             GameData.LootItemRow item = usable[rng.Next(usable.Count)];
-            return new ItemData { ItemId = item.Id, PrefabId = 0, Level = level, Count = 1 };
+            // PrefabId is the client's icon index for a consumable, never 0 (the world model, which
+            // carries no icon texture) - see ItemType.IsModelIndex.
+            return new ItemData { ItemId = item.Id, PrefabId = 1, Level = level, Count = 1 };
         }
 
         /// <summary>Picks a model variant that covers the item's level, or the closest one.</summary>

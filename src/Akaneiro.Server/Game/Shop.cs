@@ -155,6 +155,7 @@ namespace Akaneiro.Server.Game
                 return;
             }
             var item = new ItemData { ItemId = itemId, Level = Character.Level, Count = count };
+            Data.EnsurePrefab(item); // the client's consumable shop shows these with icon index 1
             if (!_s.Inventory.CanAdd(item))
             {
                 Fail(EServerErrorType.eItemError_BagFull);

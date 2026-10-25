@@ -455,6 +455,38 @@ namespace Akaneiro.Server.Game
         /// <summary>Every item the client knows (Props.General), by item id.</summary>
         public IReadOnlyDictionary<int, ItemProps> Items { get; }
 
+        /// <summary>
+        /// Fills in the PrefabId an item has to carry for its Props.General type, and returns
+        /// whether the item changed. Equipment uses a model-variant id from its own table; every
+        /// other type uses the client's index into the item's ItemPrefabs entry, and index 0 is the
+        /// world model, which has no icon texture - such items render blank in bag and mailbox
+        /// (ItemPrefabs.GetItemIcon logs "Item download err") and quest items with 0 do not even
+        /// count for the mission that asks for them (see ItemType.IsModelIndex).
+        /// </summary>
+        public bool EnsurePrefab(Data.ItemData item)
+        {
+            if (item == null || item.PrefabId != 0)
+                return false;
+            if (!Items.TryGetValue(item.ItemId, out ItemProps props) || !ItemType.IsModelIndex(props.Type))
+                return false;
+            item.PrefabId = 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Fills in the PrefabId of every item of an account - bag, stash, equipment and mail
+        /// attachments - so characters saved before the index was set still get their icon.
+        /// Returns whether anything changed; the caller saves in that case.
+        /// </summary>
+        public bool NormalizePrefabIds(Data.AccountData account)
+        {
+            if (account == null)
+                return false;
+            return account.Characters
+                .SelectMany(c => c.Bag.Concat(c.Stash).Concat(c.Equipment).Concat(c.Mail.SelectMany(m => m.Items)))
+                .Count(EnsurePrefab) > 0; // Count, not Any: every item has to be looked at.
+        }
+
         /// <summary>What a consumable does when used (ConsumableItem.General), by item id.</summary>
         public IReadOnlyDictionary<int, ConsumableRow> ConsumableEffects { get; }
 
@@ -536,7 +568,8 @@ namespace Akaneiro.Server.Game
 
         /// <summary>
         /// Item types of Props.General "Type" as the client's inventory uses them
-        /// (InventoryCtrl.GetSlotFromType): armor, accessories, weapons, consumables.
+        /// (InventoryCtrl.GetSlotFromType): armor, accessories, weapons, quest items,
+        /// materials and consumables.
         /// </summary>
         public static class ItemType
         {
@@ -548,7 +581,24 @@ namespace Akaneiro.Server.Game
             public const int Legs = 6;
             public const int OneHanded = 7;
             public const int TwoHanded = 8;
+            public const int QuestItem = 9;
+            public const int Gem = 11;
+            public const int ElementCore = 12;
+            public const int Material = 13;
             public const int Consumable = 14;
+
+            /// <summary>
+            /// Whether an item's PrefabId is a model-variant id (equipment, looked up in
+            /// Armor/Weapon/AccessoriesAttribute.Prefab) or the client's icon/model index inside
+            /// its ItemPrefabs registry entry. Equipment index 0 is the world model, which carries
+            /// no icon texture (ItemPrefabs.GetItemIcon logs "Item download err" and falls back to
+            /// defaultImg); everything else - food, potions, scrolls, quest items, crafting
+            /// materials - is shown from index 1, exactly as the client itself builds it in the
+            /// consumable shop (_UI_CS_Consumable.InitItemList), the crafting panel
+            /// (CraftingDetailPanel), the material lists and the daily reward screen
+            /// (GetItemObject(id, 1, 0, 0, 0, 1)).
+            /// </summary>
+            public static bool IsModelIndex(int itemType) => itemType >= QuestItem;
         }
 
         public sealed class ItemProps
@@ -805,8 +855,10 @@ namespace Akaneiro.Server.Game
                     Item = r.Int("TypeID") == 0 ? null : new Data.ItemData
                     {
                         ItemId = r.Int("TypeID"),
-                        // Consumables are shown with prefab 1 but carry none (DailyRewardScreenCtrl).
-                        PrefabId = r.Int("RewardType") == 5 ? r.Int("PrefabID") : 0,
+                        // A consumable reward carries the client's icon index (DailyRewardScreenCtrl
+                        // builds it as GetItemObject(id, 1, 0, 0, 0, 1)); only equipment has a real
+                        // model variant in the table.
+                        PrefabId = r.Int("RewardType") == 5 ? r.Int("PrefabID") : 1,
                         Gem = r.Int("Gem"),
                         Element = r.Int("Element"),
                         Enchant = r.Int("Enchant"),

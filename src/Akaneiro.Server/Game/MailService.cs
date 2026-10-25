@@ -49,19 +49,22 @@ namespace Akaneiro.Server.Game
         /// consumable row), the 20-scroll revive pack, and the two Steam gift items - Steam
         /// Necklace and Raging Steam Blast Katana - from uniqueItem.rare rows 9500/9501, again
         /// as TypeID+Prefab+Gem+Enchant+Element+Level rather than the (unresolvable) row numbers.
+        /// The foods' and the scroll's "prefab" is the client's icon index 1, not a model variant:
+        /// index 0 is the world model, which carries no icon texture, so the mail panel would show
+        /// a blank tile (ItemType.IsModelIndex).
         /// </summary>
         private static readonly (int Id, int Prefab, int Level, int Gem, int Enchant, int Element, int Count)[] StarterPackRewards =
         {
-            (20009, 0, 1, 0, 0, 0, 3), // Sea Urchin Sushi  (+POWER)
-            (20010, 0, 1, 0, 0, 0, 3), // Kagami Mochi      (+SKILL)
-            (20014, 0, 1, 0, 0, 0, 3), // Dorayaki          (+DEFENSE)
-            (20015, 0, 1, 0, 0, 0, 3), // Fugu Tempura      (+20% move speed)
-            (20016, 0, 1, 0, 0, 0, 3), // Sukiyaki          (+25% crit chance)
-            (20017, 0, 1, 0, 0, 0, 3), // Shochu            (+80% monster XP)
-            (20018, 0, 1, 0, 0, 0, 3), // Awamori           (+loot quality)
-            (20019, 0, 1, 0, 0, 0, 3), // Hojicha Tea       (+energy regen)
-            (20020, 0, 1, 0, 0, 0, 3), // Chrysanthemum Tea (+HP regen)
-            (20103, 0, 1, 0, 0, 0, 1), // 20 Shinigami Scrolls
+            (20009, 1, 1, 0, 0, 0, 3), // Sea Urchin Sushi  (+POWER)
+            (20010, 1, 1, 0, 0, 0, 3), // Kagami Mochi      (+SKILL)
+            (20014, 1, 1, 0, 0, 0, 3), // Dorayaki          (+DEFENSE)
+            (20015, 1, 1, 0, 0, 0, 3), // Fugu Tempura      (+20% move speed)
+            (20016, 1, 1, 0, 0, 0, 3), // Sukiyaki          (+25% crit chance)
+            (20017, 1, 1, 0, 0, 0, 3), // Shochu            (+80% monster XP)
+            (20018, 1, 1, 0, 0, 0, 3), // Awamori           (+loot quality)
+            (20019, 1, 1, 0, 0, 0, 3), // Hojicha Tea       (+energy regen)
+            (20020, 1, 1, 0, 0, 0, 3), // Chrysanthemum Tea (+HP regen)
+            (20103, 1, 1, 0, 0, 0, 1), // 20 Shinigami Scrolls
             (3002, 6, 1, 101, 0, 0, 1),    // Steam Necklace (9500: Necklace/ACC06/Steam Gem)
             (1001, 9, 5, 101, 103, 303, 1) // Raging Steam Blast Katana (9501: WPN09/Raging III/Blast III)
         };

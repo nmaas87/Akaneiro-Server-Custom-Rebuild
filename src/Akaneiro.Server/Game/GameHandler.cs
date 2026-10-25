@@ -30,6 +30,8 @@ namespace Akaneiro.Server.Game
                 _s.Account = _s.World.Accounts.LoadOrCreate(account);
                 if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
                     _s.SaveAccount();
+                if (_s.World.Data.NormalizePrefabIds(_s.Account))
+                    _s.SaveAccount(); // items saved before they carried the client's icon index
                 _s.Log.LogInformation("   web login: uid {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
                 _s.Send(GameResponses.UserLoginOK(false, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
                 return;
@@ -52,6 +54,8 @@ namespace Akaneiro.Server.Game
             // Characters created before starter gear existed get it here, so the select screen shows it.
             if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
                 _s.SaveAccount();
+            if (_s.World.Data.NormalizePrefabIds(_s.Account))
+                _s.SaveAccount(); // items saved before they carried the client's icon index
             _s.Log.LogInformation("   login: account {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
 
             _s.Send(GameResponses.UserLoginOK(false, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));

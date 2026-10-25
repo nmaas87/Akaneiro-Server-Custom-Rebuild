@@ -755,7 +755,14 @@ namespace Akaneiro.Server.Game
                 foreach (GameData.CollectTarget target in _s.Scene.PendingCollectTargets)
                 {
                     for (int i = 0; i < Math.Max(1, target.Count); i++)
-                        loot.Add(new ItemData { ItemId = target.ItemId, PrefabId = 0, Level = Math.Max(1, monster.Type.LootLevel), Count = 1 });
+                    {
+                        var item = new ItemData { ItemId = target.ItemId, PrefabId = 0, Level = Math.Max(1, monster.Type.LootLevel), Count = 1 };
+                        // Quest items need the client's index 1: a COLLECT task matches on
+                        // perfrab == its "recycle" (MissionLogic checks both), which is 1 in every
+                        // mission, and index 0 (the world model) has no icon.
+                        _s.World.Data.EnsurePrefab(item);
+                        loot.Add(item);
+                    }
                 }
                 _s.Scene.PendingCollectTargets.Clear();
             }

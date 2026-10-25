@@ -1,3 +1,6 @@
+using System.Linq;
+using Akaneiro.Server.Data;
+using Akaneiro.Server.Game;
 using Akaneiro.Server.Tests.Harness;
 using Xunit.Abstractions;
 
@@ -79,20 +82,22 @@ public sealed class MailTests
         Assert.Equal(25000, mail.karma);
         Assert.Equal(60, mail.crystal);
 
-        // Foods (stacks of 3) and the scroll pack are plain Props.General consumables; the
-        // necklace and the katana are uniqueItem.rare rows 9500/9501 mapped to real ids.
+        // Foods (stacks of 3) and the scroll pack are plain Props.General consumables - their
+        // "prefab" is the client's icon index 1 (index 0 is the world model, which has no icon
+        // texture); the necklace and the katana are uniqueItem.rare rows 9500/9501 mapped to real
+        // ids with their real model variants.
         var expected = new[]
         {
-            (id: 20009, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Sea Urchin Sushi
-            (id: 20010, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Kagami Mochi
-            (id: 20014, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Dorayaki
-            (id: 20015, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Fugu Tempura
-            (id: 20016, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Sukiyaki
-            (id: 20017, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Shochu
-            (id: 20018, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Awamori
-            (id: 20019, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Hojicha Tea
-            (id: 20020, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Chrysanthemum Tea
-            (id: 20103, prefab: 0, level: 1, gem: 0, enchant: 0, element: 0, count: 1),   // 20 Shinigami Scrolls
+            (id: 20009, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Sea Urchin Sushi
+            (id: 20010, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Kagami Mochi
+            (id: 20014, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Dorayaki
+            (id: 20015, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Fugu Tempura
+            (id: 20016, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Sukiyaki
+            (id: 20017, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Shochu
+            (id: 20018, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Awamori
+            (id: 20019, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Hojicha Tea
+            (id: 20020, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 3),   // Chrysanthemum Tea
+            (id: 20103, prefab: 1, level: 1, gem: 0, enchant: 0, element: 0, count: 1),   // 20 Shinigami Scrolls
             (id: 3002, prefab: 6, level: 1, gem: 101, enchant: 0, element: 0, count: 1),  // Steam Necklace
             (id: 1001, prefab: 9, level: 5, gem: 101, enchant: 103, element: 303, count: 1), // Raging Steam Blast Katana
         };
@@ -213,6 +218,62 @@ public sealed class MailTests
         Assert.Equal(EServerErrorType.eMailError_MailItemSlotError,
             player.Take("On_GetMailItemResult").Arg<EServerErrorType>(0).Get());
         Assert.Empty(player.Character.Bag);
+    }
+
+    [Fact]
+    public void ConsumablesCarryTheClientsIconIndexEverywhereTheyAreCreated()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+
+        // Bought at the elder: the client builds its own shop cards as GetItemObject(id, 1, ...),
+        // so the server's copy has to match or the bag slot stays pictureless.
+        player.Session.Account.Karma = 1000; // the potion costs 250
+        player.Send(ProtocolGame_SendRequest.BuyConsumeItem(2, 20058, 1)); // Small Health Potion
+        player.Take("On_BuyConsumeItemSuccAck");
+        Assert.Equal(1, player.Character.Bag.Single(i => i.ItemId == 20058).PrefabId);
+
+        // Dropped by a monster (Loot.RollConsumable / RollMaterial).
+        var rolled = Loot.RollMaterial(player.World.Random);
+        Assert.Equal(1, rolled.PrefabId);
+
+        // Equipment keeps its real model variant: EnsurePrefab never touches it.
+        var cloak = new ItemData { ItemId = 2010, PrefabId = 101 };
+        Assert.False(player.World.Data.EnsurePrefab(cloak));
+        Assert.Equal(101, cloak.PrefabId);
+    }
+
+    [Fact]
+    public void OldSavesGetTheIconIndexOnTheNextLogin()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        string account = player.Session.Account.Account;
+        int id = player.Character.Id;
+
+        // Items saved before the index existed: blank, exactly as in the shipped account files -
+        // one in the bag, one still sitting unclaimed in a letter.
+        player.Character.Bag.Add(new ItemData { ItemId = 20058, PrefabId = 0, Slot = 5, Count = 2 });
+        player.Character.Mail.First(m => m.Title == "Starter Pack Gifts").Items[0].PrefabId = 0;
+        player.Session.SaveAccount();
+
+        // A full logout/login reloads the account file, and with it the repair pass.
+        player.Send(ProtocolGame_SendRequest.UserLogout());
+        player.Session.Character = null;
+        player.ClearInbox();
+        player.Send(ProtocolGame_SendRequest.UserLogin(account, new EUserType(EUserType.eUserType_Steam),
+            new EClientType(EClientType.eClientType_Standalone_Win), "", "token"));
+        player.Take("On_UserLoginOK");
+        player.Send(ProtocolGame_SendRequest.UserSelectCharacter(id));
+        player.Take("On_UserSelectCharacterOK");
+
+        Assert.Equal(1, player.Character.Bag.Single(i => i.ItemId == 20058).PrefabId);
+        // The foods and the scroll in the letter get the index; the Kickstarter gear in the other
+        // letter keeps its model variant.
+        Assert.All(player.Character.Mail.First(m => m.Title == "Starter Pack Gifts").Items.Take(10),
+            item => Assert.Equal(1, item.PrefabId));
+        Assert.Equal(new[] { 101, 101, 101, 1002 },
+            player.Character.Mail.First(m => m.Title == "Kickstarter Exclusives").Items.Select(i => i.PrefabId));
+        // Gear keeps its model variant through the same pass.
+        Assert.All(player.Character.Equipment, gear => Assert.NotEqual(0, gear.PrefabId));
     }
 
     [Fact]
