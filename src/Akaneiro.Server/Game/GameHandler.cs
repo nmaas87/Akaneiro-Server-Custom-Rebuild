@@ -95,6 +95,7 @@ namespace Akaneiro.Server.Game
             };
             StarterLoadout.Grant(character, _s.World.Data);
             _s.Mail.GrantKickstarterMail(character); // the "Kickstarter Exclusives" thank-you letter
+            _s.Mail.GrantStarterPackMail(character); // the "Starter Pack Gifts" letter
             _s.Account.Characters.Add(character);
             _s.SaveAccount();
             _s.Log.LogInformation("   created character #{Id} '{Name}'", character.Id, character.Name);
@@ -123,7 +124,6 @@ namespace Akaneiro.Server.Game
             }
 
             StarterLoadout.Grant(character, _s.World.Data); // characters created before starter gear existed
-            _s.Mail.GrantKickstarterMail(character); // and before the Kickstarter letter existed
             Trainer.GrantStarterMasteries(character);
             _s.Character = character;
             _s.ActiveBuffs.Clear(); // food eaten by another character of this login

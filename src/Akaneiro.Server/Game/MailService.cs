@@ -20,6 +20,13 @@ namespace Akaneiro.Server.Game
         public const string KickstarterText =
             "The Order of Akane thanks you for your contribution through Kickstarter";
 
+        public const string StarterPackTitle = "Starter Pack Gifts";
+        public const string StarterPackText =
+            "The Order of Akane thanks you for your contribution through Steam Early Access";
+
+        public const int StarterPackKarma = 25000;
+        public const int StarterPackCrystal = 60;
+
         /// <summary>
         /// The Kickstarter unique items. The uniqueItem.rare rows (9000/9005/9010/9015) are
         /// catalog entries, not items: the client resolves every SItemInfo by its item id in
@@ -37,6 +44,28 @@ namespace Akaneiro.Server.Game
             (2001, 1002, 10, 805, 821) // Wolf's Granny Cap (GWOLF): stealth
         };
 
+        /// <summary>
+        /// The Steam Early Access starter pack: nine foods (3 each, every one a Props.General
+        /// consumable row), the 20-scroll revive pack, and the two Steam gift items - Steam
+        /// Necklace and Raging Steam Blast Katana - from uniqueItem.rare rows 9500/9501, again
+        /// as TypeID+Prefab+Gem+Enchant+Element+Level rather than the (unresolvable) row numbers.
+        /// </summary>
+        private static readonly (int Id, int Prefab, int Level, int Gem, int Enchant, int Element, int Count)[] StarterPackRewards =
+        {
+            (20009, 0, 1, 0, 0, 0, 3), // Sea Urchin Sushi  (+POWER)
+            (20010, 0, 1, 0, 0, 0, 3), // Kagami Mochi      (+SKILL)
+            (20014, 0, 1, 0, 0, 0, 3), // Dorayaki          (+DEFENSE)
+            (20015, 0, 1, 0, 0, 0, 3), // Fugu Tempura      (+20% move speed)
+            (20016, 0, 1, 0, 0, 0, 3), // Sukiyaki          (+25% crit chance)
+            (20017, 0, 1, 0, 0, 0, 3), // Shochu            (+80% monster XP)
+            (20018, 0, 1, 0, 0, 0, 3), // Awamori           (+loot quality)
+            (20019, 0, 1, 0, 0, 0, 3), // Hojicha Tea       (+energy regen)
+            (20020, 0, 1, 0, 0, 0, 3), // Chrysanthemum Tea (+HP regen)
+            (20103, 0, 1, 0, 0, 0, 1), // 20 Shinigami Scrolls
+            (3002, 6, 1, 101, 0, 0, 1),    // Steam Necklace (9500: Necklace/ACC06/Steam Gem)
+            (1001, 9, 5, 101, 103, 303, 1) // Raging Steam Blast Katana (9501: WPN09/Raging III/Blast III)
+        };
+
         private readonly Session _s;
 
         public MailService(Session session) => _s = session;
@@ -47,8 +76,8 @@ namespace Akaneiro.Server.Game
 
         /// <summary>
         /// Puts the "Kickstarter Exclusives" thank-you mail (with the four Kickstarter items and no
-        /// expiry) into the character's mailbox, once per character. Called at creation and again on
-        /// selection so characters made before this existed still receive it.
+        /// expiry) into the character's mailbox, once per character. Granted at character creation
+        /// only, like the starter pack letter.
         /// </summary>
         public bool GrantKickstarterMail(CharacterData character)
         {
@@ -72,6 +101,40 @@ namespace Akaneiro.Server.Game
             }
             character.Mail.Add(mail);
             character.KickstarterMailGranted = true;
+            _s.Log.LogInformation("   mailed '{Title}' with {Count} items to #{Id} '{Name}'",
+                mail.Title, mail.Items.Count, character.Id, character.Name);
+            return true;
+        }
+
+        /// <summary>
+        /// Puts the "Starter Pack Gifts" mail (karma, crystals, foods and the two Steam gift
+        /// items, no expiry) into the character's mailbox. Granted at character creation only:
+        /// characters that existed before this feature never receive it.
+        /// </summary>
+        public bool GrantStarterPackMail(CharacterData character)
+        {
+            if (character.StarterPackMailGranted)
+                return false;
+
+            var mail = NewMail(character, KickstarterSender, StarterPackTitle, StarterPackText);
+            mail.Karma = StarterPackKarma;
+            mail.Crystal = StarterPackCrystal;
+            foreach (var (id, prefab, level, gem, enchant, element, count) in StarterPackRewards)
+            {
+                mail.Items.Add(new ItemData
+                {
+                    Slot = mail.Items.Count,
+                    ItemId = id,
+                    PrefabId = prefab,
+                    Level = level,
+                    Gem = gem,
+                    Enchant = enchant,
+                    Element = element,
+                    Count = count,
+                });
+            }
+            character.Mail.Add(mail);
+            character.StarterPackMailGranted = true;
             _s.Log.LogInformation("   mailed '{Title}' with {Count} items to #{Id} '{Name}'",
                 mail.Title, mail.Items.Count, character.Id, character.Name);
             return true;
@@ -153,7 +216,14 @@ namespace Akaneiro.Server.Game
             foreach (ItemData item in mail.Items)
                 _s.Inventory.AddToBag(item);
             mail.Items.Clear();
-            ClaimMoney(mail);
+            if (mail.Karma > 0 || mail.Crystal > 0)
+            {
+                // "Accept all" also banks the money, and the client is told about the wallet.
+                _s.Account.Karma += mail.Karma;
+                _s.Account.Crystals += mail.Crystal;
+                ClaimMoney(mail);
+                _s.SendMoney();
+            }
             _s.Send(GameResponses.GetMailAllItemsResult(mailID, Proto.Error(EServerErrorType.eSuccess)));
         }
 

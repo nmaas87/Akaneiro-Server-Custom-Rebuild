@@ -88,6 +88,13 @@ namespace Akaneiro.Server.Data
         /// <summary>Set once the "Kickstarter Exclusives" thank-you mail was put into the mailbox.</summary>
         public bool KickstarterMailGranted { get; set; }
 
+        /// <summary>
+        /// Set once the "Starter Pack Gifts" mail was put into the mailbox at creation. Unlike the
+        /// Kickstarter letter this is granted on creation only - characters made before it existed
+        /// never receive it.
+        /// </summary>
+        public bool StarterPackMailGranted { get; set; }
+
         /// <summary>The mastery level being trained (EquipMastery id) and when it is done; null when none.</summary>
         public MasteryTraining Training { get; set; }
 
