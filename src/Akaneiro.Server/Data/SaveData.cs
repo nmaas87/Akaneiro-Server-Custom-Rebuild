@@ -88,6 +88,9 @@ namespace Akaneiro.Server.Data
         /// <summary>Set once the "Kickstarter Exclusives" thank-you mail was put into the mailbox.</summary>
         public bool KickstarterMailGranted { get; set; }
 
+        /// <summary>Set once the "Complete Rare Catalog" letter (every unique + special) was sent.</summary>
+        public bool CatalogMailGranted { get; set; }
+
         /// <summary>
         /// Set once the "Starter Pack Gifts" mail was put into the mailbox at creation. Unlike the
         /// Kickstarter letter this is granted on creation only - characters made before it existed
@@ -167,12 +170,6 @@ namespace Akaneiro.Server.Data
 
         /// <summary>1 = karma, 2 = crystals (EMoneyType).</summary>
         public int MoneyType { get; set; } = 1;
-
-        /// <summary>
-        /// 0 = a single item handed to the bag; &gt; 0 = a whole-catalog pack (Shop.BundleKinds)
-        /// whose goods are delivered by mail instead - the shop row only shows the representative.
-        /// </summary>
-        public int Bundle { get; set; }
     }
 
     public sealed class AbilityData

@@ -149,36 +149,6 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
-        /// A named unique for the rare vendor shelf (uniqueItem.rare): the row's identity - its real
-        /// item id (the TypeID column), prefab, gem, element and enchant - rides on the shelf level;
-        /// the row's own level only gates visibility. Only catalogued-visible rows are offered (the
-        /// original shop hid the rest); rows the client cannot price are never rolled. excludeItemIds
-        /// keeps one stock from offering the same unique twice. Null when nothing fits.
-        /// </summary>
-        public static ItemData RollUniqueShop(GameData data, int level, Random rng, ICollection<int> excludeItemIds = null)
-        {
-            List<GameData.UniqueShopRow> pool = data.UniqueShop.Values
-                .Where(r => r.Visible && r.RequiredLevel <= level && data.ItemValues.ContainsKey(r.BaseId))
-                .Where(r => excludeItemIds == null || !excludeItemIds.Contains(r.BaseId))
-                .OrderBy(r => r.Id)
-                .ToList();
-            if (pool.Count == 0)
-                return null;
-
-            GameData.UniqueShopRow row = pool[rng.Next(pool.Count)];
-            return new ItemData
-            {
-                ItemId = row.BaseId,
-                PrefabId = row.PrefabId,
-                Level = level,
-                Gem = row.Gem,
-                Element = row.Element,
-                Enchant = row.Enchant,
-                Count = 1,
-            };
-        }
-
-        /// <summary>
         /// Gives a dropped piece of equipment an enchantment, an element or a gem - or nothing - with
         /// the chances of its level (e.g. level 1: 30 none, 42 enchantment, 33 gem, 19 element).
         /// </summary>
@@ -222,23 +192,6 @@ namespace Akaneiro.Server.Game
             return new ItemData { ItemId = item.Id, PrefabId = 1, Level = level, Count = 1 };
         }
 
-        /// <summary>A weapon model variant that exists at this level (for catalog specials).</summary>
-        public static int RollWeaponPrefab(GameData data, int level, Random rng) =>
-            PickPrefab(data.WeaponPrefabs, level, rng)?.PrefabId ?? 1;
-
-        /// <summary>A model variant for any equipment id, from the prefab table of its own kind.</summary>
-        public static int RollPrefabFor(GameData data, int itemId, int level, Random rng)
-        {
-            IReadOnlyList<GameData.ItemPrefabRow> prefabs = null;
-            if (data.Weapons.ContainsKey(itemId))
-                prefabs = data.WeaponPrefabs;
-            else if (data.ItemEquipSlots.GetValueOrDefault(itemId) is 2 or 5)
-                prefabs = data.AccessoryPrefabs;
-            else if (data.ItemArmor.ContainsKey(itemId))
-                prefabs = data.ArmorPrefabs;
-            return prefabs == null ? 1 : PickPrefab(prefabs, level, rng)?.PrefabId ?? 1;
-        }
-
         /// <summary>Picks a model variant that covers the item's level, or the closest one.</summary>
         private static GameData.ItemPrefabRow PickPrefab(IReadOnlyList<GameData.ItemPrefabRow> prefabs, int level, Random rng)
         {
@@ -246,6 +199,26 @@ namespace Akaneiro.Server.Game
             if (fitting.Count > 0)
                 return fitting[rng.Next(fitting.Count)];
             return prefabs.OrderBy(p => Math.Abs(p.MinLevel - level)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// A model variant for any equipment id, from the prefab table of its own kind (weapon,
+        /// armor or accessory), that exists at the given level. The catalog/special rows carry no
+        /// model variant of their own, but equipment needs a real one or the bag tile renders blank
+        /// (ItemType.IsModelIndex). Deterministic (lowest variant) so a mailed item never changes look.
+        /// </summary>
+        public static int PrefabFor(GameData data, int itemId, int level)
+        {
+            IReadOnlyList<GameData.ItemPrefabRow> prefabs =
+                data.ItemEquipSlots.GetValueOrDefault(itemId) is 7 or 8 ? data.WeaponPrefabs :
+                data.ItemEquipSlots.GetValueOrDefault(itemId) is 2 or 5 ? data.AccessoryPrefabs :
+                data.ArmorPrefabs;
+            GameData.ItemPrefabRow best = prefabs
+                .Where(p => level >= p.MinLevel && level <= p.MaxLevel)
+                .OrderBy(p => p.PrefabId)
+                .DefaultIfEmpty(prefabs.OrderBy(p => Math.Abs(p.MinLevel - level)).FirstOrDefault())
+                .FirstOrDefault();
+            return best?.PrefabId ?? 1;
         }
 
         private static T PickWeighted<T>(IReadOnlyList<T> items, Func<T, int> weight, Random rng) where T : class

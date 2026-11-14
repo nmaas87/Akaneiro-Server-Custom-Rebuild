@@ -161,6 +161,7 @@ namespace Akaneiro.Server.Game
             StarterLoadout.Grant(character, _s.World.Data);
             _s.Mail.GrantKickstarterMail(character); // the "Kickstarter Exclusives" thank-you letter
             _s.Mail.GrantStarterPackMail(character); // the "Starter Pack Gifts" letter
+            _s.Mail.GrantCatalogMail(character);     // "The Complete Rare Catalog": every unique + special
             _s.Account.Characters.Add(character);
             _s.SaveAccount();
             _s.Log.LogInformation("   created character #{Id} '{Name}'", character.Id, character.Name);

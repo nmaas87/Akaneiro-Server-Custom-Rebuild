@@ -144,31 +144,58 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
-        /// Delivery for the vendor's bundle tiles (Shop.Bundle*): every catalogued and special item
-        /// of that kind, already rolled at the buying level, attached to one forever-mail and the
-        /// mailbox pushed right away so the badge lights up mid-session.
+        /// The "Complete Rare Catalog" letter: every named unique in the original catalog
+        /// (uniqueItem.rare, including the rows its shop never listed) plus the pledge and event
+        /// specials, each with its catalogued parts, at the level its row names. One letter per
+        /// character, granted at creation like the welcome letters. The bag never has to hold it:
+        /// it just sits in the mailbox until it is claimed.
         /// </summary>
-        public void SendBundleMail(int kind, List<ItemData> items)
+        public bool GrantCatalogMail(CharacterData character)
         {
-            string title = kind switch
+            if (character.CatalogMailGranted)
+                return false;
+
+            var mail = NewMail(character, KickstarterSender, "The Complete Rare Catalog",
+                "Every named unique the old catalog ever listed, and the pledged gear that never "
+                + "made it onto a shelf - each with its own enchantments, at the level its entry "
+                + "names. They are not for sale anywhere: consider them yours. - Goto");
+
+            var seen = new HashSet<(int Item, int Prefab, int Enchant, int Gem, int Element)>();
+            foreach (GameData.UniqueShopRow row in _s.World.Data.UniqueShop.Values.OrderBy(r => r.Id))
             {
-                Shop.BundleWeapons => "Weapon Bundle: every unique blade",
-                Shop.BundleArmor => "Armor Bundle: every unique guard",
-                Shop.BundleAccessories => "Accessory Bundle: every unique charm",
-                _ => "Collector's Bundle: the whole catalog",
-            };
-            var mail = NewMail(Character, "Goto", title,
-                "You cleared Goto's shelf. Everything the old catalog ever listed of this kind, "
-                + "forged to the level you paid for it at. Enjoy, hunter.");
-            foreach (ItemData item in items)
-            {
-                // Slot is the item's index inside the mail; the client addresses attachments by it.
-                item.Slot = mail.Items.Count;
-                mail.Items.Add(item);
+                if (!seen.Add((row.BaseId, row.PrefabId, row.Enchant, row.Gem, row.Element)))
+                    continue;
+                mail.Items.Add(new ItemData
+                {
+                    Slot = mail.Items.Count,
+                    ItemId = row.BaseId,
+                    PrefabId = row.PrefabId,
+                    Level = Math.Max(1, row.RequiredLevel),
+                    Gem = row.Gem,
+                    Element = row.Element,
+                    Enchant = row.Enchant,
+                    Count = 1,
+                });
             }
-            Character.Mail.Add(mail);
-            _s.Log.LogInformation("   bundle mail '{Title}': {Count} items", mail.Title, items.Count);
-            SendMailbox();
+            foreach (GameData.ItemProps props in _s.World.Data.SpecialItems.Values.OrderBy(i => i.Id))
+            {
+                if (!seen.Add((props.Id, 0, 0, 0, 0)))
+                    continue;
+                mail.Items.Add(new ItemData
+                {
+                    Slot = mail.Items.Count,
+                    ItemId = props.Id,
+                    Level = Math.Max(1, props.LevelRequirement),
+                    PrefabId = Loot.PrefabFor(_s.World.Data, props.Id, Math.Max(1, props.LevelRequirement)),
+                    Count = 1,
+                });
+            }
+
+            character.Mail.Add(mail);
+            character.CatalogMailGranted = true;
+            _s.Log.LogInformation("   mailed '{Title}' with {Count} items to #{Id} '{Name}'",
+                mail.Title, mail.Items.Count, character.Id, character.Name);
+            return true;
         }
 
         private MailData NewMail(CharacterData character, string sender, string title, string content) =>

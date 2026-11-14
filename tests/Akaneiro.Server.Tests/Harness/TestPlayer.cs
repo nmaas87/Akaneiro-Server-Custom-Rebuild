@@ -49,16 +49,11 @@ public sealed class TestPlayer : IPacketSink, IDisposable
     /// the gate on, delete it to open the server again.</summary>
     public string AllowlistPath { get; }
 
-    public TestPlayer(ITestOutputHelper output = null, int seed = 1, bool webLogin = false, int autoSaveSeconds = 180,
-        bool shopBundles = true, int shopBundleItem = 0)
+    public TestPlayer(ITestOutputHelper output = null, int seed = 1, bool webLogin = false, int autoSaveSeconds = 180)
     {
         _dataDir = Path.Combine(Path.GetTempPath(), "akaneiro-tests", Guid.NewGuid().ToString("N"));
         AllowlistPath = Path.Combine(_dataDir, "allowlist.txt");
-        World = new World(Options.Create(new ServerOptions
-            {
-                LogPackets = false, WebLogin = webLogin, AutoSaveSeconds = autoSaveSeconds,
-                ShopBundles = shopBundles, ShopBundleItem = shopBundleItem,
-            }),
+        World = new World(Options.Create(new ServerOptions { LogPackets = false, WebLogin = webLogin, AutoSaveSeconds = autoSaveSeconds }),
             new AccountStore(_dataDir), TestData.Data, new WebUserStore(_dataDir), new LoginAllowlist(AllowlistPath))
         {
             Clock = Clock,

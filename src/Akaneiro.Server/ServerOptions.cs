@@ -63,19 +63,5 @@ namespace Akaneiro.Server
         /// only adds the second login path (see Http/WebLoginService.cs).
         /// </summary>
         public bool WebLogin { get; set; } = false;
-
-        /// <summary>
-        /// Goto's four bundle tiles: whole-catalog packs of uniques (incl. the specials) that the
-        /// player buys on the rare shelf and receives by mail. Turning this off leaves the shelf at
-        /// the rotating named uniques (already-saved bundles stop showing with the next stock).
-        /// </summary>
-        public bool ShopBundles { get; set; } = true;
-
-        /// <summary>
-        /// Item id every bundle tile displays (a plain row from the client's equipment tables, e.g.
-        /// 1001 = the basic Katana icon). The client names and pictures shop rows by item id, so this
-        /// is as generic as the row can get; 0 shows each pack's flashiest unique instead.
-        /// </summary>
-        public int ShopBundleItem { get; set; } = 0;
     }
 }

@@ -28,13 +28,14 @@ public sealed class MailTests
         Assert.Single(Mailbox(player).Cast<SMailInfo>().Where(m => m.title == title));
 
     private static SMailInfo KickstarterMail(TestPlayer player) => Mail(player, "Kickstarter Exclusives");
+    private static SMailInfo CatalogMail(TestPlayer player) => Mail(player, "The Complete Rare Catalog");
 
     [Fact]
     public void EveryNewCharacterIsMailedTheWelcomeLetters()
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
 
-        Assert.Equal(2, Mailbox(player).Count); // both letters arrive, once
+        Assert.Equal(3, Mailbox(player).Count); // all three letters arrive, once
 
         SMailInfo kickstarter = KickstarterMail(player);
         Assert.Equal("Spicy Horse", kickstarter.senderName);
@@ -119,6 +120,46 @@ public sealed class MailTests
     }
 
     [Fact]
+    public void TheCompleteRareCatalogLetterCarriesEveryUniqueOnce()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+
+        SMailInfo letter = CatalogMail(player);
+
+        // Every distinct catalogued unique part (the 120 uniqueItem.rare rows fold to 116, the
+        // hidden rows included) plus every named special of Props 4001-4062 (19) - Amaterasu's
+        // Sword among them, which never stood on any shop shelf.
+        Assert.Equal(116 + 19, letter.itemVec.Count);
+        Assert.Equal("Spicy Horse", letter.senderName);
+        Assert.Equal(0, letter.timeout); // "Forever"
+        Assert.Contains(letter.itemVec.Cast<SItemInfo>(), i => i.ID == 4054 && i.level >= 1 && i.perfrab > 0);
+        Assert.Contains(letter.itemVec.Cast<SItemInfo>(), i => i.ID == 1003 && i.enchant == 201 && i.gem == 703);
+        Assert.Contains(letter.itemVec.Cast<SItemInfo>(), i => i.ID == 2010 && i.gem == 905 && i.enchant == 800);
+        Assert.All(letter.itemVec.Cast<SItemInfo>(), i => Assert.True(i.level >= 1, $"level {i.level}"));
+        Assert.All(letter.itemVec.Cast<SItemInfo>(), i => Assert.True(i.ID >= 1001, $"id {i.ID} is no equipment"));
+        int slot = 0;
+        foreach (SItemInfo item in letter.itemVec.Cast<SItemInfo>())
+            Assert.Equal((uint)slot++, item.slot); // the client addresses attachments by index
+    }
+
+    [Fact]
+    public void AUniqueFromTheCatalogLetterClaimsIntoTheBagWithItsParts()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        SMailInfo letter = CatalogMail(player);
+        int slot = letter.itemVec.Cast<SItemInfo>().ToList().FindIndex(i => i.ID == 4054);
+        Assert.True(slot >= 0);
+
+        player.Send(ProtocolGame_SendRequest.GetMailItem(letter.id, slot));
+
+        Assert.Equal(EServerErrorType.eSuccess,
+            player.Take("On_GetMailItemResult").Arg<EServerErrorType>(0).Get());
+        ItemData sword = Assert.Single(player.Session.Character.Bag.Where(i => i.ItemId == 4054));
+        Assert.True(sword.PrefabId > 0); // a real model variant, so the bag tile renders
+        Assert.Equal(116 + 19 - 1, CatalogMail(player).itemVec.Count); // gone from the letter
+    }
+
+    [Fact]
     public void TheWelcomeMailsArriveOnlyOnce()
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
@@ -131,7 +172,7 @@ public sealed class MailTests
 
         player.Send(ProtocolGame_SendRequest.UserSelectCharacter(characterId));
         player.Take("On_UserSelectCharacterOK");
-        Assert.Equal(2, Mailbox(player).Count); // re-selecting does not either
+        Assert.Equal(3, Mailbox(player).Count); // re-selecting does not either
     }
 
     [Fact]
@@ -295,12 +336,12 @@ public sealed class MailTests
 
         player.Send(ProtocolGame_SendRequest.DeleteMail(mailId));
         player.Take("On_DeleteMailResult");
-        Assert.Single(Mailbox(player));
-        Assert.Equal("Starter Pack Gifts", OnlyRemainingMailTitle(player));
+        var titles = Mailbox(player).Cast<SMailInfo>().Select(m => m.title).ToList();
+        Assert.Equal(2, titles.Count);
+        Assert.DoesNotContain("Kickstarter Exclusives", titles);
+        Assert.Contains("Starter Pack Gifts", titles);
+        Assert.Contains("The Complete Rare Catalog", titles);
     }
-
-    private static string OnlyRemainingMailTitle(TestPlayer player) =>
-        Assert.Single(Mailbox(player).Cast<SMailInfo>()).title;
 
     [Fact]
     public void AcceptAllIntoANearlyFullBagKeepsWhatDoesNotFitOnTheLetter()
@@ -330,7 +371,7 @@ public sealed class MailTests
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
         int characterId = player.Character.Id;
-        Assert.Equal(2, Mailbox(player).Count);
+        Assert.Equal(3, Mailbox(player).Count);
 
         player.Send(ProtocolGame_SendRequest.UserLogout());
         player.Session.Character = null;

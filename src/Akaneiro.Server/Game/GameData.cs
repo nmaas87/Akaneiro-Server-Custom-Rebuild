@@ -150,7 +150,7 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
-        /// A named unique item from uniqueItem.rare - the table the original service sold uniques
+        /// A named unique item from uniqueItem.rare - the catalog the original service sold uniques
         /// from (its KarmaPrice/CrystalPrice/Visible columns). The row's ID (1080, 9000, ...) is a
         /// catalog number, not an item: the client resolves items by their real id, which is the
         /// TypeID column (see MailService's Kickstarter rewards for the same finding).
@@ -164,8 +164,6 @@ namespace Akaneiro.Server.Game
             public int Element { get; set; }
             public int Enchant { get; set; }
             public int RequiredLevel { get; set; }
-            public int KarmaPrice { get; set; }
-            public int CrystalPrice { get; set; }
             public bool Visible { get; set; }
         }
 
@@ -475,7 +473,7 @@ namespace Akaneiro.Server.Game
         /// <summary>Every item the client knows (Props.General), by item id.</summary>
         public IReadOnlyDictionary<int, ItemProps> Items { get; }
 
-        /// <summary>The unique items the original shops sold (uniqueItem.rare), by catalog id.</summary>
+        /// <summary>The whole unique catalog (uniqueItem.rare), by catalog id.</summary>
         public IReadOnlyDictionary<int, UniqueShopRow> UniqueShop { get; }
 
         /// <summary>
@@ -839,16 +837,11 @@ namespace Akaneiro.Server.Game
                 StackSize = Math.Max(1, g.First().Int("Accumulation")),
                 UsesRealMoney = g.First().Int("isUseRealMoney") != 0,
             });
-            ConsumableEffects = ReadTable(Path.Combine(tables, "ConsumableItem.General.EN.txt"))
-                .Where(r => r.Int("ID") != 0)
-                .GroupBy(r => r.Int("ID"))
-                .ToDictionary(g => g.Key, g => new ConsumableRow
-                {
-                    Id = g.Key,
-                    Name = g.First().Str("Name"),
-                    StatusEffect = g.First().Int("StatusEffect"),
-                    BuffId = g.First().Int("BuffID"),
-                });
+            // Named pledge/event gear (Razzle Dazzle, Amaterasu's Sword, ...): not in the rare
+            // catalog, but the client knows the rows and renders them in mail and bag.
+            SpecialItems = Items.Values.Where(i => i.Id >= 4000 && i.Id < 5000)
+                .GroupBy(i => i.Id)
+                .ToDictionary(g => g.Key, g => g.First());
             UniqueShop = ReadTable(Path.Combine(tables, "uniqueItem.rare.EN.txt"))
                 .Where(r => r.Int("ID") != 0)
                 .GroupBy(r => r.Int("ID"))
@@ -861,13 +854,18 @@ namespace Akaneiro.Server.Game
                     Element = g.First().Int("Element"),
                     Enchant = g.First().Int("Enchant"),
                     RequiredLevel = g.First().Int("Level"),
-                    KarmaPrice = g.First().Int("KarmaPrice"),
-                    CrystalPrice = g.First().Int("CrystalPrice"),
                     Visible = g.First().Int("Visible") != 0,
                 });
-            SpecialItems = Items.Values.Where(i => i.Id >= 4000 && i.Id < 5000)
-                .GroupBy(i => i.Id)
-                .ToDictionary(g => g.Key, g => g.First());
+            ConsumableEffects = ReadTable(Path.Combine(tables, "ConsumableItem.General.EN.txt"))
+                .Where(r => r.Int("ID") != 0)
+                .GroupBy(r => r.Int("ID"))
+                .ToDictionary(g => g.Key, g => new ConsumableRow
+                {
+                    Id = g.Key,
+                    Name = g.First().Str("Name"),
+                    StatusEffect = g.First().Int("StatusEffect"),
+                    BuffId = g.First().Int("BuffID"),
+                });
             // Minutes a mission map rests after the 1st, 2nd, ... run of the day.
             MissionCooldownMinutes = ReadTable(Path.Combine(tables, "MissionsThreatCycle.CoolDown.EN.txt"))
                 .Select(r => r.Int("coolDownTime"))

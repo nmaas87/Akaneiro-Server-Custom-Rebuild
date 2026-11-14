@@ -50,10 +50,8 @@ The game client is used as it is, so these stay:
 - Goto, the rare vendor in the village (right of Cato), answers to nothing when clicked. The
   shipped client's "rare vendor" click branch is an empty stub - it sends no request and opens
   no screen (confirmed in the client's own ShopNpc code and in its runtime log). Nothing is
-  lost: Cato's shop already asks the server for both offer lists, so Goto's stock - named
-  uniques from the original rare catalog plus four whole-catalog bundle tiles whose goods are
-  delivered by mail - shows inside Cato's window (see the price note under ASSUMPTIONS). The
-  other village NPCs - Cato,
+  lost: Cato's shop already asks the server for both offer lists, and Goto's four rare items
+  are in Cato's list (see the price note under ASSUMPTIONS). The other village NPCs - Cato,
   Craftsman Resak (crafting), the elder, the trainers, the well, the stash, the bounty board -
   all open normally in the shipped client.
 
