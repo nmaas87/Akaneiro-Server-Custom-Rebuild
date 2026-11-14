@@ -25,7 +25,8 @@ mission tasks), kill chains, wanted bounties, inventory and equipment, the vendo
 trainer and masteries, the stash, the well, spirit helpers, hireable companion allies (the
 summon window; no shipped client build runs that window - the whole ally chain is stubbed out
 client-side, in the Steam build as much as the web one - see KNOWN-ISSUES), the mailbox with the
-welcome letters, daily rewards and crafting.
+welcome letters, daily rewards and crafting. The 2013 Chinese standalone build also plays over
+the web login; the server answers it in its own older packet dialect (see HOSTING.txt).
 
 Every player gets their own single-player world. Several players can use one server at the same
 time (for example in a LAN), but they do not see each other. One account plays on one connection

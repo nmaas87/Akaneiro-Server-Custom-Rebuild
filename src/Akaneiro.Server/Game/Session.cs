@@ -52,6 +52,10 @@ namespace Akaneiro.Server.Game
         public World World { get; }
         public ILogger Log { get; }
 
+        /// <summary>True for a connection the web login marked as the 2013 client build; every
+        /// send then goes through Zh2013Dialect (drop unknown methods, rewrite old struct layouts).</summary>
+        public bool ZhClient { get; set; }
+
         public AccountData Account { get; set; }
         public CharacterData Character { get; set; }
 
@@ -326,6 +330,14 @@ namespace Akaneiro.Server.Game
 
         public void Send(Packet packet)
         {
+            // The 2013 Chinese client build understands a subset of the protocol with older struct
+            // layouts; everything goes through the dialect filter before it hits the wire.
+            if (ZhClient)
+            {
+                if (!Zh2013Dialect.Supports(packet))
+                    return; // a method this client never had a parser for (mail, well, gifts...)
+                packet = Zh2013Dialect.Translate(packet);
+            }
             if (World.Options.LogPackets)
             {
                 byte[] bytes = packet.GetByteStream();

@@ -88,24 +88,30 @@ namespace Akaneiro.Server.Data
 
         private WebUserData FindUid(string uid) => _users.FirstOrDefault(u => u.Uid == uid);
 
-        /// <summary>gameCode issued by the web login: token -> uid + expiry.</summary>
-        private readonly Dictionary<string, (string Uid, DateTimeOffset Until)> _tokens =
-            new Dictionary<string, (string, DateTimeOffset)>();
+        /// <summary>gameCode issued by the web login: token -> uid + expiry + client dialect.</summary>
+        private readonly Dictionary<string, (string Uid, DateTimeOffset Until, bool Legacy2013)> _tokens =
+            new Dictionary<string, (string, DateTimeOffset, bool)>();
 
-        /// <summary>Hands out a gameCode for a TCP login (see Http/WebLoginService.cs).</summary>
-        public string IssueToken(string uid, DateTimeOffset now, TimeSpan lifetime)
+        /// <summary>
+        /// Hands out a gameCode for a TCP login (see Http/WebLoginService.cs). legacy2013 marks the
+        /// 2013 client build (the Chinese fat client sends no "other" version field) so the game
+        /// connection can switch to the Zh2013Dialect packet layout.
+        /// </summary>
+        public string IssueToken(string uid, DateTimeOffset now, TimeSpan lifetime, bool legacy2013 = false)
         {
             string token = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
-            _tokens[token] = (uid, now + lifetime);
+            _tokens[token] = (uid, now + lifetime, legacy2013);
             return token;
         }
 
         /// <summary>
         /// Checks a gameCode from the web login: known, unexpired, and issued to this uid. A Steam
-        /// login never produces a token here, so the two paths can never be confused.
+        /// login never produces a token here, so the two paths can never be confused. legacy2013
+        /// reports which client build the login POST came from.
         /// </summary>
-        public bool ValidateToken(string token, string uid, DateTimeOffset now)
+        public bool ValidateToken(string token, string uid, DateTimeOffset now, out bool legacy2013)
         {
+            legacy2013 = false;
             if (string.IsNullOrEmpty(token) || !_tokens.TryGetValue(token, out var entry))
                 return false;
             if (now > entry.Until)
@@ -113,7 +119,10 @@ namespace Akaneiro.Server.Data
                 _tokens.Remove(token);
                 return false;
             }
-            return entry.Uid == uid;
+            if (entry.Uid != uid)
+                return false;
+            legacy2013 = entry.Legacy2013;
+            return true;
         }
 
         private void Save()

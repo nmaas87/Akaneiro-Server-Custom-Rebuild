@@ -258,6 +258,18 @@ server restart, log in through the client again). A web uid cannot log in withou
 and a Steam ID never goes through the web check - the two paths cannot be confused. Like the
 Steam login, this is only safe where you trust everyone who can connect.
 
+THE 2013 CHINESE CLIENT (SAME LOGIN, OLDER PROTOCOL CUT)
+--------------------------------------------------------
+
+The old Chinese standalone build ("Akaneiro Demon Hunters (ZH)") logs in through exactly the
+client.php flow above: it just never sends an "other" version field with its login, and the
+server marks that gameCode as the 2013 dialect. Such a connection then only sees packets that
+client can parse - newer messages (mail, well, redeem gifts, cooldown speedups, ...) are dropped
+and the handful of structs that gained fields since 2013 are rewritten to their old field lists.
+Everything else plays. The 2013 build has no mailbox, no stash and no well window, so those
+features simply stay invisible on it (the account itself is a normal web account and looks
+complete again from a 2014 client).
+
 
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK
 -------------------------------------------

@@ -83,7 +83,10 @@ namespace Akaneiro.Server.Http
                     }
 
                     WebUserData user = world.WebUsers.Find(email);
-                    string token = world.WebUsers.IssueToken(user.Uid, DateTimeOffset.UtcNow, TokenLifetime);
+                    // The 2014 clients (Steam/web "client ver") always post an "other" version field;
+                    // the 2013 Chinese fat client does not - that absence is its dialect marker.
+                    string token = world.WebUsers.IssueToken(user.Uid, DateTimeOffset.UtcNow, TokenLifetime,
+                        legacy2013: string.IsNullOrWhiteSpace(version));
                     string server = $"{options.PublicHost}:{options.GamePort}";
                     log.LogInformation("web login {Email} (uid {Uid}) -> {Server} (client version {Version})", email, user.Uid, server, version);
 
