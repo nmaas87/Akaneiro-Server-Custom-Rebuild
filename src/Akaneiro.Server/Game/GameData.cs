@@ -149,6 +149,26 @@ namespace Akaneiro.Server.Game
             public int Chance { get; set; } = 100;
         }
 
+        /// <summary>
+        /// A named unique item from uniqueItem.rare - the table the original service sold uniques
+        /// from (its KarmaPrice/CrystalPrice/Visible columns). The row's ID (1080, 9000, ...) is a
+        /// catalog number, not an item: the client resolves items by their real id, which is the
+        /// TypeID column (see MailService's Kickstarter rewards for the same finding).
+        /// </summary>
+        public sealed class UniqueShopRow
+        {
+            public int Id { get; set; }
+            public int BaseId { get; set; }
+            public int PrefabId { get; set; }
+            public int Gem { get; set; }
+            public int Element { get; set; }
+            public int Enchant { get; set; }
+            public int RequiredLevel { get; set; }
+            public int KarmaPrice { get; set; }
+            public int CrystalPrice { get; set; }
+            public bool Visible { get; set; }
+        }
+
         /// <summary>A monster type, read from its prefab by tools/SceneExtract.</summary>
         public sealed class MonsterRow
         {
@@ -454,6 +474,9 @@ namespace Akaneiro.Server.Game
 
         /// <summary>Every item the client knows (Props.General), by item id.</summary>
         public IReadOnlyDictionary<int, ItemProps> Items { get; }
+
+        /// <summary>The unique items the original shops sold (uniqueItem.rare), by catalog id.</summary>
+        public IReadOnlyDictionary<int, UniqueShopRow> UniqueShop { get; }
 
         /// <summary>
         /// Fills in the PrefabId an item has to carry for its Props.General type, and returns
@@ -819,6 +842,22 @@ namespace Akaneiro.Server.Game
                     Name = g.First().Str("Name"),
                     StatusEffect = g.First().Int("StatusEffect"),
                     BuffId = g.First().Int("BuffID"),
+                });
+            UniqueShop = ReadTable(Path.Combine(tables, "uniqueItem.rare.EN.txt"))
+                .Where(r => r.Int("ID") != 0)
+                .GroupBy(r => r.Int("ID"))
+                .ToDictionary(g => g.Key, g => new UniqueShopRow
+                {
+                    Id = g.Key,
+                    BaseId = g.First().Int("TypeID"),
+                    PrefabId = g.First().Int("PrefabID"),
+                    Gem = g.First().Int("Gem"),
+                    Element = g.First().Int("Element"),
+                    Enchant = g.First().Int("Enchant"),
+                    RequiredLevel = g.First().Int("Level"),
+                    KarmaPrice = g.First().Int("KarmaPrice"),
+                    CrystalPrice = g.First().Int("CrystalPrice"),
+                    Visible = g.First().Int("Visible") != 0,
                 });
             // Minutes a mission map rests after the 1st, 2nd, ... run of the day.
             MissionCooldownMinutes = ReadTable(Path.Combine(tables, "MissionsThreatCycle.CoolDown.EN.txt"))

@@ -149,6 +149,36 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
+        /// A named unique for the rare vendor shelf (uniqueItem.rare): the row's identity - its real
+        /// item id (the TypeID column), prefab, gem, element and enchant - rides on the shelf level;
+        /// the row's own level only gates visibility. Only catalogued-visible rows are offered (the
+        /// original shop hid the rest); rows the client cannot price are never rolled. excludeItemIds
+        /// keeps one stock from offering the same unique twice. Null when nothing fits.
+        /// </summary>
+        public static ItemData RollUniqueShop(GameData data, int level, Random rng, ICollection<int> excludeItemIds = null)
+        {
+            List<GameData.UniqueShopRow> pool = data.UniqueShop.Values
+                .Where(r => r.Visible && r.RequiredLevel <= level && data.ItemValues.ContainsKey(r.BaseId))
+                .Where(r => excludeItemIds == null || !excludeItemIds.Contains(r.BaseId))
+                .OrderBy(r => r.Id)
+                .ToList();
+            if (pool.Count == 0)
+                return null;
+
+            GameData.UniqueShopRow row = pool[rng.Next(pool.Count)];
+            return new ItemData
+            {
+                ItemId = row.BaseId,
+                PrefabId = row.PrefabId,
+                Level = level,
+                Gem = row.Gem,
+                Element = row.Element,
+                Enchant = row.Enchant,
+                Count = 1,
+            };
+        }
+
+        /// <summary>
         /// Gives a dropped piece of equipment an enchantment, an element or a gem - or nothing - with
         /// the chances of its level (e.g. level 1: 30 none, 42 enchantment, 33 gem, 19 element).
         /// </summary>

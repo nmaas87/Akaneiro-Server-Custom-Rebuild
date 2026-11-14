@@ -9,8 +9,10 @@ namespace Akaneiro.Server.Game
 {
     /// <summary>
     /// The village vendors. Gato (SHOPNPC) sells equipment the server rolls for the character's
-    /// level and replaces every 12 hours; the elder's shop sells food, potions and materials from
-    /// the client's own tables (BuyConsumeItem). Everything can be sold back.
+    /// level and replaces every 12 hours; the four rare offers (Goto's shelf, displayed in the same
+    /// window) sell named uniques from the original catalog (uniqueItem.rare). The elder's shop sells
+    /// food, potions and materials from the client's own tables (BuyConsumeItem). Everything can be
+    /// sold back.
     /// <para>
     /// Prices: the client values equipment at level * (1 + element + enchant + gem) * base value * 0.4
     /// (PlayerDataManager.GetItemValue(2, ...)) and shows that in the tooltip; that is what selling
@@ -67,9 +69,23 @@ namespace Akaneiro.Server.Game
             int uuid = 1;
             for (int i = 0; i < OffersPerStock * 4 && stock.Items.Count < OffersPerStock; i++)
                 Add(stock.Items, Loot.RollEquipment(Data, Character.Level, _s.World.Random), ref uuid, 1);
-            // The rare vendor's items are a little ahead of the character and cost twice as much.
+            // Goto's shelf: named uniques from the rare catalog, a little ahead of the character and
+            // at twice the price. The catalog only shows a handful of rows per level, so slots the
+            // uniques cannot fill (small catalog, big shelf) fall back to rolled gear.
+            var offeredUniques = new HashSet<int>();
             for (int i = 0; i < RareOffers * 4 && stock.RareItems.Count < RareOffers; i++)
-                Add(stock.RareItems, Loot.RollEquipment(Data, Character.Level + 2, _s.World.Random), ref uuid, 2);
+            {
+                ItemData unique = Loot.RollUniqueShop(Data, Character.Level + 2, _s.World.Random, offeredUniques);
+                if (unique != null)
+                {
+                    offeredUniques.Add(unique.ItemId);
+                    Add(stock.RareItems, unique, ref uuid, 2);
+                }
+                else
+                {
+                    Add(stock.RareItems, Loot.RollEquipment(Data, Character.Level + 2, _s.World.Random), ref uuid, 2);
+                }
+            }
             return stock;
         }
 
