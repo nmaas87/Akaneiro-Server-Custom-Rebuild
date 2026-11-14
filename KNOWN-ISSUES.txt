@@ -33,6 +33,12 @@ The game client is used as it is, so these stay:
   page; close it. Crystal prices are free on this server, karma prices are not.
 - The client asks for the "friend reward" twice every time a map loads. The server answers only
   once per visit, otherwise the mission summary screen would close right after opening.
+- Reconnecting to an account that is already playing: the client shows its "X is still online,
+  reconnect?" panel and the shipped builds answer "No" on their own. That is exactly what the
+  server needs: the old (usually already dead) connection is closed, and the new login loads the
+  account fresh from disk, so the zombie's saves can never roll back progress. A connection that
+  died without saying goodbye is dropped by the server itself after 45 seconds without the
+  client's 10-second ping.
 
 
 NOT BUILT: THE ORIGINAL ONLINE FEATURES

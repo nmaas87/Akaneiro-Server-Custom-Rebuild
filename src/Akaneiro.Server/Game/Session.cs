@@ -55,6 +55,35 @@ namespace Akaneiro.Server.Game
         public AccountData Account { get; set; }
         public CharacterData Character { get; set; }
 
+        /// <summary>Name of the character last selected in this session (reconnect handshake text).</summary>
+        public string LastCharacterName { get; set; } = "";
+
+        /// <summary>The account string this session is reconnecting against (GameHandler.UserLogin
+        /// found a live owner and asked; answered by GameHandler.UserReconnect).</summary>
+        public string PendingReconnect { get; set; }
+
+        /// <summary>Set when a newer session took this account away: the stale session must not
+        /// save (its copy predates the takeover) and its connection is closed.</summary>
+        public bool Superseded { get; private set; }
+
+        /// <summary>The account key this session claimed ownership of, if any.</summary>
+        public string AccountKey { get; private set; }
+
+        /// <summary>Claim the account for this session (all callers hold <see cref="World.Sync"/>).</summary>
+        public void ClaimAccount(string account)
+        {
+            AccountKey = account;
+            World.ClaimAccount(account, this);
+        }
+
+        /// <summary>End this session's connection (its read loop ends, OnDisconnected runs).</summary>
+        public void Disconnect()
+        {
+            _aiTimer?.Dispose();
+            _aiTimer = null;
+            _connection.Close();
+        }
+
         /// <summary>Scene requested via EnterScene; becomes active on MapLoadOK.</summary>
         public string SceneName { get; set; } = "";
         public Vector3 Position { get; set; }
@@ -272,6 +301,10 @@ namespace Akaneiro.Server.Game
 
         public void SaveAccount()
         {
+            // A session whose account was taken over holds an outdated copy; saving it would
+            // roll back everything the new session did.
+            if (Superseded)
+                return;
             if (Account != null)
                 World.Accounts.Save(Account);
         }
@@ -290,7 +323,20 @@ namespace Akaneiro.Server.Game
             _aiTimer?.Dispose();
             _aiTimer = null;
             lock (World.Sync)
+            {
                 SaveAccount();
+                if (AccountKey != null)
+                    World.ReleaseAccount(AccountKey, this);
+            }
+        }
+
+        /// <summary>A newer session took this account: persist what this one has, then go away
+        /// without saving again (all callers hold <see cref="World.Sync"/>).</summary>
+        public void Supersede()
+        {
+            SaveAccount(); // last state of the old session goes to disk first
+            Superseded = true;
+            Disconnect();
         }
 
         private void LogPacket(string direction, string name)

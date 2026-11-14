@@ -96,6 +96,12 @@ public sealed class TestPlayer : IPacketSink, IDisposable
             throw new InvalidOperationException("the client could not parse a packet the server sent");
     }
 
+    /// <summary>A "closed" test client simply stops receiving; the session end is driven explicitly.</summary>
+    void IPacketSink.Close() => Closed = true;
+
+    /// <summary>True once the server ended this test connection (reconnect takeover).</summary>
+    public bool Closed { get; private set; }
+
     /// <summary>Lets game time pass; monsters act, cooldowns run out, ability objects expire.</summary>
     public void Wait(double seconds)
     {

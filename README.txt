@@ -25,7 +25,9 @@ mission tasks), kill chains, wanted bounties, inventory and equipment, the vendo
 trainer and masteries, the stash, the well, spirit helpers, daily rewards and crafting.
 
 Every player gets their own single-player world. Several players can use one server at the same
-time (for example in a LAN), but they do not see each other.
+time (for example in a LAN), but they do not see each other. One account plays on one connection
+at a time: logging in a second time hands the account over, closing the old connection (even a
+half-dead one, which the server notices on its own after 45 seconds without a heartbeat).
 
 
 LAYOUT

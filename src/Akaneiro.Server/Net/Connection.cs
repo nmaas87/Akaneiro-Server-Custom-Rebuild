@@ -21,6 +21,11 @@ namespace Akaneiro.Server.Net
         private const short PacketPong = 2;
         private const int MaxBodySize = 1024 * 1024;
 
+        /// <summary>The client pings every 10 s; a connection that sent nothing for this long is
+        /// dead (Wi-Fi drop, suspended machine) and gets closed, so its session stops holding the
+        /// account against a reconnect.</summary>
+        public static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(45);
+
         private static int _nextId;
 
         private readonly TcpClient _client;
@@ -47,8 +52,17 @@ namespace Akaneiro.Server.Net
             {
                 while (!ct.IsCancellationRequested)
                 {
-                    if (!await ReadExactlyAsync(header, ct))
+                    // The client pings every 10 s: anything older than IdleTimeout is a dead
+                    // connection whose read would otherwise block forever.
+                    using var idle = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    idle.CancelAfter(IdleTimeout);
+
+                    if (!await ReadExactlyAsync(header, idle.Token))
+                    {
+                        if (!ct.IsCancellationRequested)
+                            _log.LogInformation("Connection {Id}: idle for {Timeout}, closing", Id, IdleTimeout);
                         break;
+                    }
 
                     int bodySize = BitConverter.ToInt32(header, 0);
                     short type = BitConverter.ToInt16(header, 4);
@@ -90,6 +104,11 @@ namespace Akaneiro.Server.Net
 
         /// <summary>Sends a packet built by the generated protocol code (already contains the 6 byte header).</summary>
         public void Send(Packet packet) => SendBytes(packet.GetByteStream());
+
+        public void Close()
+        {
+            try { _client.Close(); } catch (ObjectDisposedException) { }
+        }
 
         private void SendRaw(short type, byte[] body)
         {

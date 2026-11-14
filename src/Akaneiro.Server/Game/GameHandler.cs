@@ -25,21 +25,11 @@ namespace Akaneiro.Server.Game
             // Web login ("client ver"): client.php handed out a gameCode for this uid; it arrives
             // here as the token. This runs before the Steam path and only activates for tokens this
             // server issued through WebLoginService, so Steam logins take exactly the old branch.
-            if (_s.World.Options.WebLogin && _s.World.WebUsers.ValidateToken(tocken, account, _s.World.Clock.UtcNow))
-            {
-                _s.Account = _s.World.Accounts.LoadOrCreate(account);
-                if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
-                    _s.SaveAccount();
-                if (_s.World.Data.NormalizePrefabIds(_s.Account))
-                    _s.SaveAccount(); // items saved before they carried the client's icon index
-                _s.Log.LogInformation("   web login: uid {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
-                _s.Send(GameResponses.UserLoginOK(false, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
-                return;
-            }
+            bool webAuthenticated = _s.World.Options.WebLogin && _s.World.WebUsers.ValidateToken(tocken, account, _s.World.Clock.UtcNow);
 
             // A uid that belongs to a web account must not be usable without its gameCode; every
             // other account string (Steam IDs and anything the editor path sends) keeps behaving as before.
-            if (_s.World.Options.WebLogin && _s.World.WebUsers.IsWebUid(account))
+            if (_s.World.Options.WebLogin && !webAuthenticated && _s.World.WebUsers.IsWebUid(account))
             {
                 _s.Log.LogInformation("   web login uid {Account} rejected: no valid gameCode", account);
                 _s.Send(GameResponses.UserLoginFailed(Proto.Error(EServerErrorType.eWrongAccountOrPwd)));
@@ -50,18 +40,75 @@ namespace Akaneiro.Server.Game
             if (string.IsNullOrWhiteSpace(account))
                 account = "local";
 
+            // A live session still holds this account (a dropped connection the server has not
+            // noticed yet, or a second machine). The protocol's reconnect handshake decides what
+            // happens; the shipped clients answer UserReconnectNotify with false, which means
+            // "kick the old one and log in fresh" - exactly the fix for a zombie session.
+            Session previous = _s.World.OwnerOf(account);
+            if (previous != null && previous != _s)
+            {
+                _s.PendingReconnect = account;
+                _s.Log.LogInformation("   login {Account}: session #{Old} still lives, asking how to proceed",
+                    account, previous.Character?.Name ?? "(no character)");
+                _s.Send(GameResponses.UserReconnectNotify(
+                    previous.Character?.Name ?? previous.LastCharacterName,
+                    previous.Mission?.Mission.Name ?? ""));
+                return;
+            }
+
+            FinishLogin(account);
+        }
+
+        /// <summary>The normal login tail: load the account, claim it, greet the client.</summary>
+        private void FinishLogin(string account, bool reconnected = false)
+        {
             _s.Account = _s.World.Accounts.LoadOrCreate(account);
             // Characters created before starter gear existed get it here, so the select screen shows it.
             if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
                 _s.SaveAccount();
             if (_s.World.Data.NormalizePrefabIds(_s.Account))
                 _s.SaveAccount(); // items saved before they carried the client's icon index
+            _s.ClaimAccount(account);
             _s.Log.LogInformation("   login: account {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
 
-            _s.Send(GameResponses.UserLoginOK(false, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
+            _s.Send(GameResponses.UserLoginOK(reconnected, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
         }
 
-        public override void UserLogout() => _s.SaveAccount();
+        /// <summary>
+        /// The answer to <see cref="UserReconnectNotify"/> (client <c>_UI_CS_Login</c> reconnect
+        /// panel; the shipped NGUI builds answer false on their own). Both branches evict the old
+        /// session - keeping it alive would let its saves roll back the new one's progress - and
+        /// reload the account from disk so nothing written by the old one is lost. true resumes
+        /// under the same character choice; false is a plain fresh login.
+        /// </summary>
+        public override void UserReconnect(bool isReconnect)
+        {
+            string account = _s.PendingReconnect;
+            _s.PendingReconnect = null;
+            if (account == null)
+            {
+                _s.Log.LogWarning("   UserReconnect({Choice}) without a pending handshake", isReconnect);
+                return;
+            }
+
+            Session previous = _s.World.OwnerOf(account);
+            if (previous != null && previous != _s)
+            {
+                _s.Log.LogInformation("   reconnect {Account}: ending session of '{Old}' ({Choice})",
+                    account, previous.Character?.Name ?? "(no character)", isReconnect ? "resume" : "fresh login");
+                _s.World.ReleaseAccount(account, previous);
+                previous.Supersede();
+            }
+
+            FinishLogin(account, reconnected: isReconnect);
+        }
+
+        public override void UserLogout()
+        {
+            _s.SaveAccount();
+            if (_s.AccountKey != null)
+                _s.World.ReleaseAccount(_s.AccountKey, _s);
+        }
 
         public override void pingRequest() => _s.Send(GameResponses.pingRequestAck());
 
@@ -130,6 +177,7 @@ namespace Akaneiro.Server.Game
             StarterLoadout.Grant(character, _s.World.Data); // characters created before starter gear existed
             Trainer.GrantStarterMasteries(character);
             _s.Character = character;
+            _s.LastCharacterName = character.Name;
             _s.ActiveBuffs.Clear(); // food eaten by another character of this login
             _s.Account.LastCharacterId = character.Id;
             _s.SaveAccount();
