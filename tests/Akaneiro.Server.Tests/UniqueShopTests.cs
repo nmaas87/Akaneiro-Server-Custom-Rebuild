@@ -27,6 +27,10 @@ public sealed class UniqueShopTests
         return player.Take("On_SendShopRareitemTrackInfo").Arg<vectorShopItemInfos>(1).Cast<SShopItemInfo>().ToList();
     }
 
+    /// <summary>The uuids of the four mail-delivered bundle tiles on the current stock.</summary>
+    private static HashSet<int> BundleUuids(TestPlayer player) =>
+        new HashSet<int>(player.Session.Character.Shop.RareItems.Where(o => o.Bundle != 0).Select(o => o.Uuid));
+
     /// <summary>True when the offer carries a whole catalogued row: id, prefab, gem, element, enchant.</summary>
     private static bool MatchesUniqueRow(SShopItemInfo offer, GameData data, out GameData.UniqueShopRow row)
     {
@@ -106,19 +110,78 @@ public sealed class UniqueShopTests
         var data = player.Session.World.Data;
 
         var rare = RareShelf(player);
+        var bundles = BundleUuids(player);
+        var stockOffers = rare.Where(o => !bundles.Contains(o.UUID)).ToList();
         int level = player.Session.Character.Level + 2;
 
-        Assert.Equal(Shop.RareOffers, rare.Count);
-        var uniques = rare.Where(o => MatchesUniqueRow(o, data, out _)).ToList();
+        Assert.Equal(Shop.RareOffers, stockOffers.Count);
+        Assert.Equal(4, bundles.Count); // the four permanent mail bundles
+        var uniques = stockOffers.Where(o => MatchesUniqueRow(o, data, out _)).ToList();
         // A fresh character: the catalog fits exactly two rows at the shelf level, and both show up.
         int fitting = data.UniqueShop.Values.Count(r => r.Visible && r.RequiredLevel <= level);
         Assert.Equal(Math.Min(fitting, Shop.RareOffers), uniques.Count);
         Assert.All(rare, i => Assert.Equal((uint)level, i.level));
         Assert.All(rare, i => Assert.Equal(EMoneyType.eMoneyType_SK, i.moneyType));
-        Assert.All(rare, i => Assert.Equal((int)(level * data.ItemValues[i.ID]) * 2, i.price));
+        // Plain offers use the doubled rare price; bundle tiles carry the whole pack price.
+        Assert.All(stockOffers, i => Assert.Equal((int)(level * data.ItemValues[i.ID]) * 2, i.price));
         Assert.All(uniques, i => Assert.True(i.enchant != 0 || i.gem != 0 || i.element != 0));
         // The catalog never repeats itself on one shelf.
         Assert.Equal(uniques.Count, uniques.Select(i => i.ID).Distinct().Count());
+    }
+
+    [Fact]
+    public void BundleTilesShowTheWholeCatalogPricedAndMailOnPurchase()
+    {
+        using var player = InVillage(karma: 50_000_000);
+        var data = player.Session.World.Data;
+
+        var rare = RareShelf(player);
+        var bundleOffers = rare.Where(o => BundleUuids(player).Contains(o.UUID)).ToList();
+        Assert.Equal(4, bundleOffers.Count);
+        // A tile costs what one plain rare offer of its shown item would: the pack is in the price.
+        Assert.All(bundleOffers, o => Assert.True(
+            o.price > (int)(player.Session.Character.Level + 2) * 2 * TestData.Data.ItemValues[o.ID],
+            $"bundle {o.UUID} costs {o.price}"));
+
+        var stock = player.Session.Character.Shop.RareItems;
+        ShopOffer weapons = stock.First(o => o.Bundle == Shop.BundleWeapons);
+        ShopOffer collector = stock.First(o => o.Bundle == Shop.BundleCollector);
+        Assert.True(collector.Price > weapons.Price);
+
+        int karma = player.Session.Account.Karma;
+        player.ClearInbox();
+        player.Send(ProtocolGame_SendRequest.BuyItem(true, new SBuyitemInfo
+        {
+            UUID = weapons.Uuid, ID = weapons.Item.ItemId, perfrab = weapons.Item.PrefabId,
+            level = (uint)weapons.Item.Level, count = 1, currencyType = 1,
+        }));
+
+        Assert.Equal(weapons.Uuid, player.Take("On_BuyItemSuccAck").Arg<SBuyitemInfo>(1).UUID);
+        Assert.Equal(karma - weapons.Price, player.Session.Account.Karma);
+
+        // The goods arrive as one mail (the badge push arrives too), not into the bag.
+        var mail = player.Session.Character.Mail.Last();
+        Assert.Equal("Weapon Bundle: every unique blade", mail.Title);
+        Assert.NotEmpty(player.TakeAll("On_GetPlayerMailResult"));
+        Assert.Empty(player.Session.Character.Bag);
+
+        // The pack is the whole weapon catalog at the character's level, specials included.
+        int level = player.Session.Character.Level;
+        Assert.All(mail.Items, i =>
+        {
+            Assert.Equal(level, i.Level);
+            int slot = data.ItemEquipSlots.GetValueOrDefault(i.ItemId);
+            Assert.True(slot is 7 or 8, $"item {i.ItemId} slot {slot}");
+            Assert.True(data.ItemValues.ContainsKey(i.ItemId), $"item {i.ItemId}");
+        });
+        Assert.Contains(mail.Items, i => i.ItemId == 4054); // Amaterasu's Sword
+        Assert.Contains(mail.Items, i => i.ItemId == 1003 && i.Enchant != 0); // catalogued unique clubs
+        for (int n = 0; n < mail.Items.Count; n++) // the client addresses attachments by index
+            Assert.Equal(n, mail.Items[n].Slot);
+
+        // The tile is gone until the stock refreshes.
+        Assert.DoesNotContain(RareShelf(player), o => o.UUID == weapons.Uuid);
+        Assert.DoesNotContain(player.Session.Character.Shop.RareItems, o => o.Bundle == Shop.BundleWeapons);
     }
 
     [Fact]
@@ -127,7 +190,8 @@ public sealed class UniqueShopTests
         using var player = InVillage();
         var data = player.Session.World.Data;
 
-        SShopItemInfo offer = RareShelf(player).First(o => MatchesUniqueRow(o, data, out _));
+        SShopItemInfo offer = RareShelf(player).First(o =>
+            MatchesUniqueRow(o, data, out _) && !BundleUuids(player).Contains(o.UUID)); // a real single offer, not a tile
         int karma = player.Session.Account.Karma;
 
         player.Send(ProtocolGame_SendRequest.BuyItem(true, new SBuyitemInfo

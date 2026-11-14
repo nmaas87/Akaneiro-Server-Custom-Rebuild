@@ -22,7 +22,8 @@ unlocking and threat levels, every mission with its monsters and their AI, comba
 critical hits, karma, loot, levels and talents, death and revival, level events (trigger volumes,
 spawner waves, gates, portals, switches and bridges, levers, baskets and chests, speech bubbles,
 mission tasks), kill chains, wanted bounties, inventory and equipment, the vendors (the rare shelf
-sells named uniques from the original catalog), the ability
+sells named uniques from the original catalog, plus whole-catalog bundle tiles delivered by mail),
+the ability
 trainer and masteries, the stash, the well, spirit helpers, hireable companion allies (the
 summon window; no shipped client build runs that window - the whole ally chain is stubbed out
 client-side, in the Steam build as much as the web one - see KNOWN-ISSUES), daily rewards and

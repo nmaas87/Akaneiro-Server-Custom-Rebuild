@@ -26,6 +26,9 @@ namespace Akaneiro.Server.Game
         public const int OffersPerStock = 16;
         public const int RareOffers = 4;
 
+        /// <summary>Bundle kinds (ShopOffer.Bundle): whole-catalog packs delivered by mail.</summary>
+        public const int BundleWeapons = 1, BundleArmor = 2, BundleAccessories = 3, BundleCollector = 4;
+
         private readonly Session _s;
 
         public Shop(Session session) => _s = session;
@@ -86,8 +89,95 @@ namespace Akaneiro.Server.Game
                     Add(stock.RareItems, Loot.RollEquipment(Data, Character.Level + 2, _s.World.Random), ref uuid, 2);
                 }
             }
+            // Four permanent tiles: whole-catalog packs whose goods arrive by mail.
+            foreach (int kind in new[] { BundleWeapons, BundleArmor, BundleAccessories, BundleCollector })
+                AddBundle(stock.RareItems, kind, ref uuid);
             return stock;
         }
+
+        // ---- bundles ----------------------------------------------------------------------------
+
+        /// <summary>
+        /// Adds one mail-delivered bundle tile: the row shows a representative unique, the price is
+        /// the sum of the whole pack at rare prices, and the goods (every catalogued + special item
+        /// of that kind) are rolled at buy time so they match the level you pay them at.
+        /// </summary>
+        private void AddBundle(List<ShopOffer> offers, int kind, ref int uuid)
+        {
+            List<ItemData> pack = PackItems(kind, Character.Level);
+            if (pack.Count == 0)
+                return;
+
+            // The row itself shows at the shelf level (like the other rare offers); the mail pack is
+            // rolled at buy time for the level you actually pay at.
+            ItemData representative = pack.OrderByDescending(i => i.Enchant != 0 || i.Gem != 0 || i.Element != 0)
+                .ThenBy(i => i.ItemId)
+                .First();
+            var offer = new ShopOffer
+            {
+                Uuid = uuid,
+                Item = new ItemData
+                {
+                    ItemId = representative.ItemId, PrefabId = representative.PrefabId,
+                    Level = Character.Level + 2,
+                    Gem = representative.Gem, Element = representative.Element, Enchant = representative.Enchant,
+                    Count = 1,
+                },
+                Price = pack.Sum(i => BuyPrice(i) * 2),
+                MoneyType = EMoneyType.eMoneyType_SK,
+                Bundle = kind,
+            };
+            uuid++;
+            offers.Add(offer);
+        }
+
+        /// <summary>Everything the catalog and the special rows hold for one kind, at the given level.</summary>
+        private List<ItemData> PackItems(int kind, int level)
+        {
+            var items = new List<ItemData>();
+            var seen = new HashSet<(int Item, int Prefab, int Enchant, int Gem, int Element)>();
+
+            foreach (GameData.UniqueShopRow row in Data.UniqueShop.Values.OrderBy(r => r.Id))
+            {
+                if (kind != BundleCollector && !FitsBundle(Data.ItemEquipSlots.GetValueOrDefault(row.BaseId), kind))
+                    continue;
+                if (!Data.ItemValues.ContainsKey(row.BaseId))
+                    continue;
+                if (!seen.Add((row.BaseId, row.PrefabId, row.Enchant, row.Gem, row.Element)))
+                    continue;
+                items.Add(new ItemData
+                {
+                    ItemId = row.BaseId, PrefabId = row.PrefabId, Level = level,
+                    Gem = row.Gem, Element = row.Element, Enchant = row.Enchant, Count = 1,
+                });
+            }
+
+            foreach (GameData.ItemProps props in Data.SpecialItems.Values.OrderBy(i => i.Id))
+            {
+                if (kind != BundleCollector && !FitsBundle(props.EquipPoint, kind))
+                    continue;
+                if (!Data.ItemValues.ContainsKey(props.Id))
+                    continue;
+                if (!seen.Add((props.Id, 0, 0, 0, 0)))
+                    continue;
+                items.Add(new ItemData
+                {
+                    ItemId = props.Id,
+                    PrefabId = Loot.RollWeaponPrefab(Data, level, _s.World.Random), // the specials are weapon-table rows
+                    Level = level,
+                    Count = 1,
+                });
+            }
+            return items;
+        }
+
+        private static bool FitsBundle(int equipPoint, int kind) => kind switch
+        {
+            BundleWeapons => equipPoint is 7 or 8,
+            BundleArmor => equipPoint is 1 or 3 or 4 or 6,
+            BundleAccessories => equipPoint is 2 or 5,
+            _ => true,
+        };
 
         private void Add(List<ShopOffer> offers, ItemData item, ref int uuid, int priceFactor)
         {
@@ -140,6 +230,24 @@ namespace Akaneiro.Server.Game
             if (offer == null)
             {
                 Fail(EServerErrorType.eItemError_BuyCantFindItem);
+                return;
+            }
+            if (offer.Bundle != 0)
+            {
+                // A bundle is not one item: the pack (rolled now, at this level) goes into a mail,
+                // so the bag never has to hold it and a full bag cannot block the sale.
+                if (!Pay(offer.Price, offer.MoneyType))
+                {
+                    Fail(EServerErrorType.eItemError_BuyNotEnoughMoneny);
+                    return;
+                }
+                List<ItemData> pack = PackItems(offer.Bundle, Character.Level);
+                offers.Remove(offer);
+                _s.Mail.SendBundleMail(offer.Bundle, pack);
+                _s.SaveAccount();
+                _s.Log.LogInformation("   sold bundle {Bundle}: {Count} items mailed for {Price} karma", offer.Bundle, pack.Count, offer.Price);
+                _s.SendMoney();
+                _s.Send(GameResponses.BuyItemSuccAck(rare ? 1 : 0, info));
                 return;
             }
             if (!_s.Inventory.CanAdd(offer.Item))

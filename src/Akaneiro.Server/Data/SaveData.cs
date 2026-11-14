@@ -167,6 +167,12 @@ namespace Akaneiro.Server.Data
 
         /// <summary>1 = karma, 2 = crystals (EMoneyType).</summary>
         public int MoneyType { get; set; } = 1;
+
+        /// <summary>
+        /// 0 = a single item handed to the bag; &gt; 0 = a whole-catalog pack (Shop.BundleKinds)
+        /// whose goods are delivered by mail instead - the shop row only shows the representative.
+        /// </summary>
+        public int Bundle { get; set; }
     }
 
     public sealed class AbilityData

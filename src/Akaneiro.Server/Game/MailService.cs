@@ -143,6 +143,34 @@ namespace Akaneiro.Server.Game
             return true;
         }
 
+        /// <summary>
+        /// Delivery for the vendor's bundle tiles (Shop.Bundle*): every catalogued and special item
+        /// of that kind, already rolled at the buying level, attached to one forever-mail and the
+        /// mailbox pushed right away so the badge lights up mid-session.
+        /// </summary>
+        public void SendBundleMail(int kind, List<ItemData> items)
+        {
+            string title = kind switch
+            {
+                Shop.BundleWeapons => "Weapon Bundle: every unique blade",
+                Shop.BundleArmor => "Armor Bundle: every unique guard",
+                Shop.BundleAccessories => "Accessory Bundle: every unique charm",
+                _ => "Collector's Bundle: the whole catalog",
+            };
+            var mail = NewMail(Character, "Goto", title,
+                "You cleared Goto's shelf. Everything the old catalog ever listed of this kind, "
+                + "forged to the level you paid for it at. Enjoy, hunter.");
+            foreach (ItemData item in items)
+            {
+                // Slot is the item's index inside the mail; the client addresses attachments by it.
+                item.Slot = mail.Items.Count;
+                mail.Items.Add(item);
+            }
+            Character.Mail.Add(mail);
+            _s.Log.LogInformation("   bundle mail '{Title}': {Count} items", mail.Title, items.Count);
+            SendMailbox();
+        }
+
         private MailData NewMail(CharacterData character, string sender, string title, string content) =>
             new MailData
             {

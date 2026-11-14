@@ -479,6 +479,12 @@ namespace Akaneiro.Server.Game
         public IReadOnlyDictionary<int, UniqueShopRow> UniqueShop { get; }
 
         /// <summary>
+        /// Named special items (Props 4001-4062: pledged and event gear like Razzle Dazzle and
+        /// Amaterasu's Sword). They are not in the rare catalog but the client knows them fully.
+        /// </summary>
+        public IReadOnlyDictionary<int, ItemProps> SpecialItems { get; }
+
+        /// <summary>
         /// Fills in the PrefabId an item has to carry for its Props.General type, and returns
         /// whether the item changed. Equipment uses a model-variant id from its own table; every
         /// other type uses the client's index into the item's ItemPrefabs entry, and index 0 is the
@@ -859,6 +865,9 @@ namespace Akaneiro.Server.Game
                     CrystalPrice = g.First().Int("CrystalPrice"),
                     Visible = g.First().Int("Visible") != 0,
                 });
+            SpecialItems = Items.Values.Where(i => i.Id >= 4000 && i.Id < 5000)
+                .GroupBy(i => i.Id)
+                .ToDictionary(g => g.Key, g => g.First());
             // Minutes a mission map rests after the 1st, 2nd, ... run of the day.
             MissionCooldownMinutes = ReadTable(Path.Combine(tables, "MissionsThreatCycle.CoolDown.EN.txt"))
                 .Select(r => r.Int("coolDownTime"))

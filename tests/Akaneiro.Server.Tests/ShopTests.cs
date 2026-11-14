@@ -51,7 +51,7 @@ public sealed class ShopTests
         var items = OpenShop(player, out var rare);
 
         Assert.Equal(Shop.OffersPerStock, items.Count);
-        Assert.Equal(Shop.RareOffers, rare.Count);
+        Assert.Equal(Shop.RareOffers + 4, rare.Count); // four plain offers plus the four bundle tiles
         Assert.All(items, i => Assert.Equal(1u, i.level));
         Assert.All(items, i => Assert.True(i.price > 0 && i.moneyType == EMoneyType.eMoneyType_SK));
         Assert.Equal(items.Count, items.Select(i => i.UUID).Distinct().Count());

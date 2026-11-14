@@ -222,6 +222,10 @@ namespace Akaneiro.Server.Game
             return new ItemData { ItemId = item.Id, PrefabId = 1, Level = level, Count = 1 };
         }
 
+        /// <summary>A weapon model variant that exists at this level (for catalog specials).</summary>
+        public static int RollWeaponPrefab(GameData data, int level, Random rng) =>
+            PickPrefab(data.WeaponPrefabs, level, rng)?.PrefabId ?? 1;
+
         /// <summary>Picks a model variant that covers the item's level, or the closest one.</summary>
         private static GameData.ItemPrefabRow PickPrefab(IReadOnlyList<GameData.ItemPrefabRow> prefabs, int level, Random rng)
         {
