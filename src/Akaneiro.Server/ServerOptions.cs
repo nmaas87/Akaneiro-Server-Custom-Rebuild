@@ -38,6 +38,17 @@ namespace Akaneiro.Server
         public int AutoSaveSeconds { get; set; } = 180;
 
         /// <summary>
+        /// Average packets per second one connection may send (game logic and ping frames alike;
+        /// server responses do not count). A hacked client that floods the socket is disconnected
+        /// once its burst is spent. 0 or less turns the flood guard off.
+        /// </summary>
+        public int PacketPerSecond { get; set; } = 100;
+
+        /// <summary>Headroom the budget starts with: short bursts (scene load, heavy fight) stay
+        /// allowed as long as the average over time stays under Akaneiro:PacketPerSecond.</summary>
+        public int PacketBurst { get; set; } = 250;
+
+        /// <summary>
         /// Serve the web login of the "client ver" build: POST /client.php?mod=login with email and
         /// password, answered from data/webusers.json. The Steam login does not use this; enabling it
         /// only adds the second login path (see Http/WebLoginService.cs).

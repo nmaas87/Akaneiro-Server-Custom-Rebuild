@@ -47,7 +47,7 @@ namespace Akaneiro.Server.Net
 
         private async Task HandleClientAsync(TcpClient client, CancellationToken ct)
         {
-            var connection = new Connection(client, _log);
+            var connection = new Connection(client, _log, _options);
             var session = new Session(_world, connection, _loggers.CreateLogger($"Session#{connection.Id}"));
             _log.LogInformation("Client #{Id} connected from {Remote}", connection.Id, connection.RemoteEndPoint);
             try

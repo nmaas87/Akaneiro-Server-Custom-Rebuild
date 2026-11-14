@@ -33,16 +33,23 @@ namespace Akaneiro.Server.Net
         private readonly ILogger _log;
         private readonly object _sendLock = new object();
 
+        /// <summary>Frames-per-second guard for this connection; null when Akaneiro:PacketPerSecond
+        /// is 0 or less (the flood guard is off).</summary>
+        private readonly PacketBudget _budget;
+
         public int Id { get; } = Interlocked.Increment(ref _nextId);
         public string RemoteEndPoint { get; }
 
-        public Connection(TcpClient client, ILogger log)
+        public Connection(TcpClient client, ILogger log, ServerOptions options)
         {
             _client = client;
             _client.NoDelay = true;
             _stream = client.GetStream();
             _log = log;
             RemoteEndPoint = client.Client.RemoteEndPoint?.ToString() ?? "?";
+            if (options != null && options.PacketPerSecond > 0)
+                _budget = new PacketBudget(options.PacketPerSecond,
+                    Math.Max(options.PacketPerSecond, options.PacketBurst), () => DateTime.UtcNow);
         }
 
         public async Task RunAsync(Session session, CancellationToken ct)
@@ -75,6 +82,14 @@ namespace Akaneiro.Server.Net
                     var body = new byte[bodySize];
                     if (!await ReadExactlyAsync(body, ct))
                         break;
+
+                    if (_budget != null && !_budget.TrySpend())
+                    {
+                        session.EndReason = "packet flood";
+                        _log.LogWarning("Connection {Id}: spent its packet budget ({Frames}/s for {Seconds}s bursts), closing",
+                            Id, _budget.FramesPerSecond, _budget.Burst);
+                        break;
+                    }
 
                     switch (type)
                     {

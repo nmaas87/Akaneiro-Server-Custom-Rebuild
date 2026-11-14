@@ -186,6 +186,11 @@ AutoSaveSeconds (default 180)
     How often every logged-in account is rewritten to disk. Saves normally happen on events (a
     kill, a finished mission, logout); this is the crash safety net so a crash rolls back at most
     this many seconds of play. Set to 0 to save only on events.
+PacketPerSecond / PacketBurst (default 100 / 250)
+    The flood guard: one connection may average PacketPerSecond inbound packets a second, with
+    PacketBurst of headroom for short spikes (a scene load, a busy fight). A hacked client that
+    floods the socket is disconnected once its burst is spent; the real client never gets close.
+    Set PacketPerSecond to 0 to turn the guard off.
 
 Relative paths are resolved against src/Akaneiro.Server (the folder "dotnet run" runs the server
 in). Every setting can also be given on the command line, which is handy for trying things out:
