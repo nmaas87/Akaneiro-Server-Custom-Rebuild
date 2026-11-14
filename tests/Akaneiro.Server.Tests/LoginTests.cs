@@ -98,5 +98,32 @@ public sealed class LoginTests
         player.Take("On_pingRequestAck");
     }
 
+    [Fact]
+    public void ANameAnotherPlayerAlreadyCarriesIsRefusedToEveryone()
+    {
+        // The first account takes the name; the door checks EVERY stored account, case-insensitively,
+        // so nobody - not even the original holder on another character slot - can take it twice.
+        using var owner = new TestPlayer(_output).LoginNewCharacter();
+        string taken = owner.Character.Name;
+
+        using var other = new TestPlayer(owner.World, _output);
+        other.SendLogin("76561190000009001");
+        other.Take("On_UserLoginOK");
+
+        other.Send(ProtocolGame_SendRequest.UserCreateCharacter(new SCharacterCreationData
+        {
+            nickname = taken.ToUpperInvariant(), // same name, different case
+            style = 4,
+            avatarTraits = new mapIntInt(),
+            sex = new ESex(ESex.eSex_Male),
+        }));
+
+        var error = other.Take<EServerErrorType>("On_UserCreateCharacterFailed", 0);
+        Assert.Equal(EServerErrorType.eUnknownError, error.Get());
+        Assert.False(other.Has("On_UserCreateCharacterOK"));
+        Assert.Empty(other.Session.Account.Characters); // nothing was half-created on that account either
+        Assert.Single(owner.Session.Account.Characters);
+    }
+
     private static void Send(TestPlayer player, Packet request) => player.Send(request);
 }
