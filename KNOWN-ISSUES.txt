@@ -41,6 +41,12 @@ The game client is used as it is, so these stay:
   account fresh from disk, so the zombie's saves can never roll back progress. A connection that
   died without saying goodbye is dropped by the server itself after 45 seconds without the
   client's 10-second ping.
+- The elder's shop (Elder Shaman Pan) only stocks Food and Drink; its "Bundles" and "Materials"
+  tabs are empty. The shipped data table (ConsumableItem.General) has ten food rows, ten potion
+  rows and no bundle or material rows at all, and the message the original service used to push
+  shop offers is a log-only stub in this client build - a server cannot restock those tabs.
+  Nothing is lost: crafting materials come from monster drops. (Checked live on the Steam
+  client: the screen and its two full tabs open, and buying potions and food works.)
 - Goto, the rare vendor in the village (right of Cato), answers to nothing when clicked. The
   shipped client's "rare vendor" click branch is an empty stub - it sends no request and opens
   no screen (confirmed in the client's own ShopNpc code and in its runtime log). Nothing is
