@@ -199,7 +199,20 @@ namespace Akaneiro.Server.Game
         {
             long unix = new DateTimeOffset(now ?? DateTime.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds();
             SpiritRental rental = c.Spirits.FirstOrDefault(r => r.Chosen && unix < r.BeginUnix + r.Seconds);
-            return rental != null && data.Spirits.TryGetValue(rental.PetId, out var row) ? row : null;
+            if (rental == null)
+                return null;
+            // Same rule as the spirit service: the rental is the line (its level-1 id) and the
+            // shared experience counter says how far that line has grown. Account files written
+            // before that model promoted the rental itself (1005 = level 5): their id still
+            // carries the level, which is folded in here without touching the save.
+            int kind = rental.PetId / 100;
+            ulong experience = c.SpiritExp.GetValueOrDefault(kind);
+            if (data.Spirits.TryGetValue(rental.PetId, out GameData.SpiritRow atId))
+                experience = Math.Max(experience, atId.XpNeeded);
+            return data.Spirits.Values
+                .Where(s => s.Id / 100 == kind && s.XpNeeded <= experience)
+                .OrderByDescending(s => s.Level)
+                .FirstOrDefault();
         }
 
         /// <summary>0 weapon, 1 armor, 2 accessory - the tables an item's enchantment and element come from.</summary>

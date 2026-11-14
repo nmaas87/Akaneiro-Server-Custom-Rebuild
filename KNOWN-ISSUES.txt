@@ -100,6 +100,11 @@ server uses these rules. They are the first place to look when something feels o
   away (how hard is the one number the tables do not carry), and the risen player takes no
   damage for the 7 s ("Revival Invulnerability") or 12 s (scroll/crystal revive) the status
   table gives. Item and crystal revivals use the stronger RevivePrayer variant of the slam.
+- Spirit levels belong to the kind, not to one rental: the rental keeps the shop id it was
+  bought under (the client only has one 3D model per spirit for exactly that id), and the
+  growth the hunter's kills earn shows up in the spirit list's level and experience fields.
+  The list carries the remaining rental time, so its bar keeps counting down when the shop
+  is opened again.
 - Basic attacks are rate-limited on the server: a swing must land before the next one starts.
   Clients that respect their own attack animation never notice; a spamming client just gets its
   extra requests ignored.

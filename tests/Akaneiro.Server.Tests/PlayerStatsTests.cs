@@ -122,7 +122,10 @@ public sealed class SpiritGrowthTests
 
         player.Session.Spirits.GainExperience(2000); // level 2 needs 1664
 
-        Assert.Equal(1002, player.Session.Character.Spirits.Single().PetId);
+        // The rental stays on its line id (the client only has the dog prefab for 1001);
+        // the growth lives in the shared experience counter.
+        Assert.Equal(1001, player.Session.Character.Spirits.Single().PetId);
         Assert.Equal(2000UL, player.Session.Character.SpiritExp[10]);
+        Assert.Equal(2, player.Session.Spirits.Active().Level);
     }
 }

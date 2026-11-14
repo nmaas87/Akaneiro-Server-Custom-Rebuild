@@ -30,19 +30,57 @@ namespace Akaneiro.Server.Game
         /// <summary>Spirits of one kind share the id without its last two digits (Inugami 10xx).</summary>
         private static int Kind(int petId) => petId / 100;
 
+        /// <summary>
+        /// The level-1 id of a spirit's line (1002 -> 1001). A rental keeps this id and never
+        /// grows with the spirit: the client owns exactly one 3D prefab per line
+        /// (SpiritBase.eSpiriteType: dog 1001, gold dog 1101, cat 2001 ...) and calls the spirit
+        /// by the id its choosePet answer echoes (UI_SpriteShop_SuccessPanel ->
+        /// Player.CallOnSpirit). A promoted id like 1002 matches no prefab, the lookup comes up
+        /// empty and the spirit silently never appears - the growth belongs in the list's
+        /// petLevel/petExp fields instead, which is what the client's shop shows.
+        /// </summary>
+        private static int LineId(int petId) => petId - petId % 100 + 1;
+
+        /// <summary>The row this kind's shared experience has reached (level 1 at 0).</summary>
+        private GameData.SpiritRow LevelRow(int kind, ulong experience) =>
+            _s.World.Data.Spirits.Values
+                .Where(s => Kind(s.Id) == kind && s.XpNeeded <= experience)
+                .OrderByDescending(s => s.Level)
+                .FirstOrDefault();
+
+        /// <summary>
+        /// Account files written while the server still promoted the rental itself (1001 ->
+        /// 1002): fold the promoted row's experience into the shared kind counter and move the
+        /// rental back to its line id, so nothing is lost.
+        /// </summary>
+        private void NormalizeRentals()
+        {
+            foreach (SpiritRental rental in Character.Spirits)
+                if (rental.PetId != LineId(rental.PetId))
+                {
+                    int kind = Kind(rental.PetId);
+                    if (_s.World.Data.Spirits.TryGetValue(rental.PetId, out GameData.SpiritRow promoted))
+                        Character.SpiritExp[kind] = Math.Max(Character.SpiritExp.GetValueOrDefault(kind), promoted.XpNeeded);
+                    rental.PetId = LineId(rental.PetId);
+                }
+        }
+
         public void SendList()
         {
+            NormalizeRentals();
             ExpireRentals();
             var list = new vectorSPetInfo();
             foreach (SpiritRental rental in Character.Spirits)
             {
+                int kind = Kind(rental.PetId);
+                ulong experience = Character.SpiritExp.GetValueOrDefault(kind);
                 list.Add(new SPetInfo
                 {
                     petTypeID = rental.PetId,
-                    petLevel = _s.World.Data.Spirits.TryGetValue(rental.PetId, out var row) ? row.Level : 1,
-                    petExp = Character.SpiritExp.GetValueOrDefault(Kind(rental.PetId)),
+                    petLevel = LevelRow(kind, experience)?.Level ?? 1,
+                    petExp = experience,
                     buypetBegTime = (ulong)rental.BeginUnix,
-                    leftTime = rental.Seconds,
+                    leftTime = (int)Math.Max(0, rental.BeginUnix + rental.Seconds - Now), // what is left, not the whole rent
                 });
             }
             _s.Send(GameResponses.RolePetListAck(list));
@@ -58,6 +96,7 @@ namespace Akaneiro.Server.Game
 
         private int TryRent(int petId, int rent)
         {
+            NormalizeRentals();
             if (!_s.World.Data.Spirits.TryGetValue(petId, out GameData.SpiritRow spirit))
                 return EServerErrorType.eUnknownError;
             if (Character.Level < spirit.LevelRequired)
@@ -82,7 +121,7 @@ namespace Akaneiro.Server.Game
             }
 
             Character.Spirits.RemoveAll(r => Kind(r.PetId) == Kind(petId));
-            Character.Spirits.Add(new SpiritRental { PetId = petId, BeginUnix = Now, Seconds = seconds });
+            Character.Spirits.Add(new SpiritRental { PetId = LineId(petId), BeginUnix = Now, Seconds = seconds });
             _s.SaveAccount();
             _s.Log.LogInformation("   rented {Spirit} for {Seconds} s", spirit.Name, seconds);
             return EServerErrorType.eSuccess;
@@ -90,8 +129,12 @@ namespace Akaneiro.Server.Game
 
         public void Choose(int petId)
         {
+            NormalizeRentals();
             ExpireRentals();
-            SpiritRental rental = Character.Spirits.FirstOrDefault(r => r.PetId == petId);
+            // The shop clicks the spirit row of the current level (1002 once the spirit grew);
+            // the rental lives under the line id. The answer must carry the line id: the client
+            // spawns the prefab that matches it, and only the level-1 id has one.
+            SpiritRental rental = Character.Spirits.FirstOrDefault(r => Kind(r.PetId) == Kind(petId));
             if (rental == null)
             {
                 _s.Send(GameResponses.choosePetAck(petId, Proto.Error(EServerErrorType.eUnknownError)));
@@ -100,37 +143,42 @@ namespace Akaneiro.Server.Game
             foreach (SpiritRental other in Character.Spirits)
                 other.Chosen = other == rental;
             _s.SaveAccount();
-            _s.Send(GameResponses.choosePetAck(petId, Proto.Error(EServerErrorType.eSuccess)));
+            _s.Send(GameResponses.choosePetAck(rental.PetId, Proto.Error(EServerErrorType.eSuccess)));
         }
 
         /// <summary>The spirit at the player's side, if any.</summary>
         public GameData.SpiritRow Active()
         {
-            SpiritRental rental = Character?.Spirits.FirstOrDefault(r => r.Chosen && Now < r.BeginUnix + r.Seconds);
-            return rental != null && _s.World.Data.Spirits.TryGetValue(rental.PetId, out var row) ? row : null;
+            if (Character == null)
+                return null;
+            NormalizeRentals();
+            SpiritRental rental = Character.Spirits.FirstOrDefault(r => r.Chosen && Now < r.BeginUnix + r.Seconds);
+            return rental == null ? null : LevelRow(Kind(rental.PetId), Character.SpiritExp.GetValueOrDefault(Kind(rental.PetId)));
         }
 
         /// <summary>
-        /// The chosen spirit shares the hunter's experience from monsters; enough of it brings the next
-        /// level (the rental moves to that level's id, e.g. Inugami 1001 -> 1002).
+        /// The chosen spirit shares the hunter's experience from monsters; enough of it brings the
+        /// next level. The rental keeps its line id - only the shared experience counter and the
+        /// petLevel the shop shows grow (see <see cref="LineId"/>).
         /// </summary>
         public void GainExperience(ulong xp)
         {
-            SpiritRental rental = Character?.Spirits.FirstOrDefault(r => r.Chosen && Now < r.BeginUnix + r.Seconds);
-            if (rental == null || xp == 0)
+            if (Character == null || xp == 0)
+                return;
+            NormalizeRentals();
+            SpiritRental rental = Character.Spirits.FirstOrDefault(r => r.Chosen && Now < r.BeginUnix + r.Seconds);
+            if (rental == null)
                 return;
             int kind = Kind(rental.PetId);
             ulong total = Character.SpiritExp[kind] = Character.SpiritExp.GetValueOrDefault(kind) + xp;
 
-            GameData.SpiritRow reached = _s.World.Data.Spirits.Values
-                .Where(s => Kind(s.Id) == kind && s.XpNeeded <= total)
-                .OrderByDescending(s => s.Level)
-                .FirstOrDefault();
-            if (reached != null && reached.Id != rental.PetId && reached.Level > (_s.World.Data.Spirits.GetValueOrDefault(rental.PetId)?.Level ?? 0))
+            int before = LevelRow(kind, total - xp)?.Level ?? 1;
+            GameData.SpiritRow reached = LevelRow(kind, total);
+            if (reached != null && reached.Level > before)
             {
-                rental.PetId = reached.Id;
                 _s.Log.LogInformation("   spirit {Spirit} reached level {Level}", reached.Name, reached.Level);
-                _s.Battle.SendAttributes();
+                _s.SaveAccount();
+                _s.Battle.SendAttributes(); // the bonus grew: the client's numbers change
             }
         }
 
@@ -144,7 +192,7 @@ namespace Akaneiro.Server.Game
                 Character.Spirits.Remove(rental);
                 _s.SaveAccount();
                 if (rental.Chosen)
-                    _s.Send(GameResponses.PetRentTimeEndNTF(rental.PetId));
+                    _s.Send(GameResponses.PetRentTimeEndNTF(LineId(rental.PetId))); // the id of the prefab the client attached
             }
         }
     }

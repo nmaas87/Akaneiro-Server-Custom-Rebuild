@@ -1,3 +1,4 @@
+using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
 using Akaneiro.Server.Tests.Harness;
 using Xunit.Abstractions;
@@ -97,6 +98,65 @@ public sealed class VillageTests
         var rented = player.Take<vectorSPetInfo>("On_RolePetListAck").Cast<SPetInfo>().Single();
         Assert.Equal(Inugami, rented.petTypeID);
         Assert.Equal(3600, rented.leftTime);
+    }
+
+    [Fact]
+    public void CallingAGrownSpiritAnswersTheLineIdTheClientHasAPrefabFor()
+    {
+        using var player = InVillage();
+        player.Send(ProtocolGame_SendRequest.BuyPet(Inugami, Spirits.RentHour));
+        player.Take("On_BuyPetAck");
+        player.Character.SpiritExp[10] = 2000; // the dog grew to level 2 hunting with the hunter
+
+        // The shop shows the kind at its current level and clicks that row: Inugami level 2 is
+        // id 1002. The client spawns the spirit from the id the answer echoes, and it only owns
+        // the dog prefab 1001 - echoing 1002 means the spirit silently never appears.
+        player.Send(ProtocolGame_SendRequest.choosePet(1002));
+        var ack = player.Take("On_choosePetAck");
+
+        Assert.Equal(EServerErrorType.eSuccess, ack.Arg<EServerErrorType>(1).Get());
+        Assert.Equal(Inugami, ack.Arg<int>(0));
+        Assert.True(player.Character.Spirits.Single().Chosen);
+        Assert.Equal(2, player.Session.Spirits.Active().Level); // the level-2 bonus is the one that counts
+    }
+
+    [Fact]
+    public void TheSpiritListCarriesTheGrownLevelAndTheRemainingTime()
+    {
+        using var player = InVillage();
+        player.Send(ProtocolGame_SendRequest.BuyPet(Inugami, Spirits.RentHour));
+        player.Take("On_BuyPetAck");
+        player.Send(ProtocolGame_SendRequest.choosePet(Inugami));
+        player.Take("On_choosePetAck");
+
+        player.Session.Spirits.GainExperience(2000); // level 2 needs 1664
+        player.Wait(600);                            // ten minutes of the hour are over
+
+        player.Send(ProtocolGame_SendRequest.RolePetListReq());
+        var rented = player.Take<vectorSPetInfo>("On_RolePetListAck").Cast<SPetInfo>().Single();
+
+        Assert.Equal(Inugami, rented.petTypeID);
+        Assert.Equal(2, rented.petLevel);
+        Assert.Equal(2000UL, rented.petExp);
+        Assert.Equal(3000, rented.leftTime); // what is left of the hour, not the whole rent
+    }
+
+    [Fact]
+    public void AnAccountFileWithAPromotedRentalIdFoldsBackIntoTheLine()
+    {
+        using var player = InVillage();
+        long now = new DateTimeOffset(player.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds();
+        player.Character.Spirits.Add(new SpiritRental { PetId = 1005, BeginUnix = now, Seconds = 3600, Chosen = true });
+
+        player.Send(ProtocolGame_SendRequest.RolePetListReq());
+        var rented = player.Take<vectorSPetInfo>("On_RolePetListAck").Cast<SPetInfo>().Single();
+
+        // 1005 (Inugami level 5, needs 39862 experience) becomes the line id again, and the
+        // level-5 experience carries over into the shared counter.
+        Assert.Equal(Inugami, rented.petTypeID);
+        Assert.Equal(5, rented.petLevel);
+        Assert.Equal(39862UL, rented.petExp);
+        Assert.Equal(Inugami, player.Character.Spirits.Single().PetId);
     }
 
     [Fact]
