@@ -836,18 +836,6 @@ namespace Akaneiro.Server.Game
                 _s.Triggers.OnMonsterKilled(monster);
         }
 
-        /// <summary>Reaching a place the mission data files as a hunt (see MissionProgress.MisfiledPlaces).</summary>
-        private void CheckMisfiledPlaces(Vector3 pos)
-        {
-            if (_s.Mission == null)
-                return;
-            foreach (MissionObjective place in _s.Mission.MisfiledPlaces(id => _s.Scene?.Monsters.Any(m => m.Type.TypeId == id) == true))
-            {
-                if (Math.Abs(pos.x - place.ObjectId) <= 5 && Math.Abs(pos.z - place.Recycle) <= 5)
-                    RecordMissionProgress(place.TypeId, place.ObjectId);
-            }
-        }
-
         /// <summary>
         /// Counts an event towards the current mission and reports finished tasks, branches and
         /// missions to the client, which shows the panels and the rewards.
@@ -1256,7 +1244,6 @@ namespace Akaneiro.Server.Game
             _s.Position = pos;
             _s.Scene?.Nav.MarkPlayer(pos); // where the player walks, monsters can walk
             _s.Triggers.CheckPosition(pos);
-            CheckMisfiledPlaces(pos);
 
             if (SceneInstance.Distance(pos, _lastStreamPosition) < StreamStep)
                 return;

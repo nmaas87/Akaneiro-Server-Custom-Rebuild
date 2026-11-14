@@ -50,20 +50,6 @@ namespace Akaneiro.Server.Game
         public sealed record Completion(int BranchIndex, MissionBranch Branch, MissionTask Task, bool BranchCompleted);
 
         /// <summary>
-        /// Objectives of the current tasks that the mission data files as a hunt although they name a
-        /// place: 5832 "Locate the main Magjaw tunnel" is hunt 132 with recycle 76 on Medium, but travel
-        /// to (132, 76) on Low. No monster of that type lives in the map, and the client only checks travel
-        /// objectives, so the server watches for the place itself.
-        /// </summary>
-        public List<MissionObjective> MisfiledPlaces(Func<int, bool> livesInMap) =>
-            _tasks.GroupBy(t => t.BranchIndex)
-                .Select(branch => branch.FirstOrDefault(t => !t.Completed))
-                .Where(t => t != null)
-                .SelectMany(t => t.Task.Objectives)
-                .Where(o => o.TypeId == MissionObjectiveType.Hunt && o.Recycle != 0 && !livesInMap(o.ObjectId))
-                .ToList();
-
-        /// <summary>
         /// Counts one event (a kill, a pickup, ...) and returns the tasks it completed. Like the
         /// client (_UI_CS_MissionLogic.CheckMissionProgress), only the current task of each branch
         /// counts: the tasks of a branch are done one after the other.

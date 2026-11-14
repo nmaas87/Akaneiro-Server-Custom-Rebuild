@@ -40,6 +40,33 @@ public sealed class MissionMapTests
     }
 
     [Fact]
+    public void ActEightStaysDarkBecauseTheClientShipsNoLevelForIt()
+    {
+        // The mission tables open Act 8 once Act 7's "Wicked Beasts" is beaten on all threats;
+        // the client has no level, scene XML or minimap texture for the Act 8 maps.
+        var hunter = new CharacterData { CompletedMissions = { 5731, 5732, 5733, 5734 } };
+
+        var open = MissionMap.Unlocked(hunter, TestData.Data);
+
+        Assert.Contains(5734, open); // Act 7 itself stays playable
+        Assert.DoesNotContain(5811, open); // Knock, Knock (A8_M1)
+        Assert.DoesNotContain(5821, open); // Fire in the Dark (A8_M2)
+        Assert.DoesNotContain(5831, open); // What Lies Below (A8_M3)
+    }
+
+    [Fact]
+    public void EveryOpenMissionSitsOnAMapTheClientShips()
+    {
+        var hunter = new CharacterData();
+        foreach (int id in TestData.Data.Missions.Keys)
+            hunter.CompletedMissions.Add(id);
+
+        foreach (int id in MissionMap.Unlocked(hunter, TestData.Data))
+            Assert.True(MissionMap.ClientHasMap(TestData.Data.Missions[id].MapName),
+                $"mission {id} sits on the map '{TestData.Data.Missions[id].MapName}' the client cannot load");
+    }
+
+    [Fact]
     public void AFinishedMapRestsLongerWithEveryRun()
     {
         var hunter = new CharacterData();

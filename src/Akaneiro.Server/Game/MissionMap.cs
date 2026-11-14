@@ -48,8 +48,35 @@ namespace Akaneiro.Server.Game
             // A map that is open at all is open on Low.
             foreach (int id in open.ToList())
                 open.Add(BaseId(id) + 1);
+            // Maps the shipped client has no level for never open (see ClientMaps).
+            open.RemoveWhere(id => !data.Missions.TryGetValue(id, out MissionDefinition mission)
+                                   || !ClientHasMap(mission.MapName));
             return open;
         }
+
+        /// <summary>Whether the shipped client can load this mission map at all.</summary>
+        public static bool ClientHasMap(string mapName) => ClientMaps.Contains(mapName);
+
+        /// <summary>
+        /// The mission maps the shipped client has a level for: its assetbundles/Scenes folder
+        /// holds exactly these 25, one per mission map (plus the two hub scenes). Act 8
+        /// ("Knock, Knock", "Fire in the Dark", "What Lies Below") is in the mission tables, and
+        /// beating Act 7's "Wicked Beasts" even unlocks it there - but the client ships no level,
+        /// no scene XML and no minimap texture for those maps: choosing one hangs the loading
+        /// screen and leaves the minimap on the previous map's image. The live game clearly never
+        /// opened Act 8; keep these maps dark.
+        /// </summary>
+        private static readonly HashSet<string> ClientMaps = new(StringComparer.Ordinal)
+        {
+            "Hub_Village_Tutorial",
+            "A1_M1", "A1_M2", "A1_M3", "A1_M4",
+            "A2_M1", "A2_M2", "A2_M3", "A2_M4",
+            "A3_M1", "A3_M2", "A3_M3", "A3_M4",
+            "A4_M1", "A4_M2", "A4_M3", "A4_M4",
+            "A5_M1", "A5_M2", "A5_M3",
+            "A6_M1", "A6_M2", "A6_M3",
+            "A7_M1", "A7_M2", "A7_M3",
+        };
 
         /// <summary>Seconds until the map can be played again (0 = now).</summary>
         public static int CooldownSeconds(CharacterData character, int missionId, long nowUnix) =>

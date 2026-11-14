@@ -22,7 +22,9 @@ The game client is used as it is, so these stay:
 - Quick slots only point to the bag slot: an item put on the quick bar still occupies its bag
   slot.
 - Mission timer, minimap, the shimmer on switches and the hand/kunai mouse cursor are drawn by the
-  client and behave as it decides.
+  client and behave as it decides. The minimap's radar shows monsters and yourself only: companion
+  allies and village NPCs never get a blip, and the map pictures and radar areas are fixed in the
+  client.
 - Crafting materials show a value of 0 in their tooltip: the client only computes values for
   equipment. Selling them still pays (a fifth of their shop price each).
 - The "speed up" panel of the mission cooldown does not send anything to the server. That is why
@@ -103,6 +105,11 @@ server uses these rules. They are the first place to look when something feels o
   and a monster goes for whichever of the two stands closer. Its kills pay you full experience
   and loot. The friend hire reward (what the original gave you when friends hired your character)
   stays empty - there is nobody to hire you.
+- Act 8 stays closed. The mission tables still carry the three cut maps of Act 8 ("Knock, Knock",
+  "Fire in the Dark", "What Lies Below"), and the chain even unlocks them after beating Act 7's
+  "Wicked Beasts" - but the shipped client has no level, no scene XML and no minimap picture for
+  them: choosing one hangs the loading screen and leaves the minimap on the last map's picture.
+  The live game evidently never opened these maps either, so the server does not unlock them.
 - The revive slam: whenever a revive succeeds the client fires its shockwave ability, and the
   server answers as the tables say - damage to everything within 5 m (from the ability row),
   the struck monsters stagger for the 400 ms the knockback status prescribes and are shoved
