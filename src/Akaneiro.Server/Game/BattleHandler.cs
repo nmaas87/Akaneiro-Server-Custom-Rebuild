@@ -735,26 +735,38 @@ namespace Akaneiro.Server.Game
         {
             if (buff.Duration > 0)
             {
-                // Food and drink: the stats count it until it runs out (PlayerStats).
+                // Food and drink: the stats count it until it runs out (PlayerStats). Taking the
+                // same thing again replaces the running buff; its old expiry moment must not
+                // cancel the fresh one, so removal runs exactly once per entry in ExpireBuffs
+                // (called from the AI tick), not from a timer tied to the scene of the drink.
                 _s.ActiveBuffs.RemoveAll(b => b.Buff.Id == buff.Id || b.Until <= _s.World.Clock.UtcNow);
                 _s.ActiveBuffs.Add(new ActiveBuff(buff, _s.World.Clock.UtcNow.AddMilliseconds(buff.Duration)));
             }
             _s.Send(BattleResponses.UpdateStatusEffect(new vectorStatusEffects { StatusEffect(buff.Id, EStatusOperateType.eStatusType_Add, changes) }));
-            if (buff.Duration > 0 && _s.Scene != null)
-            {
-                SceneInstance scene = _s.Scene;
-                scene.Schedule(_s.World.Clock.UtcNow.AddMilliseconds(buff.Duration), () =>
-                {
-                    _s.ActiveBuffs.RemoveAll(b => b.Until <= _s.World.Clock.UtcNow);
-                    if (_s.Scene == scene)
-                        _s.Send(BattleResponses.UpdateStatusEffect(new vectorStatusEffects
-                        {
-                            StatusEffect(buff.Id, EStatusOperateType.eStatusType_Delete, new Dictionary<int, int>()),
-                        }));
-                    if (_s.Scene == scene)
-                        SendAttributes();
-                });
-            }
+        }
+
+        /// <summary>
+        /// Takes every buff whose time is up off the player: the icon goes away on the client and
+        /// the attributes drop back. Runs on the AI tick, so a map change or a refreshed buff
+        /// cannot leave a dead icon up or a bonus active.
+        /// </summary>
+        public void ExpireBuffs()
+        {
+            if (_s.Character == null)
+                return;
+
+            DateTime now = _s.World.Clock.UtcNow;
+            List<ActiveBuff> expired = _s.ActiveBuffs.Where(b => b.Until <= now).ToList();
+            if (expired.Count == 0)
+                return;
+
+            _s.ActiveBuffs.RemoveAll(expired.Contains);
+            var effects = new vectorStatusEffects();
+            foreach (ActiveBuff buff in expired)
+                effects.Add(StatusEffect(buff.Buff.Id, EStatusOperateType.eStatusType_Delete, new Dictionary<int, int>()));
+            _s.Send(BattleResponses.UpdateStatusEffect(effects));
+            _s.Log.LogInformation("   {Count} buff(s) ran out", expired.Count);
+            SendAttributes();
         }
 
         private static SStatusEffect StatusEffect(int buffId, int operation, Dictionary<int, int> changes)

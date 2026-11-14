@@ -188,6 +188,10 @@ namespace Akaneiro.Server.Game
                 {
                     try
                     {
+                        // The client regenerates continuously from the recovery attributes we
+                        // publish; mirror that every tick so server health never lags its bar.
+                        ApplyRegeneration();
+                        _battle.ExpireBuffs();
                         _ai.Tick();
                         Trainer.FinishTraining();
                         Spirits.ExpireRentals();
