@@ -23,7 +23,8 @@ critical hits, karma, loot, levels and talents, death and revival, level events 
 spawner waves, gates, portals, switches and bridges, levers, baskets and chests, speech bubbles,
 mission tasks), kill chains, wanted bounties, inventory and equipment, the vendors, the ability
 trainer and masteries, the stash, the well, spirit helpers, hireable companion allies (the
-summon window), daily rewards and crafting.
+summon window; the 2014 web client build has that window stubbed out client-side - see
+KNOWN-ISSUES), daily rewards and crafting.
 
 Every player gets their own single-player world. Several players can use one server at the same
 time (for example in a LAN), but they do not see each other. One account plays on one connection

@@ -105,6 +105,12 @@ server uses these rules. They are the first place to look when something feels o
   and a monster goes for whichever of the two stands closer. Its kills pay you full experience
   and loot. The friend hire reward (what the original gave you when friends hired your character)
   stays empty - there is nobody to hire you.
+  Caveat - client generation: the summon window only exists in the Steam-era client (the one
+  whose source this server's protocol was built from). The 2014-04-16 web build (proto 20140110)
+  ships that feature stubbed out client-side: in its binary the HUD's "add ally" click handler
+  and the friend-ally packet handlers (FriendAllyEnter, GetFriendListResult, SelectFriendAlly-
+  Result) are empty functions, and its HUD never instantiates the summon window at all. Nothing
+  the server sends changes that - on that build there is simply no companion UI to open.
 - Act 8 stays closed. The mission tables still carry the three cut maps of Act 8 ("Knock, Knock",
   "Fire in the Dark", "What Lies Below"), and the chain even unlocks them after beating Act 7's
   "Wicked Beasts" - but the shipped client has no level, no scene XML and no minimap picture for
