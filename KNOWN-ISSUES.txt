@@ -52,8 +52,10 @@ same level. Its online side was social and asynchronous, and none of it exists o
   summon button; its friend list stays empty here.
 - Chat with other players. Messages are only echoed back to the sender. Since several players can
   be connected to one server, this one could be added.
-- Leaderboards, events, mail, gift and redeem codes. The mailbox is always empty, codes are never
-  valid, event reports are accepted and ignored.
+- Leaderboards, events, gift and redeem codes. Codes are never valid, event reports are accepted
+  and ignored. The mailbox holds the system letters every new character gets (starter pack and
+  Kickstarter rewards); claiming their attachments works, and "Accept all" into a nearly full
+  bag takes what still fits and leaves the rest on the letter instead of destroying it.
 - Buying crystals with real money. Not possible; instead, everything that costs crystals is free
   (revivals, stash tabs, crystal items, spirit rentals priced in crystals, finishing trainings
   early, crafting with crystals).

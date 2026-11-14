@@ -303,6 +303,29 @@ public sealed class MailTests
         Assert.Single(Mailbox(player).Cast<SMailInfo>()).title;
 
     [Fact]
+    public void AcceptAllIntoANearlyFullBagKeepsWhatDoesNotFitOnTheLetter()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        int mailId = KickstarterMail(player).id;
+        int karma = player.Session.Account.Karma;
+
+        // One free slot left: 19 junk katanas in a 20-slot bag.
+        for (int slot = 0; slot < Inventory.BagSlots - 1; slot++)
+            player.Character.Bag.Add(new ItemData { ItemId = 1001, PrefabId = 0, Level = 1, Slot = slot, Count = 1 });
+
+        player.Send(ProtocolGame_SendRequest.GetMailAll(mailId));
+        Assert.Equal(EServerErrorType.eItemError_BagFull,
+            player.Take("On_GetMailAllItemsResult").Arg<EServerErrorType>(1).Get());
+
+        // One reward made it into the free slot; the rest wait on the letter instead of
+        // being silently destroyed.
+        Assert.Equal(Inventory.BagSlots, player.Character.Bag.Count);
+        Assert.Equal(1, player.Character.Bag.Count(i => i.ItemId != 1001));
+        Assert.Equal(3, Mail(player, "Kickstarter Exclusives").itemVec.Count);
+        Assert.Equal(karma, player.Session.Account.Karma); // the money comes only with the last item
+    }
+
+    [Fact]
     public void TheMailboxSurvivesSelectingTheCharacterAgain()
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();

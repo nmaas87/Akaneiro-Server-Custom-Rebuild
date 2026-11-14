@@ -199,7 +199,11 @@ namespace Akaneiro.Server.Game
             _s.Log.LogInformation("   mail #{Mail} item {Item} claimed into the bag", mailID, item.ItemId);
         }
 
-        /// <summary>"Accept all": every attachment, and any money the mail carries.</summary>
+        /// <summary>
+        /// "Accept all": every attachment, and any money the mail carries. Items are claimed one
+        /// by one until the bag is full: whatever does not fit (and the money) stays on the letter
+        /// instead of being destroyed by an all-or-nothing guess at the bag's room.
+        /// </summary>
         public void GetAll(int mailID)
         {
             MailData mail = Find(mailID);
@@ -209,16 +213,26 @@ namespace Akaneiro.Server.Game
                     Proto.Error(EServerErrorType.eMailError_MailNotExist)));
                 return;
             }
-            if (mail.Items.Any(i => !_s.Inventory.CanAdd(i)))
+
+            int claimed = 0;
+            foreach (ItemData item in mail.Items.ToList())
             {
+                if (!_s.Inventory.AddToBag(item)) // changes nothing when it does not fit
+                    break;
+                mail.Items.Remove(item);
+                claimed++;
+            }
+            CompactSlots(mail);
+
+            if (mail.Items.Count > 0)
+            {
+                _s.Log.LogInformation("   mail #{Mail}: bag full after {Count} items, {Left} stay on the letter",
+                    mailID, claimed, mail.Items.Count);
                 _s.Send(GameResponses.GetMailAllItemsResult(mailID,
                     Proto.Error(EServerErrorType.eItemError_BagFull)));
                 return;
             }
 
-            foreach (ItemData item in mail.Items)
-                _s.Inventory.AddToBag(item);
-            mail.Items.Clear();
             if (mail.Karma > 0 || mail.Crystal > 0)
             {
                 // "Accept all" also banks the money, and the client is told about the wallet.
