@@ -82,6 +82,10 @@ namespace Akaneiro.Server.Data
 
         public bool IsWebUid(string uid) => FindUid(uid) != null;
 
+        /// <summary>The e-mail behind a web-login uid, or null when it is not a web account
+        /// (the login allowlist matches web logins on their address, not their uid).</summary>
+        public string EmailOf(string uid) => FindUid(uid)?.Email;
+
         private WebUserData FindUid(string uid) => _users.FirstOrDefault(u => u.Uid == uid);
 
         /// <summary>gameCode issued by the web login: token -> uid + expiry.</summary>

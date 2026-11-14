@@ -49,6 +49,15 @@ namespace Akaneiro.Server
         public int PacketBurst { get; set; } = 250;
 
         /// <summary>
+        /// Optional "who may play" list: one Steam ID or e-mail per line (# comments allowed).
+        /// While the file does not exist everyone may log in; once it exists only the listed
+        /// accounts can - web login accounts by their e-mail, because the client only sends their
+        /// numeric uid. An existing but empty file lets nobody in. The file is picked up again
+        /// when it changes; point it anywhere, empty disables nothing (absence of the file does).
+        /// </summary>
+        public string LoginAllowlist { get; set; } = "data/allowlist.txt";
+
+        /// <summary>
         /// Serve the web login of the "client ver" build: POST /client.php?mod=login with email and
         /// password, answered from data/webusers.json. The Steam login does not use this; enabling it
         /// only adds the second login path (see Http/WebLoginService.cs).

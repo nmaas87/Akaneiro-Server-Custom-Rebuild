@@ -36,6 +36,19 @@ namespace Akaneiro.Server.Game
                 return;
             }
 
+            // The optional "who may play" list (Akaneiro:LoginAllowlist). As long as the file does
+            // not exist everyone logs in; once it exists only the listed Steam IDs and e-mail
+            // addresses can. A web login arrives as a numeric uid, so its account's e-mail is what
+            // the list is matched against - that is what keeps the fat client's mail login working
+            // once the host turns the list on. Runs before the reconnect handshake, so a listed
+            // account is also the only one that can take over its own zombie session.
+            if (!_s.World.Allowlist.Allows(account, _s.World.WebUsers.EmailOf(account)))
+            {
+                _s.Log.LogInformation("   login {Account} refused: not on the allow list", account);
+                _s.Send(GameResponses.UserLoginFailed(Proto.Error(EServerErrorType.eWrongAccountOrPwd)));
+                return;
+            }
+
             // Steam builds send the Steam ID as account and the web-service token; nothing is verified locally.
             if (string.IsNullOrWhiteSpace(account))
                 account = "local";

@@ -28,6 +28,11 @@ if (!Directory.Exists(assetsDir))
 builder.Services.AddSingleton(new AccountStore(dataDir));
 builder.Services.AddSingleton(new WebUserStore(dataDir));
 builder.Services.AddSingleton(new GameData(assetsDir, Path.Combine(AppContext.BaseDirectory, "GameData")));
+// The optional "who may play" file; empty setting = the gate is off entirely (null path).
+string allowlist = string.IsNullOrWhiteSpace(options.LoginAllowlist)
+    ? null
+    : Path.GetFullPath(Path.Combine(contentRoot, options.LoginAllowlist));
+builder.Services.AddSingleton(new LoginAllowlist(allowlist));
 builder.Services.AddSingleton<World>();
 builder.Services.AddHostedService<GameListener>();
 
@@ -41,7 +46,10 @@ SteamWebService.Map(app);
 if (options.WebLogin)
     WebLoginService.Map(app);
 
-app.Logger.LogInformation("Akaneiro server: web service on {Address}:{Http}, game port {Game} (clients connect to {Public}), data in {Data}, client assets {Assets}{WebLogin}",
+app.Logger.LogInformation("Akaneiro server: web service on {Address}:{Http}, game port {Game} (clients connect to {Public}), data in {Data}, client assets {Assets}{WebLogin}{Allowlist}",
     httpAddress, options.HttpPort, options.GamePort, options.PublicHost, dataDir, assetsDir,
-    options.WebLogin ? ", web login (client.php + /register.html) enabled" : "");
+    options.WebLogin ? ", web login (client.php + /register.html) enabled" : "",
+    allowlist == null ? ""
+        : File.Exists(allowlist) ? $", allow list ON ({allowlist})"
+        : $", allow list armed but file {allowlist} not present: everyone may log in");
 app.Run();

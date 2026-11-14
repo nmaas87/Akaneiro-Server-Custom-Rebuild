@@ -15,6 +15,10 @@ namespace Akaneiro.Server.Game
         public ServerOptions Options { get; }
         public AccountStore Accounts { get; }
         public WebUserStore WebUsers { get; }
+
+        /// <summary>The optional "who may play" gate (Akaneiro:LoginAllowlist). Null path = no
+        /// gate; that is the default here, Program wires the configured file in.</summary>
+        public LoginAllowlist Allowlist { get; }
         public GameData Data { get; }
 
         /// <summary>Time source of all game logic (cooldowns, monster behaviour, ability objects).</summary>
@@ -23,11 +27,13 @@ namespace Akaneiro.Server.Game
         /// <summary>Dice of all game logic (damage, loot, monster attacks); only used under <see cref="Sync"/>.</summary>
         public Random Random { get; init; } = new Random();
 
-        public World(IOptions<ServerOptions> options, AccountStore accounts, GameData data, WebUserStore webUsers = null)
+        public World(IOptions<ServerOptions> options, AccountStore accounts, GameData data,
+            WebUserStore webUsers = null, LoginAllowlist allowlist = null)
         {
             Options = options.Value;
             Accounts = accounts;
             WebUsers = webUsers ?? new WebUserStore(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "akaneiro-webusers-" + Guid.NewGuid().ToString("N")));
+            Allowlist = allowlist ?? new LoginAllowlist(null);
             Data = data;
         }
 

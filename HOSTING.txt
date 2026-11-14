@@ -191,6 +191,13 @@ PacketPerSecond / PacketBurst (default 100 / 250)
     PacketBurst of headroom for short spikes (a scene load, a busy fight). A hacked client that
     floods the socket is disconnected once its burst is spent; the real client never gets close.
     Set PacketPerSecond to 0 to turn the guard off.
+LoginAllowlist (default data/allowlist.txt)
+    Optional "who may play" list: one Steam ID or e-mail address per line, blank lines and #
+    comments are ignored. As long as that file does not exist everyone may log in; the moment it
+    exists only the listed accounts can. For the web login ("client ver") put the player's E-MAIL
+    ADDRESS on the list: the fat client only ever sends a numeric uid, and the server matches the
+    address that belongs to that uid. An existing but completely empty file lets nobody in. The
+    file is re-read when it changes, so players can be added or removed while the server runs.
 
 Relative paths are resolved against src/Akaneiro.Server (the folder "dotnet run" runs the server
 in). Every setting can also be given on the command line, which is handy for trying things out:
