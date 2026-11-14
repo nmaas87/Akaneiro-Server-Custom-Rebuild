@@ -946,6 +946,7 @@ namespace Akaneiro.Server.Game
 
         private const int ReviveWithKarma = 0;
         private const int ReviveFree = 1;
+        private const int ReviveWithItem = 3;   // consumes one Shinigami Scroll from the bag
         private const int ReviveWithCrystal = 4;
 
         public override void ReviveReq(EReviveType reviveType)
@@ -963,12 +964,32 @@ namespace Akaneiro.Server.Game
                 return;
             }
 
+            // A scroll revival pays with a Shinigami Scroll out of the bag; without one it fails,
+            // like it did on the original (eGS_LessReviveItem).
+            ItemData scroll = type == ReviveWithItem
+                ? _s.Character.Bag.FirstOrDefault(i => i.ItemId == Views.ReviveScrollItem)
+                : null;
+            if (type == ReviveWithItem && scroll == null)
+            {
+                _s.Log.LogInformation("   revival refused: no Shinigami Scroll in the bag");
+                _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eGS_LessReviveItem), new vectorAttrChange()));
+                return;
+            }
+
             if (cost > 0)
             {
                 _s.Account.Karma -= cost;
                 _s.SendMoney();
             }
             // Crystal revivals cost the real-money currency, which is free on this server.
+
+            if (scroll != null)
+            {
+                _s.Inventory.Consume(Views.BagBase, scroll); // announces the changed bag slot
+                _s.Log.LogInformation("   spent one Shinigami Scroll ({Left} left on the account)",
+                    Views.ReviveScrollCount(_s.Account));
+                _s.Send(GameResponses.UpdateReviveNum(Views.ReviveScrollCount(_s.Account)));
+            }
 
             _s.Revivals++;
             PlayerStats full = _s.Stats;

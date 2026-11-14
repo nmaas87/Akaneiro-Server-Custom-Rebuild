@@ -83,6 +83,9 @@ ASSUMPTIONS (ORIGINAL FORMULAS LOST)
 The original server code is lost. Where the client's data does not say how something works, the
 server uses these rules. They are the first place to look when something feels off balance.
 
+- Revival with an item (the Shinigami Scroll option) spends one scroll from the active
+  character's bag; the counter on the account screen counts the scrolls in every bag of the
+  account. Without a scroll the revive is refused, like on the original.
 - The revive slam: whenever a revive succeeds the client fires its shockwave ability, and the
   server answers as the tables say - damage to everything within 5 m (from the ability row),
   the struck monsters stagger for the 400 ms the knockback status prescribes and are shoved

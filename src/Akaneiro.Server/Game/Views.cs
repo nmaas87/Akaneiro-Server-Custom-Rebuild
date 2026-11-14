@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Protocol;
 
@@ -20,8 +21,21 @@ namespace Akaneiro.Server.Game
             info.SK = account.Karma;
             info.FK = account.Crystals;
             info.curCharSlotNum = account.CharSlots;
+            info.reviveNum = ReviveScrollCount(account);
             return info;
         }
+
+        /// <summary>Item id of the Shinigami Scroll (Props.General); one scroll revives once.</summary>
+        public const int ReviveScrollItem = 20103;
+
+        /// <summary>
+        /// Revive scrolls lying in the bags of the account's characters. The client shows this
+        /// number on the revive screen ("left revive number", accountInfo.reviveNum and
+        /// On_UpdateReviveNum); a scroll-type revival (eReviveType_Item) consumes one from the
+        /// active character's bag.
+        /// </summary>
+        public static int ReviveScrollCount(AccountData account) =>
+            account.Characters.Sum(c => c.Bag.Where(i => i.ItemId == ReviveScrollItem).Sum(i => i.Count));
 
         public static vectorCharacterInfoLogins CharacterList(AccountData account, GameData data)
         {
