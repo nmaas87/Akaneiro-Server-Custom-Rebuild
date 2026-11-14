@@ -110,6 +110,45 @@ server is your Steam account. The server window logs what happens ("Client #1 co
 "login: account ...", ...).
 
 
+SMOOTHER PLAY: A BIGGER MEMORY HEAP FOR THE GAME (OPTIONAL)
+-----------------------------------------------------------
+
+The game's own memory manager (Mono's Boehm collector) collects used-up objects each time about a
+third of its heap has filled with new ones. A long mission allocates tens of MB, which can grow
+into collections twice a second of up to 100 ms each: everything stutters, and loading the next
+map then takes a minute. Giving the collector a large heap from the start makes it collect far
+less often. The linux-port branch of this project does it this way since October 2026; there it
+went from two collections a second to two in the whole mission, and the map load afterwards
+dropped from 67 s to seconds.
+
+The collector reads its settings from the environment, on Windows too. In a terminal:
+
+    setx GC_INITIAL_HEAP_SIZE 536870912
+
+(512 MB). Afterwards close Steam completely (Steam menu > Exit) and start it again: only a new
+Steam passes the value to the game. The game is a 32-bit program; the 512 MB reserve address
+space, not RAM - the heap only grows as the game really allocates.
+
+Whether this game's build reads the setting cannot always be seen directly. Try it on your worst
+mission: if the stuttering and the slow map loads after it improve, it worked. A look into the
+collector's log sometimes helps too; start the game from a terminal once (Steam must be running):
+
+    set GC_PRINT_STATS=1
+    cd "<Steam library>\steamapps\common\Akaneiro Demon Hunters"
+    Akaneiro.exe > gc-stats.txt 2>&1
+
+Lines with "HeapSize" in gc-stats.txt prove the collector talks; no such lines does not prove
+the opposite (this stat may simply not be compiled in).
+
+Remove the setting again with:
+
+    REG delete HKCU\Environment /f /v GC_INITIAL_HEAP_SIZE
+
+(The linux-port branch also fixes a frame limiter that misses its 60 fps by a millisecond each
+frame, with a sleep hook inside the game process. On Windows that would mean changing the game's
+files, which this project does not do - and Windows' vSync usually paces the frames already.)
+
+
 SAVE GAMES
 ----------
 
