@@ -572,6 +572,14 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
+        /// The claim button of the friend-reward screen (client <c>SummonRewardPanel</c>). Single
+        /// player has nobody who could have hired this character, so there is nothing to collect;
+        /// answering with the (empty) reward list is what lets the client leave that screen.
+        /// </summary>
+        public override void ProcessFriendReward() =>
+            _s.Send(GameResponses.SendFriendRewardInfo(new mapFriendHireReward()));
+
+        /// <summary>
         /// The dev/test login's "load this map right away" path (<c>_UI_CS_TestModeCtrl</c>): the
         /// client sends the map list instead of the usual EnterScene, and loads each map when the
         /// EnterSceneOk for it arrives.
