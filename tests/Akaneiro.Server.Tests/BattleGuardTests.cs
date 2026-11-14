@@ -281,4 +281,63 @@ public sealed class BattleGuardTests
         player.Wait(6);
         Assert.Equal(full, player.Session.CurrentHp);
     }
+
+    [Fact]
+    public void TheRevivalShieldGlowsItsSevenSecondsAndThenComesOff()
+    {
+        using var player = DieNextToMonsters();
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+        player.Take("On_ReviveResult");
+        player.Send(ProtocolBattle_SendRequest.UseFightSkill(
+            BattleHandler.ReviveShockwave, 0, player.Session.Position, 0));
+        player.Take("On_UseFightSkillResult");
+        player.ClearInbox();
+
+        player.Wait(6); // still inside the window: the glow keeps its icon
+        Assert.False(Deletes(player).Any(e => e.statustID == 40018), "the shield is still running");
+
+        player.Wait(2); // past its 7 s
+
+        Assert.True(Deletes(player).Any(e => e.statustID == 40018),
+            "glow and buff-list entry only leave when the server sends the Delete");
+        Assert.DoesNotContain(player.Session.ActiveBuffs, b => b.Buff.Id == 40018);
+    }
+
+    [Fact]
+    public void TheRevivalShieldComesOffOnTheNextMap()
+    {
+        using var player = DieNextToMonsters();
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+        player.Take("On_ReviveResult");
+        player.Send(ProtocolBattle_SendRequest.UseFightSkill(
+            BattleHandler.ReviveShockwave, 0, player.Session.Position, 0));
+        player.Take("On_UseFightSkillResult");
+
+        player.ClearInbox();
+        player.EnterScene(player.Session.SceneName); // the shield does not ride into the next map
+
+        Assert.True(Deletes(player).Any(e => e.statustID == 40018),
+            "the old map's glow and icon must come off at the scene change, not at the next revive");
+        Assert.DoesNotContain(player.Session.ActiveBuffs, b => b.Buff.Id == 40018);
+    }
+
+    [Fact]
+    public void IconsThatRanOutWhileDeadAreDeletedAgainOnTheRevive()
+    {
+        using var player = DieNextToMonsters();
+        var teaRow = TestData.Data.Buffs[TeaBuff];
+
+        // A buff still running while the corpse lies there, ending two seconds later: its Delete
+        // goes out behind the death panel (deterministic injection instead of racing the wolves).
+        player.Session.ActiveBuffs.Add(new ActiveBuff(teaRow, player.Clock.UtcNow.AddSeconds(2)));
+        player.Wait(10); // now expired, deleted while dead
+        Assert.DoesNotContain(player.Session.ActiveBuffs, b => b.Buff.Id == TeaBuff);
+
+        player.ClearInbox(); // forget the Delete that went out during the death
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+        player.Take("On_ReviveResult");
+
+        Assert.True(Deletes(player).Any(e => e.statustID == TeaBuff),
+            "the revive must hand the buff list back clean, even for icons that died behind the death panel");
+    }
 }

@@ -35,6 +35,7 @@ namespace Akaneiro.Server.Game
             _s.FriendRewardAnswered = _s.DayRewardOnScreen = _s.FriendRewardSkippedOnce = false;
             _s.KillChain.End(); // a chain does not carry over into the next map
             _s.InvulnerableUntil = DateTime.MinValue; // the revival shield does not cross maps either
+            TakeOffReviveShield(); // ...and its icon+glow come off the old map's client too
             _s.Scene = null;
             _s.SceneName = mapName;
             _s.Send(BattleResponses.EnterSceneOk(mapName));
@@ -266,6 +267,10 @@ namespace Akaneiro.Server.Game
 
         public const int ReviveShockwave = 12001, RevivePrayerShockwave = 12002;
 
+        /// <summary>Ability.SelfStatusID of the revival invulnerability (the client's glow and
+        /// buff-list entry): 40018 for 7 s after the plain slam, 40019 for 12 s after the scroll.</summary>
+        private const int ReviveShield = 40018, ReviveShieldPrayer = 40019;
+
         // The push speed is the one number the tables do not carry; the monster staggers for the
         // 400 ms the DestStatusID entry (40002/40003 "Revival Knockback") prescribes, the player
         // is untouchable for the SelfStatusID duration (40018: 7 s, 40019 with a scroll: 12 s).
@@ -274,11 +279,22 @@ namespace Akaneiro.Server.Game
         private void ReviveShockwaveEffects(SUseSkillResult result, List<Monster> targets, int abilityId)
         {
             bool prayer = abilityId == RevivePrayerShockwave;
+            int shieldId = prayer ? ReviveShieldPrayer : ReviveShield;
+            int shieldMs = prayer ? 12_000 : 7_000;
             DateTime now = _s.World.Clock.UtcNow;
 
             result.statusEffectVec.Add(
-                StatusEffect(prayer ? 40019 : 40018, EStatusOperateType.eStatusType_Add, new Dictionary<int, int>()));
-            _s.InvulnerableUntil = now.AddMilliseconds(prayer ? 12_000 : 7_000);
+                StatusEffect(shieldId, EStatusOperateType.eStatusType_Add, new Dictionary<int, int>()));
+            _s.InvulnerableUntil = now.AddMilliseconds(shieldMs);
+
+            // The shield's icon and glow only leave the client when a matching
+            // eStatusType_Delete arrives. Register it in ActiveBuffs (a keyword-less description,
+            // so PlayerStats ignores it) so ExpireBuffs takes it off on the AI tick - and on the
+            // next map change via TakeOffReviveShield - instead of leaving it up forever.
+            _s.ActiveBuffs.RemoveAll(b => b.Buff.Id == shieldId);
+            _s.ActiveBuffs.Add(new ActiveBuff(
+                new GameData.BuffRow { Id = shieldId, Name = "Revival Invulnerability", Duration = shieldMs },
+                now.AddMilliseconds(shieldMs)));
 
             foreach (Monster monster in targets.Where(m => m.IsAlive))
             {
@@ -980,8 +996,35 @@ namespace Akaneiro.Server.Game
             foreach (ActiveBuff buff in expired)
                 effects.Add(StatusEffect(buff.Buff.Id, EStatusOperateType.eStatusType_Delete, new Dictionary<int, int>()));
             _s.Send(BattleResponses.UpdateStatusEffect(effects));
+            if (_s.IsDead)
+                _staleIconsForRevive.AddRange(expired.Select(b => b.Buff.Id)); // the client may sit on the death panel and miss these
             _s.Log.LogInformation("   {Count} buff(s) ran out", expired.Count);
             SendAttributes();
+        }
+
+        /// <summary>Status ids whose Delete the server sent while the player was dead; the revive
+        /// resends them, so a client that ignored packets behind the death panel still ends up
+        /// with a clean buff list.</summary>
+        private readonly List<int> _staleIconsForRevive = new List<int>();
+
+        /// <summary>
+        /// The revival shield never outlives its map: drop the tracked entry and tell the client
+        /// to take the glow and the buff-list icon off right away.
+        /// </summary>
+        private void TakeOffReviveShield()
+        {
+            List<ActiveBuff> running = _s.ActiveBuffs
+                .Where(b => b.Buff.Id == ReviveShield || b.Buff.Id == ReviveShieldPrayer).ToList();
+            if (running.Count == 0)
+                return;
+
+            _s.ActiveBuffs.RemoveAll(running.Contains);
+            var effects = new vectorStatusEffects();
+            foreach (ActiveBuff buff in running)
+                effects.Add(StatusEffect(buff.Buff.Id, EStatusOperateType.eStatusType_Delete, new Dictionary<int, int>()));
+            _s.Send(BattleResponses.UpdateStatusEffect(effects));
+            if (_s.IsDead)
+                _staleIconsForRevive.AddRange(running.Select(b => b.Buff.Id));
         }
 
         private static SStatusEffect StatusEffect(int buffId, int operation, Dictionary<int, int> changes)
@@ -1225,6 +1268,21 @@ namespace Akaneiro.Server.Game
             _s.LastRegen = _s.World.Clock.UtcNow;
             _s.SaveAccount();
             _s.Log.LogInformation("   revived (type {Type}, {Cost} karma, revival #{Count})", type, cost, _s.Revivals);
+
+            // The revive panel is the moment the buff list is seen again: a shield never survives
+            // death, anything that ran out in the meantime gets its Delete, and so does a
+            // resend-list of every icon whose Delete went out while the client sat behind the
+            // death panel - nothing stale may be in that list.
+            TakeOffReviveShield();
+            ExpireBuffs();
+            if (_staleIconsForRevive.Count > 0)
+            {
+                var stale = new vectorStatusEffects();
+                foreach (int statusId in _staleIconsForRevive)
+                    stale.Add(StatusEffect(statusId, EStatusOperateType.eStatusType_Delete, new Dictionary<int, int>()));
+                _staleIconsForRevive.Clear();
+                _s.Send(BattleResponses.UpdateStatusEffect(stale));
+            }
 
             _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eSuccess),
                 Views.Attributes(_s.Character, _s.World.Data, full)));
