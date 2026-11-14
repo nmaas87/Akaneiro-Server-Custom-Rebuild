@@ -21,11 +21,21 @@ namespace Akaneiro.Server.Game
         // Flow: client EnterScene(name) -> EnterSceneOk(name) -> client loads the level
         //       -> client MapLoadOK -> CharacterStartInfo (position + attributes) -> player can move.
 
-        public override void EnterScene(string mapName)
+        public override void EnterScene(string mapName) => EnterSceneByName(mapName);
+
+        /// <summary>
+        /// A scene change starts here; the world of the old one ends here too: dropping
+        /// <c>_s.Scene</c> stops its monsters (the AI tick and the scheduled swings are gated on
+        /// it) so nothing from the previous map fights or kills the player while the client
+        /// loads. The new SceneInstance is built on MapLoadOK.
+        /// </summary>
+        public void EnterSceneByName(string mapName)
         {
             _s.Log.LogInformation("   enter scene {Scene}", mapName);
             _s.FriendRewardAnswered = _s.DayRewardOnScreen = _s.FriendRewardSkippedOnce = false;
             _s.KillChain.End(); // a chain does not carry over into the next map
+            _s.InvulnerableUntil = DateTime.MinValue; // the revival shield does not cross maps either
+            _s.Scene = null;
             _s.SceneName = mapName;
             _s.Send(BattleResponses.EnterSceneOk(mapName));
         }

@@ -567,6 +567,17 @@ namespace Akaneiro.Server.Game
                 _s.Mail.SendMailbox(); // thanks to the Kickstarter backers, and friend gifts
         }
 
+        /// <summary>
+        /// The dev/test login's "load this map right away" path (<c>_UI_CS_TestModeCtrl</c>): the
+        /// client sends the map list instead of the usual EnterScene, and loads each map when the
+        /// EnterSceneOk for it arrives.
+        /// </summary>
+        public override void ReloadMap(vectorString mapnameVec)
+        {
+            foreach (string mapName in mapnameVec)
+                _s.Battle.EnterSceneByName(mapName);
+        }
+
         // ---- missions -----------------------------------------------------------------------
 
         public override void TutorialEnterReq(int charID)

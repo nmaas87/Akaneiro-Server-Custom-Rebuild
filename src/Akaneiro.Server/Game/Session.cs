@@ -69,6 +69,14 @@ namespace Akaneiro.Server.Game
 
         public bool IsDead => Character != null && CurrentHp <= 0;
 
+        /// <summary>
+        /// Monsters cannot hurt the player until this moment: the revive shockwave's own status
+        /// (Ability.Status 40018 "Revival Invulnerability" 7 s, 40019 with a scroll 12 s). The
+        /// client shows the buff icon from the same packet and stops showing it at its table
+        /// duration; the server mirrors it so a monster mid-swing cannot kill the risen player.
+        /// </summary>
+        public DateTime InvulnerableUntil = DateTime.MinValue;
+
         /// <summary>Food and drink buffs that are running (they change <see cref="Stats"/>).</summary>
         public List<ActiveBuff> ActiveBuffs { get; } = new List<ActiveBuff>();
 
