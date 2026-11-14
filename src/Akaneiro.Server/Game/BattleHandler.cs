@@ -294,10 +294,24 @@ namespace Akaneiro.Server.Game
         /// <summary>The player's basic attack ability (AbilityIDs.NormalAttack_1H_ID), used for every weapon.</summary>
         private const int NormalAttack1H = 10001;
 
+        private DateTime _nextNormalAttackAt;
+
         public override void UseNormalAttack(EWeaponType weaponType, uint targetObjectID, uint curTime)
         {
             if (_s.Character == null || _s.IsDead)
                 return;
+
+            // Rate gate: a swing cannot start before the previous one has landed. Honest clients
+            // already obey this through their attack animation (MeleeAttackState); without it a
+            // modified client would multiply melee DPS and kill experience by its packet rate,
+            // while ability cooldowns are enforced above.
+            DateTime now = _s.World.Clock.UtcNow;
+            if (now < _nextNormalAttackAt)
+            {
+                _s.Log.LogDebug("   basic attack rejected: swinging still");
+                return;
+            }
+            _nextNormalAttackAt = now.AddSeconds(SwingHitDelay());
 
             var result = Proto.New<SUseSkillResult>();
             // The player's melee ability is 10001 for every weapon on the client (MeleeAttackState);

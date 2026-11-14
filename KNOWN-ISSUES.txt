@@ -92,6 +92,9 @@ server uses these rules. They are the first place to look when something feels o
   away (how hard is the one number the tables do not carry), and the risen player takes no
   damage for the 7 s ("Revival Invulnerability") or 12 s (scroll/crystal revive) the status
   table gives. Item and crystal revivals use the stronger RevivePrayer variant of the slam.
+- Basic attacks are rate-limited on the server: a swing must land before the next one starts.
+  Clients that respect their own attack animation never notice; a spamming client just gets its
+  extra requests ignored.
 - Experience: monsters give 4 times the experience in their prefab.
 - Kill chains: GOOD from 3 kills, LETHAL from 6, SLAYER from 10, paying 50 / 75 / 100 % of the
   chain's experience as a bonus (matches recordings: 3 wolves +18 XP, 6 wolves +54 XP). A chain
