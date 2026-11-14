@@ -270,6 +270,15 @@ Everything else plays. The 2013 build has no mailbox, no stash and no well windo
 features simply stay invisible on it (the account itself is a normal web account and looks
 complete again from a 2014 client).
 
+Its game text (item names, tooltips, ability names, quest dialogue) can be switched to the
+2014 English tables without touching the executable: run
+
+       python tools/zhclient-english-tables/make_english_tables.py <zh client>\Akaneiro_Data <2014 client>\Akaneiro_Data
+
+(it needs "pip install unitypy"), then copy the written resources.english.assets over the
+client's resources.assets. Table data only - the menu buttons and other UI chrome are compiled
+into the client and stay Chinese.
+
 
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK
 -------------------------------------------
