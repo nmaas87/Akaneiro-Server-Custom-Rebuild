@@ -226,6 +226,19 @@ namespace Akaneiro.Server.Game
         public static int RollWeaponPrefab(GameData data, int level, Random rng) =>
             PickPrefab(data.WeaponPrefabs, level, rng)?.PrefabId ?? 1;
 
+        /// <summary>A model variant for any equipment id, from the prefab table of its own kind.</summary>
+        public static int RollPrefabFor(GameData data, int itemId, int level, Random rng)
+        {
+            IReadOnlyList<GameData.ItemPrefabRow> prefabs = null;
+            if (data.Weapons.ContainsKey(itemId))
+                prefabs = data.WeaponPrefabs;
+            else if (data.ItemEquipSlots.GetValueOrDefault(itemId) is 2 or 5)
+                prefabs = data.AccessoryPrefabs;
+            else if (data.ItemArmor.ContainsKey(itemId))
+                prefabs = data.ArmorPrefabs;
+            return prefabs == null ? 1 : PickPrefab(prefabs, level, rng)?.PrefabId ?? 1;
+        }
+
         /// <summary>Picks a model variant that covers the item's level, or the closest one.</summary>
         private static GameData.ItemPrefabRow PickPrefab(IReadOnlyList<GameData.ItemPrefabRow> prefabs, int level, Random rng)
         {

@@ -90,8 +90,9 @@ namespace Akaneiro.Server.Game
                 }
             }
             // Four permanent tiles: whole-catalog packs whose goods arrive by mail.
-            foreach (int kind in new[] { BundleWeapons, BundleArmor, BundleAccessories, BundleCollector })
-                AddBundle(stock.RareItems, kind, ref uuid);
+            if (_s.World.Options.ShopBundles)
+                foreach (int kind in new[] { BundleWeapons, BundleArmor, BundleAccessories, BundleCollector })
+                    AddBundle(stock.RareItems, kind, ref uuid);
             return stock;
         }
 
@@ -108,21 +109,39 @@ namespace Akaneiro.Server.Game
             if (pack.Count == 0)
                 return;
 
-            // The row itself shows at the shelf level (like the other rare offers); the mail pack is
-            // rolled at buy time for the level you actually pay at.
-            ItemData representative = pack.OrderByDescending(i => i.Enchant != 0 || i.Gem != 0 || i.Element != 0)
-                .ThenBy(i => i.ItemId)
-                .First();
+            // The tile's shown row: a generic item the host picked (the client names and pictures
+            // rows by item id, so a shared plain row is the most generic it gets), else the pack's
+            // flashiest unique. The row shows at the shelf level (like the other rare offers); the
+            // mail pack is rolled at buy time for the level you actually pay at.
+            ItemData representative;
+            int genericId = _s.World.Options.ShopBundleItem;
+            if (genericId != 0 && Data.ItemValues.ContainsKey(genericId))
+            {
+                representative = new ItemData
+                {
+                    ItemId = genericId,
+                    PrefabId = Loot.RollPrefabFor(Data, genericId, Character.Level + 2, _s.World.Random),
+                    Level = Character.Level + 2,
+                    Count = 1,
+                };
+            }
+            else
+            {
+                ItemData standout = pack.OrderByDescending(i => i.Enchant != 0 || i.Gem != 0 || i.Element != 0)
+                    .ThenBy(i => i.ItemId)
+                    .First();
+                representative = new ItemData
+                {
+                    ItemId = standout.ItemId, PrefabId = standout.PrefabId,
+                    Level = Character.Level + 2,
+                    Gem = standout.Gem, Element = standout.Element, Enchant = standout.Enchant,
+                    Count = 1,
+                };
+            }
             var offer = new ShopOffer
             {
                 Uuid = uuid,
-                Item = new ItemData
-                {
-                    ItemId = representative.ItemId, PrefabId = representative.PrefabId,
-                    Level = Character.Level + 2,
-                    Gem = representative.Gem, Element = representative.Element, Enchant = representative.Enchant,
-                    Count = 1,
-                },
+                Item = representative,
                 Price = pack.Sum(i => BuyPrice(i) * 2),
                 MoneyType = EMoneyType.eMoneyType_SK,
                 Bundle = kind,
@@ -212,7 +231,12 @@ namespace Akaneiro.Server.Game
         {
             ShopStock stock = Stock();
             var list = new vectorShopItemInfos();
-            foreach (ShopOffer offer in rare ? stock.RareItems : stock.Items)
+            IEnumerable<ShopOffer> offers = rare ? stock.RareItems : stock.Items;
+            // A stock rolled while bundles were on keeps them until it refreshes; hide them if the
+            // host turned the feature off in the meantime.
+            if (rare && !_s.World.Options.ShopBundles)
+                offers = offers.Where(o => o.Bundle == 0);
+            foreach (ShopOffer offer in offers)
                 list.Add(Info(offer));
             if (rare)
                 _s.Send(GameResponses.SendShopRareitemTrackInfo(false, list, (int)_s.World.Clock.UtcNow.DayOfWeek));

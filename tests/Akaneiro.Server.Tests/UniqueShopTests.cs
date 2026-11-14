@@ -130,6 +130,50 @@ public sealed class UniqueShopTests
     }
 
     [Fact]
+    public void TheHostCanTurnTheBundleTilesOff()
+    {
+        using var player = new TestPlayer(_output, shopBundles: false).LoginNewCharacter();
+        player.EnterScene("Hub_Village");
+
+        var rare = RareShelf(player);
+
+        Assert.Equal(Shop.RareOffers, rare.Count); // back to the plain unique shelf
+        Assert.Empty(player.Session.Character.Shop.RareItems.Where(o => o.Bundle != 0));
+    }
+
+    [Fact]
+    public void TurningTheFeatureOffHidesBundlesSavedOnAnOlderStock()
+    {
+        using var player = InVillage(); // stock rolled with bundles on
+        RareShelf(player); // the first look rolls the stock
+        var bundleUuids = BundleUuids(player);
+        Assert.Equal(4, bundleUuids.Count);
+
+        player.World.Options.ShopBundles = false; // the host edits appsettings and restarts
+        var rare = RareShelf(player);
+
+        Assert.Equal(Shop.RareOffers, rare.Count); // the saved bundles are not shown anymore
+        Assert.DoesNotContain(rare, o => bundleUuids.Contains(o.UUID));
+    }
+
+    [Fact]
+    public void TheHostCanPutOneGenericRowOnEveryBundleTile()
+    {
+        using var player = new TestPlayer(_output, shopBundleItem: 1001).LoginNewCharacter();
+        player.EnterScene("Hub_Village");
+
+        var rare = RareShelf(player);
+        var tiles = rare.Where(o => BundleUuids(player).Contains(o.UUID)).ToList();
+
+        Assert.Equal(4, tiles.Count);
+        Assert.All(tiles, o => Assert.Equal(1001, o.ID)); // the basic Katana: one plain picture, four tiles
+        Assert.All(tiles, o => Assert.True(o.enchant == 0 && o.gem == 0 && o.element == 0));
+        Assert.All(tiles, o => Assert.True(o.perfrab > 0));
+        // The tiles stay distinguishable by price (the pack is in the price) and buying still mails.
+        Assert.Equal(4, tiles.Select(o => o.price).Distinct().Count());
+    }
+
+    [Fact]
     public void BundleTilesShowTheWholeCatalogPricedAndMailOnPurchase()
     {
         using var player = InVillage(karma: 50_000_000);

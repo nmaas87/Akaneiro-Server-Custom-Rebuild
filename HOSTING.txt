@@ -198,6 +198,15 @@ LoginAllowlist (default data/allowlist.txt)
     ADDRESS on the list: the fat client only ever sends a numeric uid, and the server matches the
     address that belongs to that uid. An existing but completely empty file lets nobody in. The
     file is re-read when it changes, so players can be added or removed while the server runs.
+ShopBundles (default true)
+    Goto's four bundle tiles on the rare shelf: whole-catalog packs of uniques (including the
+    pledged/event specials) that the player buys at Cato's and receives by mail. Set to false to
+    keep only the rotating named uniques; bundles already saved on an unrefreshed stock simply
+    stop showing until the next 12-hour roll.
+ShopBundleItem (default 0 = each pack's flashiest unique)
+    The item every bundle tile displays, by item id (e.g. 1001 = the plain Katana icon). The
+    client names and pictures shop rows from its own tables by item id, so one shared plain row
+    is the most generic the tiles can get; the pack itself is in the price and the mail.
 
 Relative paths are resolved against src/Akaneiro.Server (the folder "dotnet run" runs the server
 in). Every setting can also be given on the command line, which is handy for trying things out:
