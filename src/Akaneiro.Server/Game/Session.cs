@@ -196,6 +196,9 @@ namespace Akaneiro.Server.Game
         /// <summary>Ability id -> time the ability becomes usable again.</summary>
         public Dictionary<int, DateTime> AbilityCooldowns { get; } = new Dictionary<int, DateTime>();
 
+        /// <summary>The friend ally hired from the summon window (BattleHandler); null when nobody is hired.</summary>
+        public FriendAlly FriendAlly { get; set; }
+
         /// <summary>Monsters of the scene the player is in (single player: one instance per session).</summary>
         public SceneInstance Scene { get; set; }
 

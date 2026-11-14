@@ -23,6 +23,10 @@ namespace Akaneiro.Server.Game
             [Cunning] = new[] { (6, 1001, 1), (0, 2001, 201), (2, 2002, 201), (8, 2003, 201) },
         };
 
+        /// <summary>The discipline's starting pieces (slot, item, model variant) - also what a summoned friend wears.</summary>
+        public static IReadOnlyList<(int Slot, int ItemId, int PrefabId)> GearFor(int style) =>
+            Gear.TryGetValue(style, out var items) ? items : Gear[Cunning];
+
         /// <summary>
         /// Gives a character its starting equipment and abilities once. Returns true if anything changed.
         /// The abilities are the three the character creation screen advertises for the discipline.

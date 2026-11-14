@@ -59,6 +59,11 @@ namespace Akaneiro.Server.Game
 
         private sealed class State
         {
+            /// <summary>Whether this monster's current target is the hired companion (else the player).</summary>
+            public bool OnAlly;
+
+            /// <summary>Not before this time the target may switch again (anti flicker).</summary>
+            public DateTime SwitchTargetAt;
             public bool Chasing;
             public DateTime NextAttack;
 
@@ -194,6 +199,9 @@ namespace Akaneiro.Server.Game
 
             RemoveExpiredObjects(now);
 
+            // The hired companion: healed out of combat, checked against its 30 minutes.
+            FriendAlly ally = _s.FriendAlly != null ? TendAlly(_s.FriendAlly, now, dt) : null;
+
             Vector3 player = _s.Position;
             foreach (Monster monster in _s.Scene.Monsters.ToList())
             {
@@ -203,13 +211,32 @@ namespace Akaneiro.Server.Game
 
                 State state = _states.TryGetValue(monster.ObjectId, out State s) ? s : _states[monster.ObjectId] = new State();
 
+                // A monster takes whichever of the two stands closer (the companion needs a clear
+                // lead to take it over, so the pair does not flicker between them).
+                if (state.OnAlly && (ally == null || !ally.Present))
+                    state.OnAlly = false;
+                float playerDistance = SceneInstance.Distance(monster.Position, player);
+                float allyDistance = ally != null && ally.Present
+                    ? SceneInstance.Distance(monster.Position, ally.Position) : float.MaxValue;
+                bool switchNow = state.OnAlly
+                    ? allyDistance > playerDistance + 3f
+                    : allyDistance < playerDistance - 2f;
+                if (switchNow && now >= state.SwitchTargetAt)
+                {
+                    state.OnAlly = !state.OnAlly;
+                    state.SwitchTargetAt = now + TimeSpan.FromSeconds(2);
+                    state.Path = null;
+                }
+                Vector3 targetPos = state.OnAlly ? ally.Position : player;
+                int targetId = state.OnAlly ? ally.ObjectId : Session.PlayerObjectId;
+
                 // A swing that has started lands when its animation reaches the hit.
                 if (state.PendingAttack != null && now >= state.HitDue)
                 {
                     if (monster.Type.ThrowAbility != 0)
-                        Throw(monster, state.PendingAttack);
+                        Throw(monster, state.PendingAttack, state.OnAlly ? ally : null);
                     else
-                        LandHit(monster, state.PendingAttack);
+                        LandHit(monster, state.PendingAttack, state.OnAlly ? ally : null);
                     state.PendingAttack = null;
                     if (_s.IsDead)
                         return;
@@ -222,7 +249,7 @@ namespace Akaneiro.Server.Game
                     continue;
                 }
 
-                float distance = SceneInstance.Distance(monster.Position, player);
+                float distance = state.OnAlly ? allyDistance : playerDistance;
                 float vision = monster.Type.VisionRadius > 0 ? monster.Type.VisionRadius : 6f;
                 float reach = monster.Type.AttackRange > 0 ? monster.Type.AttackRange : 2f;
 
@@ -230,33 +257,34 @@ namespace Akaneiro.Server.Game
                 {
                     if (distance > vision && !state.Ambush)
                     {
-                        Wander(monster, state, now, dt, distance);
+                        Wander(monster, state, now, dt, playerDistance);
                         continue;
                     }
                     if (state.Asleep)
                     {
                         state.Asleep = false;
                         state.BusyUntil = now + WakeUpDuration(monster);
-                        _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, Session.PlayerObjectId, AniWakeUp));
+                        _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, targetId, AniWakeUp));
                         _s.Log.LogInformation("   {Monster} #{Id} wakes up", monster.Type.Name, monster.ObjectId);
                         continue;
                     }
                     state.Chasing = true;
-                    _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, Session.PlayerObjectId, AniChase));
-                    _s.Log.LogInformation("   {Monster} #{Id} noticed the player", monster.Type.Name, monster.ObjectId);
+                    _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, targetId, AniChase));
+                    _s.Log.LogInformation("   {Monster} #{Id} noticed the {Target}", monster.Type.Name, monster.ObjectId,
+                        state.OnAlly ? "companion" : "player");
                 }
 
                 if (distance > vision * GiveUpFactor && !state.Ambush && now >= state.ProvokedUntil)
                 {
                     state.Chasing = false;
-                    _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, Session.PlayerObjectId, AniIdle));
+                    _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, targetId, AniIdle));
                     continue;
                 }
 
                 if (distance > reach)
                 {
                     state.InReachSince = null;
-                    MoveTowards(monster, state, player, dt);
+                    MoveTowards(monster, state, targetPos, targetId, dt);
                     continue;
                 }
                 // Just arrived: the client shows it a step behind, so it swings once it is there too.
@@ -272,10 +300,58 @@ namespace Akaneiro.Server.Game
                     state.HitDue = now + (monster.Type.ThrowAbility != 0 ? ThrowRelease(monster) : HitDelay);
                     if (monster.Type.ThrowAbility != 0 && monster.Type.ThrowCastLength > 0)
                         state.NextAttack = Max(state.NextAttack, now + TimeSpan.FromSeconds(monster.Type.ThrowCastLength));
-                    StartSwing(monster, attack);
+                    StartSwing(monster, attack, state.OnAlly ? ally : null);
                     state.NeedsChaseState = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Keeps the companion alive while its hire lasts: energy always, health after a moment
+        /// without hits, and both reported to the client (its own copy only learns the truth
+        /// through AllyRegenerate). When the 30 minutes run out, health 0 is the client's only
+        /// path to take an ally out of the world.
+        /// </summary>
+        private FriendAlly TendAlly(FriendAlly ally, DateTime now, float dt)
+        {
+            if (now >= ally.HiredUntil)
+            {
+                if (ally.ObjectId != 0)
+                    _s.Send(BattleResponses.AllyRegenerate(ally.ObjectId, 0, 0));
+                _s.FriendAlly = null;
+                _s.Log.LogInformation("   friend {Name} goes home after the hired time", ally.Character.Name);
+                return null;
+            }
+
+            if (ally.Present && ally.ObjectId != 0)
+            {
+                ally.Mp = Math.Min(ally.MaxMp, ally.Mp + (int)Math.Round(dt * Views.RegenTicksPerSecond * ally.Stats.MpRegen));
+                if (ally.Hp < ally.MaxHp && now - ally.LastHitAt >= RegenPause)
+                    ally.Hp = Math.Min(ally.MaxHp, ally.Hp + (int)Math.Round(dt * Views.RegenTicksPerSecond * ally.Stats.HpRegen));
+
+                if (now >= ally.NextRegenerateAt && (ally.Hp != ally.SyncHp || ally.Mp != ally.SyncMp))
+                    SendAllyHealth(ally, now);
+            }
+            return ally;
+        }
+
+        /// <summary>The companion's health pauses a moment after every hit (assumed; the tables give none).</summary>
+        private static readonly TimeSpan RegenPause = TimeSpan.FromSeconds(3);
+
+        private void SendAllyHealth(FriendAlly ally, DateTime now)
+        {
+            _s.Send(BattleResponses.AllyRegenerate(ally.ObjectId, ally.Hp, ally.Mp));
+            ally.SyncHp = ally.Hp;
+            ally.SyncMp = ally.Mp;
+            ally.NextRegenerateAt = now + TimeSpan.FromSeconds(2);
+        }
+
+        /// <summary>The companion fell: health 0 makes the client play its death and forget it.</summary>
+        private void AllyDown(FriendAlly ally)
+        {
+            _s.Send(BattleResponses.AllyRegenerate(ally.ObjectId, 0, 0));
+            _s.FriendAlly = null;
+            _s.Log.LogInformation("   the friend {Name} fell", ally.Character.Name);
         }
 
         /// <summary>Takes ability objects (meteors, caltrops, ...) out of the world once they are done.</summary>
@@ -376,7 +452,7 @@ namespace Akaneiro.Server.Game
         /// trail around obstacles where the straight way is not known to be walkable. The client
         /// gets the points whenever the way is found anew and walks them itself.
         /// </summary>
-        private void MoveTowards(Monster monster, State state, Vector3 player, float dt)
+        private void MoveTowards(Monster monster, State state, Vector3 goal, int targetObjectID, float dt)
         {
             DateTime now = _s.World.Clock.UtcNow;
             float speed = monster.Type.AttackSpeed > 0 ? monster.Type.AttackSpeed : Math.Max(1f, monster.Type.WanderSpeed);
@@ -387,15 +463,15 @@ namespace Akaneiro.Server.Game
             {
                 state.NeedsChaseState = false;
                 state.Path = null; // the client needs the way again, in the chase state
-                _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, Session.PlayerObjectId, AniChase));
+                _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, targetObjectID, AniChase));
             }
 
             if (state.Path == null || state.Path.Count == 0 || now - state.PathAt >= RepathInterval
-                || SceneInstance.Distance(state.PathGoal, player) > 2f)
+                || SceneInstance.Distance(state.PathGoal, goal) > 2f)
             {
-                state.Path = _s.Scene.Nav.FindPath(monster.Position, player);
+                state.Path = _s.Scene.Nav.FindPath(monster.Position, goal);
                 state.PathAt = now;
-                state.PathGoal = player;
+                state.PathGoal = goal;
 
                 var path = new vectorServerPosition { new SServerPosition { fx = monster.Position.x, fz = monster.Position.z } };
                 foreach (Vector3 point in state.Path)
@@ -429,7 +505,7 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>Starts the attack animation. The damage follows when the animation hits.</summary>
-        private void StartSwing(Monster monster, GameData.MonsterAttack attack)
+        private void StartSwing(Monster monster, GameData.MonsterAttack attack, FriendAlly allyTarget)
         {
             // The animation index picks which of the monster's attack animations plays.
             _s.Send(BattleResponses.UpdateAnimationNotify(monster.ObjectId, attack.AnimIndex, AniAttack));
@@ -440,8 +516,8 @@ namespace Akaneiro.Server.Game
             // Throwers start their toss ability (charge in the hand, face the player) instead.
             begin.skillID = monster.Type.ThrowAbility != 0 ? monster.Type.ThrowAbility : MonsterMeleeAbility;
             begin.sourceObjectID = monster.ObjectId;
-            begin.destObejctID = Session.PlayerObjectId;
-            begin.pos = _s.Position;
+            begin.destObejctID = allyTarget != null ? allyTarget.ObjectId : Session.PlayerObjectId;
+            begin.pos = allyTarget != null ? allyTarget.Position : _s.Position;
             _s.Send(BattleResponses.BeginUseSkill(begin));
         }
 
@@ -469,10 +545,10 @@ namespace Akaneiro.Server.Game
         /// (SkillObjectEnter -> NPC_Toss.On_SkillObjectEnter -> OniThrowObj) and is told when it
         /// arrives (BulletHit), with the damage if the player is still there, which also removes it.
         /// </summary>
-        private void Throw(Monster monster, GameData.MonsterAttack attack)
+        private void Throw(Monster monster, GameData.MonsterAttack attack, FriendAlly allyTarget)
         {
             SceneInstance scene = _s.Scene;
-            Vector3 from = monster.Position, target = _s.Position;
+            Vector3 from = monster.Position, target = allyTarget != null ? allyTarget.Position : _s.Position;
             float dx = target.x - from.x, dz = target.z - from.z;
             float distance = Math.Max(0.1f, (float)Math.Sqrt(dx * dx + dz * dz));
 
@@ -489,10 +565,35 @@ namespace Akaneiro.Server.Game
                 if (scene != _s.Scene)
                     return;
                 var effect = Proto.New<SSkillEffect>();
+
+                if (allyTarget != null)
+                {
+                    effect.targetID = allyTarget.ObjectId;
+                    effect.targetPos = allyTarget.Position;
+                    int hitDamage = 0;
+                    if (allyTarget.Hp > 0 && SceneInstance.Distance(target, allyTarget.Position) <= ProjectileHitRadius)
+                    {
+                        hitDamage = Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) *
+                            (1f - Combat.DamageReduction(allyTarget.Character, _s.World.Data, allyTarget.Stats))));
+                        allyTarget.Hp = Math.Max(0, allyTarget.Hp - hitDamage);
+                        allyTarget.LastHitAt = _s.World.Clock.UtcNow;
+                        effect.attributeChangeVec.Add(Proto.Attr(EAttributeType.ATTR_CurHP, -hitDamage));
+                    }
+                    _s.Send(BattleResponses.BulletHit(ball.objectID, effect));
+                    if (hitDamage > 0)
+                        SendAllyHealth(allyTarget, _s.World.Clock.UtcNow);
+                    _s.Log.LogInformation("   {Monster} #{Id} hits the friend {Name} for {Damage} with a throw ({Hp} left)",
+                        monster.Type.Name, monster.ObjectId, allyTarget.Character.Name, hitDamage, allyTarget.Hp);
+                    if (allyTarget.Hp <= 0 && hitDamage > 0)
+                        AllyDown(allyTarget);
+                    return;
+                }
+
                 effect.targetID = Session.PlayerObjectId;
                 effect.targetPos = _s.Position;
                 int damage = 0;
-                if (!_s.IsDead && SceneInstance.Distance(target, _s.Position) <= ProjectileHitRadius)
+                if (!_s.IsDead && _s.InvulnerableUntil <= _s.World.Clock.UtcNow
+                    && SceneInstance.Distance(target, _s.Position) <= ProjectileHitRadius)
                 {
                     damage = Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(_s.Character, _s.World.Data, _s.Stats))));
                     _s.CurrentHp = Math.Max(0, _s.CurrentHp - damage);
@@ -507,33 +608,55 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>Applies the damage of a swing that has reached its hit moment.</summary>
-        private void LandHit(Monster monster, GameData.MonsterAttack attack)
+        private void LandHit(Monster monster, GameData.MonsterAttack attack, FriendAlly allyTarget)
         {
-            // The player stepped out of reach during the swing: it misses.
+            // The target stepped out of reach during the swing: it misses.
+            Vector3 targetPos = allyTarget != null ? allyTarget.Position : _s.Position;
             float reach = monster.Type.AttackRange > 0 ? monster.Type.AttackRange : 2f;
-            bool inReach = SceneInstance.Distance(monster.Position, _s.Position) <= reach + DodgeMargin;
+            bool inReach = SceneInstance.Distance(monster.Position, targetPos) <= reach + DodgeMargin;
             var result = Proto.New<SUseSkillResult>();
             result.skillID = MonsterMeleeAbility;
             result.sourceObjectID = monster.ObjectId;
-            result.destObejctID = Session.PlayerObjectId;
-            result.pos = _s.Position;
+            result.destObejctID = allyTarget != null ? allyTarget.ObjectId : Session.PlayerObjectId;
+            result.pos = targetPos;
 
             bool hits = inReach && (attack.HitChance >= 100 || Rng.Next(100) < attack.HitChance);
+            if (hits && allyTarget == null && _s.InvulnerableUntil > _s.World.Clock.UtcNow)
+                hits = false; // the revival shield: the blow comes through without biting
             // Armor takes its share of every hit (Combat.DamageReduction).
             int damage = hits
-                ? Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(_s.Character, _s.World.Data, _s.Stats))))
+                ? Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(
+                    allyTarget?.Character ?? _s.Character, _s.World.Data, allyTarget?.Stats ?? _s.Stats))))
                 : 0;
             if (hits)
             {
-                _s.CurrentHp = Math.Max(0, _s.CurrentHp - damage);
+                if (allyTarget != null)
+                {
+                    allyTarget.Hp = Math.Max(0, allyTarget.Hp - damage);
+                    allyTarget.LastHitAt = _s.World.Clock.UtcNow;
+                }
+                else
+                    _s.CurrentHp = Math.Max(0, _s.CurrentHp - damage);
                 var effect = Proto.New<SSkillEffect>();
-                effect.targetID = Session.PlayerObjectId;
-                effect.targetPos = _s.Position;
+                effect.targetID = result.destObejctID;
+                effect.targetPos = targetPos;
                 effect.attributeChangeVec.Add(Proto.Attr(EAttributeType.ATTR_CurHP, -damage));
                 result.skillEffectVec.Add(effect);
             }
 
             _s.Send(BattleResponses.UseNormalAttackResult(false, result));
+
+            if (allyTarget != null)
+            {
+                if (damage > 0)
+                    SendAllyHealth(allyTarget, _s.World.Clock.UtcNow);
+                _s.Log.LogInformation("   {Monster} #{Id} hits the friend {Name} for {Damage} ({Hp} left)",
+                    monster.Type.Name, monster.ObjectId, allyTarget.Character.Name, damage, allyTarget.Hp);
+                if (allyTarget.Hp <= 0)
+                    AllyDown(allyTarget);
+                return;
+            }
+
             _s.Log.LogInformation("   {Monster} #{Id} hits the player for {Damage} ({Hp} left)",
                 monster.Type.Name, monster.ObjectId, damage, _s.CurrentHp);
 
@@ -576,6 +699,7 @@ namespace Akaneiro.Server.Game
         /// </summary>
         private void KillPlayer()
         {
+            _s.InvulnerableUntil = DateTime.MinValue;
             var attributes = Views.AttributeMap(_s.Character, _s.World.Data, _s.Stats);
             attributes[EAttributeType.ATTR_CurHP] = 0;
             attributes[EAttributeType.ATTR_CurMP] = _s.CurrentMp;

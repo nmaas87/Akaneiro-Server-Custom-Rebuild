@@ -45,11 +45,9 @@ NOT BUILT: THE ORIGINAL ONLINE FEATURES
 ---------------------------------------
 
 Akaneiro had no real-time co-op: the network protocol has no messages for other players in the
-same level. Its online side was social and asynchronous, and none of it exists on this server yet:
+same level. Its online side was social and asynchronous, and most of it does not exist on this
+server (the summon window's friend ally is covered under ASSUMPTIONS):
 
-- Summoning friends as allies. In the original you could take a friend's character along as an
-  AI-controlled ally, and you earned rewards when friends hired yours. The client still has the
-  summon button; its friend list stays empty here.
 - Chat with other players. Messages are only echoed back to the sender. Since several players can
   be connected to one server, this one could be added.
 - Leaderboards, events, gift and redeem codes. Codes are never valid, event reports are accepted
@@ -94,6 +92,17 @@ server uses these rules. They are the first place to look when something feels o
 - Revival with an item (the Shinigami Scroll option) spends one scroll from the active
   character's bag; the counter on the account screen counts the scrolls in every bag of the
   account. Without a scroll the revive is refused, like on the original.
+- Summoning a companion as an ally works, with stand-ins: the original took real other-player
+  characters from the friend network, and that network is long gone. The summon button offers
+  three invented companions - one per discipline (Kenshin, Benkei and Koga) - at your character's
+  level, wearing the discipline's weapon and clothing at an item level that fits, with the
+  abilities the game gives every ally; they fight about as well as a hunter of your level. Hiring
+  is free and lasts 30 minutes (the values the window itself shows), one ally at a time; the
+  companion comes along into the next map, heals when it stands out of the fight, and a fallen
+  one frees the slot. The client walks it and decides what it does, the server judges every hit,
+  and a monster goes for whichever of the two stands closer. Its kills pay you full experience
+  and loot. The friend hire reward (what the original gave you when friends hired your character)
+  stays empty - there is nobody to hire you.
 - The revive slam: whenever a revive succeeds the client fires its shockwave ability, and the
   server answers as the tables say - damage to everything within 5 m (from the ability row),
   the struck monsters stagger for the 400 ms the knockback status prescribes and are shoved

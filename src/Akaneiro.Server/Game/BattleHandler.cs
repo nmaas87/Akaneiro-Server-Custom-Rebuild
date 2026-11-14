@@ -73,6 +73,16 @@ namespace Akaneiro.Server.Game
             SendMonstersNearPlayer();
             _s.Triggers.CheckPosition(_s.Position); // the spawn point may lie inside a trigger
             _s.StartMonsterAi();
+
+            // A companion that is still hired comes along into the new map.
+            if (_s.FriendAlly != null)
+            {
+                _s.FriendAlly.ObjectId = 0; // the old scene's objects are gone
+                if (_s.World.Clock.UtcNow < _s.FriendAlly.HiredUntil && !_s.IsDead)
+                    SpawnFriendAlly(_s.FriendAlly);
+                else
+                    _s.FriendAlly = null;
+            }
         }
 
         /// <summary>
@@ -363,6 +373,209 @@ namespace Akaneiro.Server.Game
             _s.Send(BattleResponses.UseNormalAttackResult(false, result));
             AwardKills();
             BreakObjects();
+        }
+
+        // ---- friend allies (the summon window) -------------------------------------------------
+        // The client's ally does what it wants: its own AI walks it up and swings (AllyMovement,
+        // Ally_NormalAttackState), so the server only resolves what the client asks for and keeps
+        // the companion's health honest (AllyRegenerate). What the companion does for the player
+        // (experience, loot, mission progress) runs through the usual kill path.
+
+        /// <summary>A hire lasts as long as the summon window promises ("Duration 30 minutes").</summary>
+        private static readonly TimeSpan HireTime = TimeSpan.FromMinutes(30);
+
+        /// <summary>Server gate between the companion's swings; its own animation is the real limit.</summary>
+        private static readonly TimeSpan AllySwing = TimeSpan.FromSeconds(0.5);
+
+        /// <summary>How far from where the client says it stands a companion's hit still lands.</summary>
+        private const float AllyReach = 8f;
+
+        public override void GetFriendList()
+        {
+            if (_s.Character == null)
+                return;
+            var list = new vectorFriendCharInfo();
+            foreach (SFriendCharInfo info in Friends.Roster(_s.Character, _s.World.Data))
+                list.Add(info);
+            _s.Log.LogInformation("   friend list: {Count} companions offered", list.Count);
+            _s.Send(BattleResponses.GetFriendListResult(list));
+        }
+
+        public override void SelectFriendAlly(int friendCharID)
+        {
+            if (_s.Character == null)
+                return;
+
+            DateTime now = _s.World.Clock.UtcNow;
+            FriendAlly ally = Friends.Hire(_s.Character, _s.World.Data, friendCharID);
+            if (ally == null)
+            {
+                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eFriendError_NoExist)));
+                return;
+            }
+            if (_s.FriendAlly != null && _s.FriendAlly.Present && _s.FriendAlly.ObjectId != 0
+                && now >= _s.FriendAlly.HiredUntil)
+                _s.Send(BattleResponses.AllyRegenerate(_s.FriendAlly.ObjectId, 0, 0)); // expired, not yet ticked out
+            if (_s.FriendAlly != null && _s.FriendAlly.HiredUntil > now && _s.FriendAlly.Present)
+            {
+                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eAlreadyHaveAlly)));
+                return;
+            }
+
+            ally.HiredUntil = now + HireTime;
+            _s.FriendAlly = ally;
+            _s.Log.LogInformation("hired friend {Name} level {Level} ({Minutes} minutes)",
+                ally.Character.Name, ally.Character.Level, HireTime.TotalMinutes);
+            if (_s.Scene != null && !_s.IsDead)
+                SpawnFriendAlly(ally);
+            _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eSuccess)));
+        }
+
+        /// <summary>Puts the companion into the current scene beside the player.</summary>
+        private void SpawnFriendAlly(FriendAlly ally)
+        {
+            Vector3 at = _s.Position;
+            var info = Proto.New<SFriendAllyEnter>();
+            info.objectID = _s.Scene.NewObjectId();
+            info.charID = ally.FriendId;
+            info.pos = new Vector3(at.x + 1.5f, at.y, at.z);
+            info.sex = new ESex(ally.Character.Sex);
+            info.style = ally.Character.Style;
+            foreach (Data.ItemData item in ally.Character.Equipment)
+                info.equipinfo.Add(new itemuuid
+                {
+                    slotPart = item.Slot,
+                    itemID = item.ItemId,
+                    itemLevel = Math.Max(1, item.Level),
+                    prefabID = item.PrefabId,
+                });
+            info.attrVec = Views.Attributes(ally.Character, _s.World.Data, ally.Stats);
+            foreach (int skillId in ally.Skills)
+                info.skillVec.Add(skillId);
+
+            _s.Send(BattleResponses.FriendAllyEnter(info));
+            ally.ObjectId = info.objectID;
+            ally.Position = info.pos;
+            ally.SyncHp = ally.Hp;
+            ally.SyncMp = ally.Mp;
+            ally.NextRegenerateAt = DateTime.MinValue;
+            _s.Log.LogInformation("   {Name} joins the fight (#{Id})", ally.Character.Name, ally.ObjectId);
+        }
+
+        public override void CreateAllyNpcRequest(Vector3 pos, EAllyNpcType allyType)
+        {
+            // "right-click to call": the player clicked their companion and the client asks
+            // the server to have it come to their side.
+            FriendAlly ally = _s.FriendAlly;
+            if (ally == null || !ally.Present || allyType.Get() != EAllyNpcType.eAllyNpcType_Friend)
+                return;
+            _s.Send(BattleResponses.SetObjectPosition(ally.ObjectId, _s.Position));
+            ally.Position = _s.Position;
+        }
+
+        public override void AllyUpdateMoveRequest(int objectID, Vector3 pos, Vector3 target, float rot, uint continueTime)
+        {
+            FriendAlly ally = _s.FriendAlly;
+            if (ally == null || objectID != ally.ObjectId)
+                return;
+            // The client walks the companion around on its own; the server notes where it stands.
+            ally.Position = pos;
+        }
+
+        public override void UseAllyNormalAttack(EWeaponType weaponType, uint targetObjectID, uint curTime)
+        {
+            FriendAlly ally = _s.FriendAlly;
+            if (ally == null || !ally.Present || _s.Scene == null || _s.IsDead)
+                return;
+
+            DateTime now = _s.World.Clock.UtcNow;
+            if (now < ally.NextSwingAt)
+                return;
+            ally.NextSwingAt = now + AllySwing;
+
+            var result = Proto.New<SUseSkillResult>();
+            result.skillID = NormalAttack1H;
+            result.sourceObjectID = ally.ObjectId;
+            result.destObejctID = (int)targetObjectID;
+
+            Monster target = _s.Scene.Find((int)targetObjectID);
+            if (target != null && target.IsAlive && SceneInstance.Distance(ally.Position, target.Position) <= AllyReach)
+                Hit(result, target, Combat.WeaponDamage(ally.Character, _s.World.Data, _s.World.Random), ally.Stats);
+            else if (target == null)
+                _s.Log.LogInformation("   {Name} attacks unknown object #{Id}", ally.Character.Name, targetObjectID);
+
+            _s.Send(BattleResponses.UseNormalAttackResult(false, result));
+            AwardKills();
+        }
+
+        public override void UseAllySkill(uint sourceID, uint skillID, uint targetObjectID, Vector3 location, uint curTime)
+        {
+            FriendAlly ally = _s.FriendAlly;
+            if (ally == null || !ally.Present || _s.Scene == null || _s.IsDead || (int)sourceID != ally.ObjectId)
+                return;
+
+            int abilityId = (int)skillID;
+            if (!ally.Skills.Contains(abilityId) || !_s.World.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
+            {
+                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, Proto.Error(EServerErrorType.eGS_SkillNotExist)));
+                return;
+            }
+
+            DateTime now = _s.World.Clock.UtcNow;
+            if (ally.Cooldowns.TryGetValue(abilityId, out DateTime ready) && now < ready)
+            {
+                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, Proto.Error(EServerErrorType.eGS_SkillColding)));
+                return;
+            }
+
+            if (ally.Mp < ability.MpNeed)
+            {
+                _s.Log.LogDebug("   {Name} is out of energy for {Ability}", ally.Character.Name, ability.Name);
+                return;
+            }
+
+            ally.Mp -= ability.MpNeed;
+            ally.Cooldowns[abilityId] = now.AddMilliseconds(ability.CooldownMs);
+            _s.Log.LogInformation("   {Name} uses {Ability}", ally.Character.Name, ability.Name);
+
+            var begin = Proto.New<SUseSkillResult>();
+            begin.skillID = abilityId;
+            begin.sourceObjectID = ally.ObjectId;
+            begin.destObejctID = (int)targetObjectID;
+            begin.pos = location;
+            begin.attributeChangeVec.Add(Proto.Attr(EAttributeType.ATTR_CurMP, -ability.MpNeed));
+            _s.Send(BattleResponses.BeginUseSkill(begin));
+
+            if (ability.ObjectId != 0)
+            {
+                var skillObject = Proto.New<SSkillObjectEnter>();
+                skillObject.objectID = _s.Scene.NewObjectId();
+                skillObject.skillID = abilityId;
+                skillObject.objectTypeID = ability.ObjectId;
+                skillObject.pos = location;
+                skillObject.direction = new Vector3(0f, 0f, 1f);
+                skillObject.ownerObjectID = ally.ObjectId;
+                _s.Send(BattleResponses.SkillObjectEnter(skillObject));
+                _s.Send(BattleResponses.SkillObjectActive(skillObject.objectID));
+                _s.Scene.TemporaryObjects[skillObject.objectID] = now.AddMilliseconds(Math.Max(ability.AnimDurationMs, 1000) + 1000);
+            }
+
+            var result = Proto.New<SUseSkillResult>();
+            result.skillID = abilityId;
+            result.sourceObjectID = ally.ObjectId;
+            result.destObejctID = (int)targetObjectID;
+            result.pos = location;
+
+            var attributes = Views.AttributeMap(ally.Character, _s.World.Data, ally.Stats);
+            List<Monster> targets = AbilityTargets(ability, targetObjectID, location, ally.Position).ToList();
+            for (int hit = 0; hit < ability.AttackCount; hit++)
+                foreach (Monster monster in targets.Where(m => m.IsAlive))
+                    Hit(result, monster, Combat.AbilityDamage(ability, ally.Character, _s.World.Data, attributes, _s.World.Random), ally.Stats);
+
+            _s.Log.LogInformation("   {Name} hit {Count} monsters", ally.Character.Name, targets.Count);
+
+            _s.Send(BattleResponses.UseFightSkillResult(result));
+            AwardKills();
         }
 
         /// <summary>
