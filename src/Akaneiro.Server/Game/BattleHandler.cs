@@ -167,7 +167,7 @@ namespace Akaneiro.Server.Game
             _s.ApplyRegeneration();
 
             int abilityId = (int)skillID;
-            if (!_s.Character.Abilities.Any(a => a.Id == abilityId) ||
+            if ((!IsReviveShockwave(abilityId) && !_s.Character.Abilities.Any(a => a.Id == abilityId)) ||
                 !_s.World.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
             {
                 Fail(targetObjectID, abilityId, EServerErrorType.eGS_SkillNotExist);
@@ -226,16 +226,69 @@ namespace Akaneiro.Server.Game
 
             PlayerStats stats = _s.Stats;
             var attributes = Views.AttributeMap(_s.Character, _s.World.Data, stats);
-            List<Monster> targets = AbilityTargets(ability, targetObjectID, location).ToList();
+            List<Monster> targets = AbilityTargets(ability, targetObjectID, location, _s.Position).ToList();
             for (int hit = 0; hit < ability.AttackCount; hit++)
             {
                 foreach (Monster monster in targets.Where(m => m.IsAlive))
                     Hit(result, monster, Combat.AbilityDamage(ability, _s.Character, _s.World.Data, attributes, _s.World.Random), stats);
             }
+
+            // The revive slam also hits and staggers everything around the player and shields
+            // the player briefly; all four numbers come from the tables (see ReviveShockwave).
+            if (IsReviveShockwave(abilityId))
+                ReviveShockwaveEffects(result, targets, abilityId);
+
             _s.Log.LogInformation("   ability hit {Count} monsters", targets.Count);
 
             _s.Send(BattleResponses.UseFightSkillResult(result));
             AwardKills();
+        }
+
+        /// <summary>
+        /// The revive shockwave (12001 Revive_Shockwave, and 12002 RevivePrayer_Shockwave for
+        /// item/crystal revivals): the client fires it on its own when a revive succeeds
+        /// (SessionBattleClient.On_ReviveResult -> UseAbilityFromID), and the ability state then
+        /// sends the UseFightSkill and waits - the VFX only plays when the answer arrives. It is
+        /// not an ability the character learns, so it skips the ownership check; the table gives
+        /// its 5 m radius, its damage and the four statuses below.
+        /// </summary>
+        private static bool IsReviveShockwave(int abilityId) => abilityId == ReviveShockwave || abilityId == RevivePrayerShockwave;
+
+        public const int ReviveShockwave = 12001, RevivePrayerShockwave = 12002;
+
+        // The push speed is the one number the tables do not carry; the monster staggers for the
+        // 400 ms the DestStatusID entry (40002/40003 "Revival Knockback") prescribes, the player
+        // is untouchable for the SelfStatusID duration (40018: 7 s, 40019 with a scroll: 12 s).
+        private const float RevivePush = 8f, RevivePrayerPush = 12f;
+
+        private void ReviveShockwaveEffects(SUseSkillResult result, List<Monster> targets, int abilityId)
+        {
+            bool prayer = abilityId == RevivePrayerShockwave;
+            DateTime now = _s.World.Clock.UtcNow;
+
+            result.statusEffectVec.Add(
+                StatusEffect(prayer ? 40019 : 40018, EStatusOperateType.eStatusType_Add, new Dictionary<int, int>()));
+            _s.InvulnerableUntil = now.AddMilliseconds(prayer ? 12_000 : 7_000);
+
+            foreach (Monster monster in targets.Where(m => m.IsAlive))
+            {
+                monster.StunnedUntil = now.AddMilliseconds(400);
+
+                // The physical shove: SetKnockBackSpeed behavior 1 is what the client applies.
+                float dx = monster.Position.x - _s.Position.x;
+                float dz = monster.Position.z - _s.Position.z;
+                float length = Math.Max(0.01f, (float)Math.Sqrt(dx * dx + dz * dz));
+                float push = prayer ? RevivePrayerPush : RevivePush;
+                _s.Send(BattleResponses.SetKnockBackSpeed(monster.ObjectId,
+                    new Vector3(dx / length * push, 0f, dz / length * push), 1));
+
+                // The knockback pose rides along with the hit.
+                SSkillEffect effect = result.skillEffectVec.Cast<SSkillEffect>()
+                    .FirstOrDefault(e => e.targetID == monster.ObjectId);
+                if (effect != null)
+                    effect.statusEffectVec.Add(
+                        StatusEffect(prayer ? 40003 : 40002, EStatusOperateType.eStatusType_Add, new Dictionary<int, int>()));
+            }
         }
 
         /// <summary>The player's basic attack ability (AbilityIDs.NormalAttack_1H_ID), used for every weapon.</summary>
@@ -373,7 +426,7 @@ namespace Akaneiro.Server.Game
         /// takes the sent position when it is a real place on the map, and otherwise falls back to
         /// the player's own position, then hits everything within the ability's reach.
         /// </summary>
-        private IEnumerable<Monster> AbilityTargets(GameData.AbilityRow ability, uint targetObjectID, Vector3 location)
+        private IEnumerable<Monster> AbilityTargets(GameData.AbilityRow ability, uint targetObjectID, Vector3 location, Vector3 casterPos)
         {
             if (_s.Scene == null || ability.TargetType == TargetTypeSelf)
                 return Enumerable.Empty<Monster>();
@@ -386,20 +439,20 @@ namespace Akaneiro.Server.Game
             }
 
             float reach = ability.AreaRadius > 0 ? ability.AreaRadius : 3f;
-            Vector3 center = IsPlaceOnTheMap(location) ? location : _s.Position;
+            Vector3 center = IsPlaceOnTheMap(location, casterPos) ? location : casterPos;
             return _s.Scene.Near(center, reach).ToList();
         }
 
         /// <summary>
         /// Tells a world position from a direction vector: directions are short and point away from
-        /// the player, while a real target position is somewhere near them on the map.
+        /// the caster, while a real target position is somewhere near them on the map.
         /// </summary>
-        private bool IsPlaceOnTheMap(Vector3 location)
+        private bool IsPlaceOnTheMap(Vector3 location, Vector3 casterPos)
         {
             const float maxCastDistance = 40f;
             if (Math.Abs(location.x) < 2f && Math.Abs(location.z) < 2f)
                 return false; // a direction vector, or nothing at all
-            return SceneInstance.Distance(location, _s.Position) <= maxCastDistance;
+            return SceneInstance.Distance(location, casterPos) <= maxCastDistance;
         }
 
         /// <summary>Applies damage to a monster and adds the hit to the result the client will show.</summary>

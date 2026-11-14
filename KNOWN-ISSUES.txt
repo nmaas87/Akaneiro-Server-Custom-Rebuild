@@ -83,6 +83,12 @@ ASSUMPTIONS (ORIGINAL FORMULAS LOST)
 The original server code is lost. Where the client's data does not say how something works, the
 server uses these rules. They are the first place to look when something feels off balance.
 
+- The revive slam: whenever a revive succeeds the client fires its shockwave ability, and the
+  server answers as the tables say - damage to everything within 5 m (from the ability row),
+  the struck monsters stagger for the 400 ms the knockback status prescribes and are shoved
+  away (how hard is the one number the tables do not carry), and the risen player takes no
+  damage for the 7 s ("Revival Invulnerability") or 12 s (scroll/crystal revive) the status
+  table gives. Item and crystal revivals use the stronger RevivePrayer variant of the slam.
 - Experience: monsters give 4 times the experience in their prefab.
 - Kill chains: GOOD from 3 kills, LETHAL from 6, SLAYER from 10, paying 50 / 75 / 100 % of the
   chain's experience as a bonus (matches recordings: 3 wolves +18 XP, 6 wolves +54 XP). A chain
