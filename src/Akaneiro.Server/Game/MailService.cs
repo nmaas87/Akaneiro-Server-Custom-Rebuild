@@ -155,19 +155,39 @@ namespace Akaneiro.Server.Game
             if (character.CatalogMailGranted)
                 return false;
 
-            var mail = NewMail(character, KickstarterSender, "The Complete Rare Catalog",
-                "Every named unique the old catalog ever listed, and the pledged gear that never "
-                + "made it onto a shelf - each with its own enchantments, at the level its entry "
-                + "names. They are not for sale anywhere: consider them yours. - Goto");
+            var mail = NewMail(character, KickstarterSender, CatalogTitle, CatalogText);
+            mail.Items.AddRange(CatalogItems(_s.World.Data));
 
+            character.Mail.Add(mail);
+            character.CatalogMailGranted = true;
+            _s.Log.LogInformation("   mailed '{Title}' with {Count} items to #{Id} '{Name}'",
+                mail.Title, mail.Items.Count, character.Id, character.Name);
+            return true;
+        }
+
+        public const string CatalogTitle = "The Complete Rare Catalog";
+        public const string CatalogText =
+            "Every named unique the old catalog ever listed, and the pledged gear that never "
+            + "made it onto a shelf - each with its own enchantments, at the level its entry "
+            + "names. They are not for sale anywhere: consider them yours. - Goto";
+
+        /// <summary>
+        /// The catalog letter's attachments: every distinct catalogued unique part plus every
+        /// named special, each with the parts its row names and at the level that row names.
+        /// Slots are the list ordinals. Exposed so an offline tool can inject the very same
+        /// letter into a saved character; callers wrap it in a MailData and set the flag.
+        /// </summary>
+        public static List<ItemData> CatalogItems(GameData data)
+        {
+            var items = new List<ItemData>();
             var seen = new HashSet<(int Item, int Prefab, int Enchant, int Gem, int Element)>();
-            foreach (GameData.UniqueShopRow row in _s.World.Data.UniqueShop.Values.OrderBy(r => r.Id))
+            foreach (GameData.UniqueShopRow row in data.UniqueShop.Values.OrderBy(r => r.Id))
             {
                 if (!seen.Add((row.BaseId, row.PrefabId, row.Enchant, row.Gem, row.Element)))
                     continue;
-                mail.Items.Add(new ItemData
+                items.Add(new ItemData
                 {
-                    Slot = mail.Items.Count,
+                    Slot = items.Count,
                     ItemId = row.BaseId,
                     PrefabId = row.PrefabId,
                     Level = Math.Max(1, row.RequiredLevel),
@@ -177,25 +197,20 @@ namespace Akaneiro.Server.Game
                     Count = 1,
                 });
             }
-            foreach (GameData.ItemProps props in _s.World.Data.SpecialItems.Values.OrderBy(i => i.Id))
+            foreach (GameData.ItemProps props in data.SpecialItems.Values.OrderBy(i => i.Id))
             {
                 if (!seen.Add((props.Id, 0, 0, 0, 0)))
                     continue;
-                mail.Items.Add(new ItemData
+                items.Add(new ItemData
                 {
-                    Slot = mail.Items.Count,
+                    Slot = items.Count,
                     ItemId = props.Id,
                     Level = Math.Max(1, props.LevelRequirement),
-                    PrefabId = Loot.PrefabFor(_s.World.Data, props.Id, Math.Max(1, props.LevelRequirement)),
+                    PrefabId = Loot.PrefabFor(data, props.Id, Math.Max(1, props.LevelRequirement)),
                     Count = 1,
                 });
             }
-
-            character.Mail.Add(mail);
-            character.CatalogMailGranted = true;
-            _s.Log.LogInformation("   mailed '{Title}' with {Count} items to #{Id} '{Name}'",
-                mail.Title, mail.Items.Count, character.Id, character.Name);
-            return true;
+            return items;
         }
 
         private MailData NewMail(CharacterData character, string sender, string title, string content) =>
