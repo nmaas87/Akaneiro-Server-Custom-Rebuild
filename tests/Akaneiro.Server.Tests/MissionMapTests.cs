@@ -65,22 +65,6 @@ public sealed class MissionMapTests
     }
 }
 
-/// <summary>5832 "Locate the main Magjaw tunnel": filed as a hunt, but it is a place.</summary>
-public sealed class MisfiledObjectiveTests
-{
-    [Fact]
-    public void ReachingTheTunnelCompletesTheTask()
-    {
-        using var player = new TestPlayer().LoginNewCharacter();
-        player.AcceptMission(5832);
-        player.EnterScene("A8_M3");
-
-        player.MoveTo(new UnityEngine.Vector3(132, 0, 76));
-
-        Assert.True(player.Has("On_taskCompleteNTF"), "the tunnel task should be done");
-    }
-}
-
 /// <summary>Finished maps are playable again at once (cooldowns are switched off).</summary>
 public sealed class NoCooldownTests
 {

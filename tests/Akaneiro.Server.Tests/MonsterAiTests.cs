@@ -311,6 +311,7 @@ public sealed class ThrowerTests
     public void ALobberThrowsABallThatHitsThePlayer()
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5131);
         player.AcceptMission(5131);
         player.EnterScene("A1_M3");
         player.Session.CurrentHp = 1_000_000;
@@ -338,6 +339,7 @@ public sealed class ThrowTimingTests
     public void TheLobbersBallFliesWhenItsArmComesDown()
     {
         using var player = new TestPlayer().LoginNewCharacter();
+        player.Unlock(5131);
         player.AcceptMission(5131);
         player.EnterScene("A1_M3");
         player.Session.CurrentHp = 1_000_000;

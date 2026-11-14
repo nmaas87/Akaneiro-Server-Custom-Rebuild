@@ -226,6 +226,7 @@ public sealed class TriggerTests
     public void ThreatLevelDecidesWhichSpawnersTakePart(int threat, int present, int absent)
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5130 + threat);
         player.AcceptMission(5130 + threat); // A1_M3
         player.EnterScene("A1_M3");
 
@@ -254,6 +255,7 @@ public sealed class TriggerTests
     {
         // A3_M2: once 20 Amano Brutes are dead, the task's triggers (785;786;103) bring the boss.
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5321);
         player.AcceptMission(5321);
         player.EnterScene("A3_M2");
         var boss = player.Scene.MonstersOf(139).Single(); // "Boss_Thief Lord Min"
@@ -339,6 +341,7 @@ public sealed class SpawnWaveTests
         // A1_M4 spawner 144 (threat 1): 4 wolves, SpawnRepeatCount 2 -> a second pack of 4 once
         // the first one is dead.
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5141);
         player.AcceptMission(5141);
         player.EnterScene("A1_M4");
         var pack = player.Scene.MonstersOf(144).ToList();
@@ -365,6 +368,7 @@ public sealed class SpawnWaveTests
         // A1_M4 has packs of Insane and Tainted Wolves (NpcPrefabArray with IsRandomSpawnNpc);
         // Blind Rage on Low needs 18 Insane Wolves.
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5141);
         player.AcceptMission(5141);
         player.EnterScene("A1_M4");
 
@@ -386,6 +390,7 @@ public sealed class PortalTests
         // A1_M4 "Blind Rage": portal 1o (133.9, 2.8, 249.2) leads up to (198.6, 19.7, 133.9),
         // where the switches for the rest of the bridge are.
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5141);
         player.AcceptMission(5141);
         player.EnterScene("A1_M4");
         var portal = player.Scene.TriggersById(8028).Single();

@@ -29,11 +29,11 @@ public sealed class TestPlayer : IPacketSink, IDisposable
 
     private readonly List<Message> _inbox = new();
     private readonly List<string> _errors = new();
-    private readonly ProtocolGame_ICallbackReceiver _gameReceiver;
-    private readonly ProtocolBattle_ICallbackReceiver _battleReceiver;
+    private ProtocolGame_ICallbackReceiver _gameReceiver;
+    private ProtocolBattle_ICallbackReceiver _battleReceiver;
     private readonly string _dataDir;
 
-    public ManualClock Clock { get; } = new();
+    public ManualClock Clock { get; private set; } = new();
     public World World { get; }
     public Session Session { get; }
 
@@ -55,7 +55,22 @@ public sealed class TestPlayer : IPacketSink, IDisposable
             Random = new Random(seed),
         };
         Session = new Session(World, this, new OutputLogger(output, _errors));
+        WireReceivers();
+    }
 
+    /// <summary>A second client on the same server (same accounts, same clock): the reconnect
+    /// and one-session-per-account tests drive two of these against one World.</summary>
+    public TestPlayer(World world, ITestOutputHelper output = null)
+    {
+        _dataDir = null; // the World belongs to whoever created it
+        World = world;
+        Clock = (ManualClock)world.Clock; // one clock for the whole server
+        Session = new Session(World, this, new OutputLogger(output, _errors));
+        WireReceivers();
+    }
+
+    private void WireReceivers()
+    {
         _gameReceiver = DispatchProxy.Create<ProtocolGame_ICallbackReceiver, Recorder>();
         ((Recorder)(object)_gameReceiver).Inbox = _inbox;
         _battleReceiver = DispatchProxy.Create<ProtocolBattle_ICallbackReceiver, Recorder>();
@@ -136,13 +151,24 @@ public sealed class TestPlayer : IPacketSink, IDisposable
     public TestPlayer LoginNewCharacter(int sex = ESex.eSex_Female, int style = 4)
     {
         int n = Interlocked.Increment(ref _counter);
-        Send(ProtocolGame_SendRequest.UserLogin("7656119" + n.ToString("D10"), new EUserType(EUserType.eUserType_Steam),
+        return LoginAs("7656119" + n.ToString("D10"), sex, style);
+    }
+
+    /// <summary>The bare login request (no assertions): the reconnect handshake tests take the
+    /// UserLoginOK or UserReconnectNotify answer themselves.</summary>
+    public void SendLogin(string account) =>
+        Send(ProtocolGame_SendRequest.UserLogin(account, new EUserType(EUserType.eUserType_Steam),
             new EClientType(EClientType.eClientType_Standalone_Win), "", "token"));
+
+    /// <summary>Login + create + select on a chosen account string.</summary>
+    public TestPlayer LoginAs(string account, int sex = ESex.eSex_Female, int style = 4)
+    {
+        SendLogin(account);
         Take("On_UserLoginOK");
 
         var create = new SCharacterCreationData
         {
-            nickname = "Tester" + n,
+            nickname = "Tester" + Interlocked.Increment(ref _counter),
             style = style,
             avatarTraits = new mapIntInt(),
             sex = new ESex(sex),
@@ -161,6 +187,19 @@ public sealed class TestPlayer : IPacketSink, IDisposable
     {
         Send(ProtocolGame_SendRequest.AcceptMission(npcId, missionId));
         Take("On_AcceptMissionOk");
+    }
+
+    /// <summary>
+    /// Pretends the character has already finished these missions: the server only lets a
+    /// mission be accepted when its map is unlocked (MissionMap.Unlocked), and scene-mechanic
+    /// tests pick maps further into the progression. Seeding the completed list says exactly
+    /// that: "this character has cleared this map".
+    /// </summary>
+    public void Unlock(params int[] missionIds)
+    {
+        foreach (int id in missionIds)
+            if (!Character.CompletedMissions.Contains(id))
+                Character.CompletedMissions.Add(id);
     }
 
     /// <summary>Loads a scene the way the client does; returns the start info. Other answers stay in the inbox.</summary>
@@ -215,7 +254,8 @@ public sealed class TestPlayer : IPacketSink, IDisposable
     public void Dispose()
     {
         Session.OnDisconnected();
-        try { Directory.Delete(_dataDir, true); } catch (IOException) { }
+        if (_dataDir != null)
+            try { Directory.Delete(_dataDir, true); } catch (IOException) { }
     }
 
     /// <summary>Implements the client's callback interfaces and records every call.</summary>

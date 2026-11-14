@@ -166,6 +166,7 @@ public sealed class BreakableTests
     {
         // A1_M4 "Blind Rage": the switch at (213, 235) lowers "Bridge1" (SelfAnimation 58).
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5141);
         player.AcceptMission(5141);
         player.EnterScene("A1_M4");
         player.Session.CurrentHp = 1_000_000;

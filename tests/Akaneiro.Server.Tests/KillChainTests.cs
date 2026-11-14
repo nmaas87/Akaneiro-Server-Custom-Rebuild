@@ -23,6 +23,7 @@ public sealed class KillChainTests
     public void QuickKillsMakeAChainThatPaysWhenItEnds()
     {
         using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Unlock(5141);
         player.AcceptMission(5141);
         player.EnterScene("A1_M4");
         player.Session.CurrentHp = 1_000_000;

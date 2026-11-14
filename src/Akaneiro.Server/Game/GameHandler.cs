@@ -404,7 +404,11 @@ namespace Akaneiro.Server.Game
             _s.Send(GameResponses.GetGiftAck(Proto.New<SGift>(), Proto.Error(EServerErrorType.eUnknownError)));
 
         // The mailbox holds the reward letters (see MailService); the client polls it every minute.
-        public override void DeleteMail(int mailID) => _s.Mail.Delete(mailID);
+        public override void DeleteMail(int mailID)
+        {
+            if (_s.Character != null)
+                _s.Mail.Delete(mailID);
+        }
 
         public override void GetMailItem(int mailID, int itemSlotID)
         {
@@ -588,18 +592,26 @@ namespace Akaneiro.Server.Game
         public override void AcceptMission(int npcID, int missionID)
         {
             // The client already knows which scene belongs to the mission and loads it on success
-            // (On_AcceptMissionOk -> EnterScene).
-            if (_s.World.Data.Missions.TryGetValue(missionID, out MissionDefinition mission))
+            // (On_AcceptMissionOk -> EnterScene). Everything it can pick comes from the mission
+            // list, so anything outside the unlocked set is a modified client: refuse it like
+            // every other progression gate.
+            if (!_s.World.Data.Missions.TryGetValue(missionID, out MissionDefinition mission))
             {
-                _s.Mission = new MissionProgress(mission);
-                _s.Log.LogInformation("   accept mission {Mission} '{Name}' ({Branches} branches)",
-                    missionID, mission.Name, mission.Branches.Count);
-            }
-            else
-            {
-                _s.Mission = null;
                 _s.Log.LogWarning("   accept mission {Mission}: no definition found", missionID);
+                _s.Send(GameResponses.AcceptMissionFail(1));
+                return;
             }
+            if (_s.Character == null || !MissionMap.Unlocked(_s.Character, _s.World.Data).Contains(missionID))
+            {
+                _s.Log.LogWarning("   accept mission {Mission} '{Name}': not unlocked for this character",
+                    missionID, mission.Name);
+                _s.Send(GameResponses.AcceptMissionFail(1));
+                return;
+            }
+
+            _s.Mission = new MissionProgress(mission);
+            _s.Log.LogInformation("   accept mission {Mission} '{Name}' ({Branches} branches)",
+                missionID, mission.Name, mission.Branches.Count);
 
             _s.Send(GameResponses.AcceptMissionOk(1));
         }

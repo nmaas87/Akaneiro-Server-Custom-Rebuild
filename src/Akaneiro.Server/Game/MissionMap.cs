@@ -18,6 +18,10 @@ namespace Akaneiro.Server.Game
         /// <summary>The first mission map ("Wicked Beasts" on Low) is always open.</summary>
         public const int FirstMission = 5111;
 
+        /// <summary>The tutorial ("Welcome, Red Hunter"): every new character is in it; the client
+        /// starts it via TutorialEnterReq without it ever showing on the mission map.</summary>
+        public const int TutorialMission = 5011;
+
         /// <summary>Whether finished maps rest (MissionsThreatCycle). Off: maps are playable again at once.</summary>
         public const bool CooldownsEnabled = false;
 
@@ -26,7 +30,7 @@ namespace Akaneiro.Server.Game
         /// <summary>Mission ids (map + threat) the character may play.</summary>
         public static HashSet<int> Unlocked(CharacterData character, GameData data)
         {
-            var open = new HashSet<int> { FirstMission };
+            var open = new HashSet<int> { FirstMission, TutorialMission };
             foreach (int done in character.CompletedMissions)
             {
                 open.Add(done);
