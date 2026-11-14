@@ -57,7 +57,11 @@ namespace Akaneiro.Server.Net
             finally
             {
                 session.OnDisconnected();
-                _log.LogInformation("Client #{Id} disconnected", connection.Id);
+                // One line naming why the session died: "why did my character roll back?" starts
+                // in this log (superseded, idle timeout, ...).
+                _log.LogInformation("Client #{Id} disconnected: {Reason}{Who}", connection.Id, session.EndReason,
+                    session.AccountKey == null ? "" :
+                    $" (account {session.AccountKey}, character '{session.Character?.Name ?? session.LastCharacterName}')");
             }
         }
     }

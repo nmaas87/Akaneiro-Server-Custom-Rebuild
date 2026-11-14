@@ -74,13 +74,49 @@ namespace Akaneiro.Server.Game
         {
             AccountKey = account;
             World.ClaimAccount(account, this);
+            StartAutoSave();
         }
+
+        private IDisposable _saveTimer;
+
+        /// <summary>
+        /// The crash safety net: saves are event-driven (kill, mission, logout), so a crash between
+        /// two of them loses whatever happened since. Re-write the whole account every
+        /// Akaneiro:AutoSaveSeconds (0 or less turns this off) so the rollback is bounded.
+        /// </summary>
+        private void StartAutoSave()
+        {
+            int seconds = World.Options.AutoSaveSeconds;
+            if (seconds <= 0)
+                return;
+            _saveTimer?.Dispose();
+            _saveTimer = World.Clock.Every(TimeSpan.FromSeconds(seconds), () =>
+            {
+                lock (World.Sync)
+                {
+                    try
+                    {
+                        SaveAccount(); // no-ops for Superseded sessions and before any account load
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogError(ex, "automatic save failed");
+                    }
+                }
+            });
+        }
+
+        /// <summary>Why the connection ended ("connection closed", "idle timeout", "superseded",
+        /// ...); only used for the one-line session summary in the log.</summary>
+        public string EndReason { get; set; } = "connection closed";
 
         /// <summary>End this session's connection (its read loop ends, OnDisconnected runs).</summary>
         public void Disconnect()
         {
             _aiTimer?.Dispose();
             _aiTimer = null;
+            _saveTimer?.Dispose();
+            _saveTimer = null;
             _connection.Close();
         }
 
@@ -325,6 +361,8 @@ namespace Akaneiro.Server.Game
         {
             _aiTimer?.Dispose();
             _aiTimer = null;
+            _saveTimer?.Dispose();
+            _saveTimer = null;
             lock (World.Sync)
             {
                 SaveAccount();
@@ -339,6 +377,7 @@ namespace Akaneiro.Server.Game
         {
             SaveAccount(); // last state of the old session goes to disk first
             Superseded = true;
+            EndReason = "superseded";
             Disconnect();
         }
 

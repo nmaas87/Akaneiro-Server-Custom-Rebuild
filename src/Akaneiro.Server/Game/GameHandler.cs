@@ -108,6 +108,7 @@ namespace Akaneiro.Server.Game
             _s.SaveAccount();
             if (_s.AccountKey != null)
                 _s.World.ReleaseAccount(_s.AccountKey, _s);
+            _s.EndReason = "logged out";
         }
 
         public override void pingRequest() => _s.Send(GameResponses.pingRequestAck());

@@ -59,8 +59,7 @@ namespace Akaneiro.Server.Net
 
                     if (!await ReadExactlyAsync(header, idle.Token))
                     {
-                        if (!ct.IsCancellationRequested)
-                            _log.LogInformation("Connection {Id}: idle for {Timeout}, closing", Id, IdleTimeout);
+                        session.EndReason = ct.IsCancellationRequested ? "server stopping" : "client closed";
                         break;
                     }
 
@@ -68,6 +67,7 @@ namespace Akaneiro.Server.Net
                     short type = BitConverter.ToInt16(header, 4);
                     if (bodySize < 0 || bodySize > MaxBodySize)
                     {
+                        session.EndReason = "invalid frame size";
                         _log.LogWarning("Connection {Id}: invalid body size {Size}, closing", Id, bodySize);
                         break;
                     }
@@ -92,7 +92,18 @@ namespace Akaneiro.Server.Net
                     }
                 }
             }
-            catch (Exception ex) when (ex is IOException || ex is SocketException || ex is OperationCanceledException)
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                // The read got nothing for IdleTimeout: a dead connection (Wi-Fi drop, suspended
+                // machine). Its session would otherwise hold the account against a reconnect.
+                session.EndReason = "idle timeout";
+                _log.LogInformation("Connection {Id}: idle for {Timeout}, closing", Id, IdleTimeout);
+            }
+            catch (OperationCanceledException)
+            {
+                session.EndReason = "server stopping";
+            }
+            catch (Exception ex) when (ex is IOException || ex is SocketException)
             {
                 // connection dropped
             }

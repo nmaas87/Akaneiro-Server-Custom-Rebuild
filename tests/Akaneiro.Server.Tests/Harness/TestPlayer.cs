@@ -45,10 +45,10 @@ public sealed class TestPlayer : IPacketSink, IDisposable
     public SBagGroup Bags { get; private set; }
     public SCharacterInfoBasic Selected { get; private set; }
 
-    public TestPlayer(ITestOutputHelper output = null, int seed = 1, bool webLogin = false)
+    public TestPlayer(ITestOutputHelper output = null, int seed = 1, bool webLogin = false, int autoSaveSeconds = 180)
     {
         _dataDir = Path.Combine(Path.GetTempPath(), "akaneiro-tests", Guid.NewGuid().ToString("N"));
-        World = new World(Options.Create(new ServerOptions { LogPackets = false, WebLogin = webLogin }),
+        World = new World(Options.Create(new ServerOptions { LogPackets = false, WebLogin = webLogin, AutoSaveSeconds = autoSaveSeconds }),
             new AccountStore(_dataDir), TestData.Data, new WebUserStore(_dataDir))
         {
             Clock = Clock,

@@ -182,6 +182,10 @@ ClientAssetsDir (default ../../client-source)
     Where the client's data tables are (the repository's client-source folder).
 LogPackets (default true)
     Logs the name of every message between game and server. Set to false for a quieter log.
+AutoSaveSeconds (default 180)
+    How often every logged-in account is rewritten to disk. Saves normally happen on events (a
+    kill, a finished mission, logout); this is the crash safety net so a crash rolls back at most
+    this many seconds of play. Set to 0 to save only on events.
 
 Relative paths are resolved against src/Akaneiro.Server (the folder "dotnet run" runs the server
 in). Every setting can also be given on the command line, which is handy for trying things out:

@@ -31,6 +31,13 @@ namespace Akaneiro.Server
         public bool LogPackets { get; set; } = true;
 
         /// <summary>
+        /// Write every logged-in account to disk again after this many seconds, so a server crash
+        /// costs at most this much play (saves are already event-driven; this is the safety net).
+        /// 0 or less turns the periodic save off and leaves only the event saves.
+        /// </summary>
+        public int AutoSaveSeconds { get; set; } = 180;
+
+        /// <summary>
         /// Serve the web login of the "client ver" build: POST /client.php?mod=login with email and
         /// password, answered from data/webusers.json. The Steam login does not use this; enabling it
         /// only adds the second login path (see Http/WebLoginService.cs).
