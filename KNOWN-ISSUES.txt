@@ -41,6 +41,13 @@ The game client is used as it is, so these stay:
   account fresh from disk, so the zombie's saves can never roll back progress. A connection that
   died without saying goodbye is dropped by the server itself after 45 seconds without the
   client's 10-second ping.
+- Goto, the rare vendor in the village (right of Cato), answers to nothing when clicked. The
+  shipped client's "rare vendor" click branch is an empty stub - it sends no request and opens
+  no screen (confirmed in the client's own ShopNpc code and in its runtime log). Nothing is
+  lost: Cato's shop already asks the server for both offer lists, and Goto's four rare items
+  are in Cato's list (see the price note under ASSUMPTIONS). The other village NPCs - Cato,
+  Craftsman Resak (crafting), the elder, the trainers, the well, the stash, the bounty board -
+  all open normally in the shipped client.
 
 
 NOT BUILT: THE ORIGINAL ONLINE FEATURES
@@ -105,12 +112,16 @@ server uses these rules. They are the first place to look when something feels o
   and a monster goes for whichever of the two stands closer. Its kills pay you full experience
   and loot. The friend hire reward (what the original gave you when friends hired your character)
   stays empty - there is nobody to hire you.
-  Caveat - client generation: the summon window only exists in the Steam-era client (the one
-  whose source this server's protocol was built from). The 2014-04-16 web build (proto 20140110)
-  ships that feature stubbed out client-side: in its binary the HUD's "add ally" click handler
-  and the friend-ally packet handlers (FriendAllyEnter, GetFriendListResult, SelectFriendAlly-
-  Result) are empty functions, and its HUD never instantiates the summon window at all. Nothing
-  the server sends changes that - on that build there is simply no companion UI to open.
+  Caveat - client generation: no shipped client build actually runs this feature. Both client
+  builds of this era (the 2014-04-16 web build and the Steam build, which is the same
+  proto 20140110 app) compile the whole ally chain into empty stubs: the HUD's "add ally" click
+  handler and the friend-ally packet handlers (FriendAllyEnter, GetFriendListResult,
+  SelectFriendAllyResult) are empty functions, the HUD never registers the ally-info-group
+  template ("+" button), and the old EZGUI summon window is attached to no prefab or scene in
+  any build or in the public-domain project. Nothing the server sends changes that - on the
+  stock clients there is no companion UI at all. A modified client (IL patch of the shipped
+  Assembly-CSharp.dll, or the public-domain client project with the flow implemented) lets the
+  complete server side drive companions normally.
 - Act 8 stays closed. The mission tables still carry the three cut maps of Act 8 ("Knock, Knock",
   "Fire in the Dark", "What Lies Below"), and the chain even unlocks them after beating Act 7's
   "Wicked Beasts" - but the shipped client has no level, no scene XML and no minimap picture for
