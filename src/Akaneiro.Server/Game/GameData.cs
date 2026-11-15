@@ -553,6 +553,11 @@ namespace Akaneiro.Server.Game
         /// <summary>The daily login rewards, day 1, 2, ... (DayReward.reward).</summary>
         public IReadOnlyList<DayRewardRow> DayRewards { get; }
 
+        /// <summary>All four gift tables (DayReward.reward .. reward4). The 2013 client's daily
+        /// window shows one track at a time and picks it via SelectDayRewardNTF; those servers
+        /// handed out every track's gift for the day. DayRewards is the first track.</summary>
+        public IReadOnlyList<IReadOnlyList<DayRewardRow>> DayRewardTracks { get; }
+
         public sealed class DayRewardRow
         {
             public int Day { get; init; }
@@ -927,7 +932,16 @@ namespace Akaneiro.Server.Game
                     CrystalChance = g.First().Int("CrChance"),
                 });
 
-            DayRewards = ReadTable(Path.Combine(tables, "DayReward.reward.EN.txt"))
+            DayRewards = DayRows("DayReward.reward.EN.txt");
+            DayRewardTracks = new[]
+            {
+                DayRewards,
+                DayRows("DayReward.reward2.EN.txt"),
+                DayRows("DayReward.reward3.EN.txt"),
+                DayRows("DayReward.reward4.EN.txt"),
+            };
+
+            IReadOnlyList<DayRewardRow> DayRows(string file) => ReadTable(Path.Combine(tables, file))
                 .Where(r => r.Int("Day") != 0)
                 .Select(r => new DayRewardRow
                 {

@@ -268,6 +268,11 @@ namespace Akaneiro.Server.Game
         /// </summary>
         public override void RequestDayReward()
         {
+            if (_s.Dialect == ClientDialect.Apr2013)
+            {
+                RequestDayReward2013();
+                return;
+            }
             var reward = Proto.New<SDayReward>();
             DateTime now = _s.World.Clock.UtcNow;
             int today = now.Year * 10000 + now.Month * 100 + now.Day;
@@ -308,6 +313,79 @@ namespace Akaneiro.Server.Game
             reward.returnCode = Proto.Error(EServerErrorType.eSuccess);
             _s.Send(GameResponses.RequestDayRewardOK(reward));
             _s.SendMoney();
+        }
+
+        /// <summary>
+        /// The daily gift the 2013-era clients know: pressing Play at the village asks for it, the
+        /// window ("Gifts from the village") shows one of four gift tables (DayReward.reward ..
+        /// reward4, 18 days each - SelectDayRewardNTF picks the track) and the server hands out
+        /// every track's gift for the streak day. The answer's status vector marks the granted day
+        /// (1 = the client lights it), dayID selects the row its "Congratulations" panel prints,
+        /// and an already-claimed day answers eDayRewardError_AlreadyGet - which that client
+        /// swallows and follows with the friend reward instead of a popup.
+        /// </summary>
+        private void RequestDayReward2013()
+        {
+            var reward = Proto.New<SDayReward>();
+            DateTime now = _s.World.Clock.UtcNow;
+            int today = now.Year * 10000 + now.Month * 100 + now.Day;
+            DateTime yesterdayDate = now.AddDays(-1);
+            int yesterday = yesterdayDate.Year * 10000 + yesterdayDate.Month * 100 + yesterdayDate.Day;
+            AccountData account = _s.Account;
+            IReadOnlyList<IReadOnlyList<GameData.DayRewardRow>> tracks = _s.Data.DayRewardTracks;
+
+            if (account == null || _s.Character == null || account.DayRewardLastDate == today
+                || tracks.Count == 0 || tracks[0].Count == 0)
+            {
+                reward.returnCode = _s.Err((int)EServerErrorType.eDayRewardError_AlreadyGet);
+                reward.dayRewardStatusVec = new vectorInt();
+                _s.Send(GameResponses.RequestDayRewardOK(reward));
+                return;
+            }
+
+            account.DayRewardStreak = account.DayRewardLastDate == yesterday
+                ? account.DayRewardStreak % tracks[0].Count + 1 : 1;
+            account.DayRewardLastDate = today;
+            int day = account.DayRewardStreak;
+
+            var status = new vectorInt();
+            for (int d = 1; d <= tracks[0].Count; d++)
+                status.Add(d == day ? 1 : 0);
+
+            bool items = false;
+            foreach (IReadOnlyList<GameData.DayRewardRow> track in tracks)
+            {
+                GameData.DayRewardRow row = track.FirstOrDefault(r => r.Day == day);
+                if (row == null)
+                    continue;
+                switch (row.Type)
+                {
+                    case 1:
+                        account.Karma += row.Count;
+                        break;
+                    case 2:
+                        account.Crystals += row.Count;
+                        break;
+                    default:
+                        if (row.Item != null && _s.Inventory.AddToBag(Clone(row.Item)))
+                            items = true;
+                        else
+                            _s.Log.LogInformation("   bag full, day reward {Item} is lost", row.Name);
+                        break;
+                }
+            }
+            _s.SaveAccount();
+            _s.Log.LogInformation("   2013 daily gift day {Day} across {Tracks} tracks", day, tracks.Count);
+
+            _s.Send(GameResponses.SelectDayRewardNTF((day - 1) % tracks.Count));
+            reward.dayID = day;
+            reward.daytime = new DateTimeOffset(now, TimeSpan.Zero).ToUnixTimeSeconds();
+            reward.dayRewardStatusVec = status;
+            reward.returnCode = Proto.Error(EServerErrorType.eSuccess);
+            _s.Send(GameResponses.RequestDayRewardOK(reward));
+            _s.SendMoney();
+            if (items)
+                _s.Send(GameResponses.SendBagInfo(Views.Bags(_s.Character)));
         }
 
         private static ItemData Clone(ItemData item) => new ItemData

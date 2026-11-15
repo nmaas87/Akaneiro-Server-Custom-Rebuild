@@ -515,6 +515,86 @@ public sealed class Apr2013DialectTests
         Assert.False(player.Has("On_MissionAreaInfoAck"));
     }
 
+    [Fact]
+    public void The2013DailyGiftGrantsAllFourTracksAndMarksTheStreakDay()
+    {
+        // "Gifts from the village": RequestDayReward hands out the streak day of every gift
+        // table (DayReward.reward .. reward4), marks that day (1) in the status vector the
+        // window lights up, rotates the shown track via SelectDayRewardNTF, and answers a
+        // second same-day visit with the already-claimed code the client swallows (107 in the
+        // April build's numbering).
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-daily-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data,
+        };
+        var account = Account();
+        var character = Character();
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = character,
+        };
+
+        apr.HandlePacket(ProtocolGame_SendRequest.RequestDayReward().GetByteStream()[6..]);
+
+        // the granted gift items announce themselves (NotifyItemUpdate) before the window answer;
+        // the window itself is the NTF + OK pair
+        Packet ntf = Reader(recording.Packets.Single(p =>
+            BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_SelectDayRewardNTF));
+        Assert.Equal(0, ntf.ReadInt()); // first streak day shows the first gift table
+        Packet ok = Reader(recording.Packets.Single(p =>
+            BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_RequestDayRewardOK));
+        Assert.Equal(1, ok.ReadInt());  // dayID: streak day one
+        ok.ReadLong();
+        EServerErrorType.Read(ok, out var code);
+        Assert.Equal(0, code.Get());
+        vectorInt.Read(ok, out var status);
+        int days = TestData2013.Data.DayRewardTracks[0].Count;
+        Assert.Equal(days, status.Count);
+        Assert.Equal(1, (int)status[0]);
+        if (days > 1)
+            Assert.Equal(0, (int)status[1]);
+
+        // day one of every track lands on the account: karma, crystals, and the bag
+        int karma = 500, crystals = 12, bag = 1; // the fixture's single item stays
+        foreach (var track in TestData2013.Data.DayRewardTracks)
+        {
+            var row = track.FirstOrDefault(r => r.Day == 1);
+            if (row == null) continue;
+            switch (row.Type)
+            {
+                case 1: karma += row.Count; break;
+                case 2: crystals += row.Count; break;
+                default: if (row.Item != null) bag++; break;
+            }
+        }
+        Assert.Equal(karma, account.Karma);
+        Assert.Equal(crystals, account.Crystals);
+        Assert.Equal(bag, character.Bag.Count);
+
+        // same-day again: no second grant, and the April client's already-claimed code
+        apr.HandlePacket(ProtocolGame_SendRequest.RequestDayReward().GetByteStream()[6..]);
+        Packet again = Reader(recording.Packets.Last(p =>
+            BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_RequestDayRewardOK));
+        again.ReadInt();
+        again.ReadLong();
+        EServerErrorType.Read(again, out var late);
+        Assert.Equal(107, late.Get()); // April's eDayRewardError_AlreadyGet: no popup, straight to the friend reward
+    }
+
+    [Fact]
+    public void BothEraContentSetsCarryFourGiftTracks()
+    {
+        Assert.Equal(4, TestData.Data.DayRewardTracks.Count);
+        Assert.Equal(4, TestData2013.Data.DayRewardTracks.Count);
+        Assert.All(TestData2013.Data.DayRewardTracks, track => Assert.True(track.Count > 0));
+    }
+
     private sealed class RecordingSink : Akaneiro.Server.Net.IPacketSink
     {
         public List<Packet> Packets { get; } = new List<Packet>();
