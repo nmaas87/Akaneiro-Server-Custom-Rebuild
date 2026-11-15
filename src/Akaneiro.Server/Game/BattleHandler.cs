@@ -1235,17 +1235,19 @@ namespace Akaneiro.Server.Game
             // April death menu economics: "Escape Prayer" never reaches the server (the button
             // sends EnterScene itself), "Revival Prayer" (type 1) stands the hunter up where they
             // fell for the karma-shard ladder the 2014 build charges for its karma revive, and
-            // the "Shinigami Scroll" buttons (types 4 and 3) pay with one scroll from the bag or,
-            // when the bag has none, with three crystals.
+            // the "Shinigami Scroll" buttons (types 4 and 3) pay with one scroll charge off the
+            // account's counter - the 2013 model has no scroll items in the bag - or, when the
+            // counter is at zero, with three crystals.
             int cost = type == ReviveWithKarma || (apr && type == ReviveFree)
                 ? _s.Data.RevivalCost(_s.Character.Level, _s.Revivals)
                 : 0;
             const int AprilScrollCrystalCost = 3;
             bool scrollButton = apr ? type == 3 || type == 4 : type == ReviveWithItem;
-            ItemData scroll = scrollButton
+            ItemData scroll = scrollButton && !apr
                 ? _s.Character.Bag.FirstOrDefault(i => i.ItemId == Views.ReviveScrollItem)
                 : null;
-            int crystals = scrollButton && scroll == null && apr ? AprilScrollCrystalCost : 0;
+            bool charge = apr && scrollButton && _s.Account.ReviveCharges > 0;
+            int crystals = scrollButton && apr && !charge ? AprilScrollCrystalCost : 0;
 
             if (cost > 0 && _s.Account.Karma < cost)
             {
@@ -1281,6 +1283,13 @@ namespace Akaneiro.Server.Game
                     Views.ReviveScrollCount(_s.Account));
                 _s.Send(GameResponses.UpdateReviveNum(Views.ReviveScrollCount(_s.Account)));
             }
+            else if (charge)
+            {
+                _s.Account.ReviveCharges--;
+                _s.Log.LogInformation("   spent one Shinigami Scroll charge ({Left} left on the account)",
+                    _s.Account.ReviveCharges);
+                _s.NotifyReviveScrolls();
+            }
 
             _s.Revivals++;
             PlayerStats full = _s.Stats;
@@ -1307,8 +1316,11 @@ namespace Akaneiro.Server.Game
 
             _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eSuccess),
                 Views.Attributes(_s.Character, _s.Data, full)));
+            // The 2013 single-int revive notice feeds GetRevivalKarma: how often the hunter has
+            // already stood up, the column index into RevivalCost.Costs for the next prayer.
+            // (Scroll counts ride UpdateReviveNum / accountInfo.reviveNum instead.)
             if (_s.Dialect == ClientDialect.Apr2013)
-                _s.Send(Apr2013Dialect.PlayerReviveNumNTF2013(Views.ReviveScrollCount(_s.Account)));
+                _s.Send(Apr2013Dialect.PlayerReviveNumNTF2013(_s.Revivals));
             else
                 _s.Send(BattleResponses.PlayerReviveNumNTF(0, _s.Revivals));
         }

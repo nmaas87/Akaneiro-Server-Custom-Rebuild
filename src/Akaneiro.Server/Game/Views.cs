@@ -9,7 +9,7 @@ namespace Akaneiro.Server.Game
     /// <summary>Builds protocol structures from save data.</summary>
     public static class Views
     {
-        public static SAccountInfo AccountInfo(AccountData account)
+        public static SAccountInfo AccountInfo(AccountData account, bool aprilCharges = false)
         {
             var info = Proto.New<SAccountInfo>();
             info.account = account.Account;
@@ -21,7 +21,9 @@ namespace Akaneiro.Server.Game
             info.SK = account.Karma;
             info.FK = account.Crystals;
             info.curCharSlotNum = account.CharSlots;
-            info.reviveNum = ReviveScrollCount(account);
+            // The April client shows this number as its Shinigami Scroll counter; in the 2013
+            // model it is the account's charge number, not a bag count.
+            info.reviveNum = aprilCharges ? account.ReviveCharges : ReviveScrollCount(account);
             return info;
         }
 
@@ -29,13 +31,34 @@ namespace Akaneiro.Server.Game
         public const int ReviveScrollItem = 20103;
 
         /// <summary>
-        /// Revive scrolls lying in the bags of the account's characters. The client shows this
-        /// number on the revive screen ("left revive number", accountInfo.reviveNum and
-        /// On_UpdateReviveNum); a scroll-type revival (eReviveType_Item) consumes one from the
-        /// active character's bag.
+        /// Revive scrolls lying in the bags of the account's characters (the 2014 model). The
+        /// client shows this number on the revive screen ("left revive number", accountInfo.reviveNum
+        /// and On_UpdateReviveNum); a scroll-type revival (eReviveType_Item) consumes one from the
+        /// active character's bag. The 2013 build instead keeps account.ReviveCharges.
         /// </summary>
         public static int ReviveScrollCount(AccountData account) =>
             account.Characters.Sum(c => c.Bag.Where(i => i.ItemId == ReviveScrollItem).Sum(i => i.Count));
+
+        /// <summary>
+        /// Turns 2013-model leftovers - scroll items carried over from 2014-era play - into the
+        /// account's charge number, so the April counter matches what the client can spend.
+        /// Returns whether anything moved.
+        /// </summary>
+        public static bool MigrateAprilScrolls(AccountData account)
+        {
+            int moved = 0;
+            foreach (CharacterData character in account.Characters)
+                for (int i = character.Bag.Count - 1; i >= 0; i--)
+                    if (character.Bag[i].ItemId == ReviveScrollItem)
+                    {
+                        moved += character.Bag[i].Count;
+                        character.Bag.RemoveAt(i);
+                    }
+            if (moved == 0)
+                return false;
+            account.ReviveCharges += moved;
+            return true;
+        }
 
         public static vectorCharacterInfoLogins CharacterList(AccountData account, GameData data)
         {

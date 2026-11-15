@@ -98,7 +98,14 @@ namespace Akaneiro.Server.Game
             _s.ClaimAccount(account);
             _s.Log.LogInformation("   login: account {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
 
-            _s.Send(GameResponses.UserLoginOK(reconnected, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.Data)));
+            // The 2013 model has no scroll items in the bag: carried-over stacks (2014-era play
+            // on this account) become the account's charge number before any of it is shown.
+            if (_s.Dialect == ClientDialect.Apr2013 && Views.MigrateAprilScrolls(_s.Account))
+                _s.SaveAccount();
+
+            _s.Send(GameResponses.UserLoginOK(reconnected,
+                Views.AccountInfo(_s.Account, _s.Dialect == ClientDialect.Apr2013),
+                Views.CharacterList(_s.Account, _s.Data)));
         }
 
         /// <summary>

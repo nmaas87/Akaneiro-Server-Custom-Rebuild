@@ -321,6 +321,16 @@ namespace Akaneiro.Server.Game
         /// </summary>
         public bool AddToBag(ItemData item)
         {
+            // The 2013 model has no scroll items: every scroll that would land in a bag (shop,
+            // mail, day gift, drop) is one charge on the account's counter instead.
+            if (_s.Dialect == ClientDialect.Apr2013 && item.ItemId == Views.ReviveScrollItem)
+            {
+                _s.Account.ReviveCharges += Math.Max(1, item.Count);
+                _s.SaveAccount();
+                _s.NotifyReviveScrolls();
+                return true;
+            }
+
             if (!CanAdd(item))
                 return false;
 

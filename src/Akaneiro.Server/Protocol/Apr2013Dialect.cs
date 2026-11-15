@@ -153,9 +153,10 @@ namespace Akaneiro.Server.Protocol
             return os;
         }
 
-        /// <summary>PlayerReviveNumNTF under the 2013 protocol: a single int, the number of
-        /// Shinigami Scrolls the death panel shows (Revival.RevivalCount). The 2014 twin of
-        /// this packet carries the crystal and karma revive counts instead.</summary>
+        /// <summary>PlayerReviveNumNTF under the 2013 protocol: a single int, how often the
+        /// hunter has already stood up - the client feeds it to GetRevivalKarma as the column
+        /// index into RevivalCost.Costs. The 2014 twin carries the crystal and karma revive
+        /// counts; scroll counts arrive via UpdateReviveNum in both eras.</summary>
         public static Packet PlayerReviveNumNTF2013(int reviveNum)
         {
             Packet os = Begin(ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF);

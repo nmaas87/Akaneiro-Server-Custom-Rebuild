@@ -17,6 +17,14 @@ namespace Akaneiro.Server.Data
 
         /// <summary>When the village well started filling again (unix seconds); 0 = never used.</summary>
         public long WellBeginUnix { get; set; }
+
+        /// <summary>
+        /// Shinigami Scroll charges, the 2013 model's revive money: that client never carries
+        /// scrolls as bag items - its counter (accountInfo.reviveNum / UpdateReviveNum) is an
+        /// account number. A scroll-type revival (types 3/4) spends one. The 2014 model keeps
+        /// scrolls in the bags and leaves this field alone.
+        /// </summary>
+        public int ReviveCharges { get; set; }
         public long CreatedUnix { get; set; }
         public int LastCharacterId { get; set; }
         public List<CharacterData> Characters { get; set; } = new List<CharacterData>();

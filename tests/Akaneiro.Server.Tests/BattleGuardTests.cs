@@ -216,8 +216,9 @@ public sealed class BattleGuardTests
         Assert.Equal(5000 - cost, player.Session.Account.Karma);
         Assert.Equal(100, player.Session.Account.Crystals);
 
-        // And the 2013-shaped scroll count notice (one int, scrolls on the account): the 2014
-        // harness receiver can't decode it, so it waits in the raw bin.
+        // And the 2013-shaped revive-count notice (one int: how often the hunter has stood up,
+        // the karma ladder's column index): the 2014 harness receiver can't decode it, so it
+        // waits in the raw bin.
         byte[] ntf = Assert.Single(player.RawPackets((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF));
         Assert.Equal(8, ntf.Length); // method id + exactly one payload int
     }
@@ -230,7 +231,7 @@ public sealed class BattleGuardTests
         player.Session.Account.Crystals = 10;
         player.ClearInbox();
 
-        // No scroll in any bag: the April scroll button still revives. Crystals are the
+        // The counter is at zero: the April scroll button still revives. Crystals are the
         // real-money currency, waived on this server for every era (like the modern crystal
         // revival and the shop's crystal-priced goods), so the balance is neither checked nor
         // spent - "unlimited crystals", exactly the full client's feel.
@@ -242,19 +243,22 @@ public sealed class BattleGuardTests
     }
 
     [Fact]
-    public void TheAprilShinigamiScrollButtonSpendsTheScroll()
+    public void TheAprilShinigamiScrollButtonSpendsTheCharge()
     {
         using var player = DieNextToMonsters();
         player.Session.Dialect = ClientDialect.Apr2013;
-        Give(player, ReviveScroll, 0, count: 1);
+        player.Session.Account.ReviveCharges = 1; // the 2013 model: a number, never a bag item
         player.ClearInbox();
 
-        // Both scroll buttons (the build sends 4 and 3) pay with the bag's Shinigami Scroll.
+        // Both scroll buttons (the build sends 4 and 3) pay with one charge off the account's
+        // counter, and the client's counter text follows with the UpdateReviveNum push.
         player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(4)));
 
         Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
         Assert.False(player.Session.IsDead);
-        Assert.Equal(0, player.Character.Bag.Count(i => i.ItemId == ReviveScroll));
+        Assert.Equal(0, player.Session.Account.ReviveCharges);
+        Assert.Equal(0, player.Take("On_UpdateReviveNum").Arg<int>(0));
+        Assert.DoesNotContain(player.Character.Bag, i => i.ItemId == ReviveScroll);
     }
 
     [Fact]

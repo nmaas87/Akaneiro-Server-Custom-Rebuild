@@ -771,11 +771,11 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
-    public void BoughtShinigamiScrollsLandInTheDeathPanelCounter()
+    public void BoughtShinigamiScrollsAreAccountChargesNotBagItems()
     {
-        // The panel's scroll count is not recomputed from the bag - the client only mirrors the
-        // pushes - so buying (or looting/mailing) scrolls must re-push the 2013 PlayerReviveNumNTF,
-        // whose single int is the account-wide scroll number.
+        // The 2013 build never carries scrolls: its counter (accountInfo.reviveNum at login,
+        // On_UpdateReviveNum afterwards) is an account number. Buying scrolls moves the number,
+        // the bag stays clean.
         string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-scrollcount-" + Guid.NewGuid().ToString("N"));
         var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
             new AccountStore(dir), TestData.Data, new WebUserStore(dir),
@@ -785,7 +785,7 @@ public sealed class Apr2013DialectTests
         };
         var account = Account();
         var character = Character();
-        account.Characters.Add(character); // the scroll count is the account-wide sum over its characters
+        account.Characters.Add(character);
         var recording = new RecordingSink();
         var apr = new Session(world, recording, NullLogger.Instance)
         {
@@ -797,20 +797,21 @@ public sealed class Apr2013DialectTests
         // Two scrolls from the elder's shop (its crystal price is waived on this server).
         apr.HandlePacket(ProtocolGame_SendRequest.BuyConsumeItem(2, 20103, 2).GetByteStream()[6..]);
 
+        Assert.Equal(2, account.ReviveCharges);
+        Assert.DoesNotContain(character.Bag, i => i.ItemId == 20103);
         var counts = recording.Packets
-            .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF)
+            .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_UpdateReviveNum)
             .Select(p => BitConverter.ToInt32(p.GetByteStream(), 10))
             .ToList();
         Assert.Equal(new[] { 2 }, counts);
-        Assert.Equal(2, character.Bag.Where(i => i.ItemId == 20103).Sum(i => i.Count));
 
-        // And spending one pulls the panel's number back down the same way.
-        apr.Inventory.Consume(Views.BagBase, character.Bag.Single(i => i.ItemId == 20103 && i.Count == 2));
-        var after = recording.Packets
-            .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF)
-            .Select(p => BitConverter.ToInt32(p.GetByteStream(), 10))
-            .ToList();
-        Assert.Equal(new[] { 2, 1 }, after);
+        // Scrolls a character still carries from 2014-era play become charges on April login,
+        // and the migration is idempotent.
+        character.Bag.Add(new ItemData { Slot = 1, ItemId = 20103, Count = 3 });
+        Assert.True(Views.MigrateAprilScrolls(account));
+        Assert.Equal(5, account.ReviveCharges);
+        Assert.DoesNotContain(character.Bag, i => i.ItemId == 20103);
+        Assert.False(Views.MigrateAprilScrolls(account));
     }
 
     [Fact]
@@ -842,10 +843,11 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
-    public void The2013ReviveNumPacketCarriesASingleScrollCount()
+    public void The2013ReviveNumPacketCarriesASingleLadderIndex()
     {
-        // The 2014 PlayerReviveNumNTF carries two counters (crystal/karma revivals); the
-        // April build reads one int - its death panel's Shinigami Scroll count.
+        // The 2014 PlayerReviveNumNTF carries two counters (crystal/karma revivals); the April
+        // build reads one int - how often the hunter has already stood up, which GetRevivalKarma
+        // uses as the column index into RevivalCost.Costs.
         Packet p = Apr2013Dialect.PlayerReviveNumNTF2013(7);
         byte[] bytes = p.GetByteStream();
         Assert.Equal((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF, BitConverter.ToInt32(bytes, 6));

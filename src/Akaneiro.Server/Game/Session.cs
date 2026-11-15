@@ -389,14 +389,14 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
-        /// Re-push the death panel's Shinigami Scroll count (the whole account's scrolls). The
-        /// April panel keeps its own scroll slot and only learns the number through this push;
-        /// login and revival already send it, item flows call this for the April dialect.
+        /// Re-push the client's Shinigami Scroll counter (On_UpdateReviveNum: HUD number and
+        /// revive panel label). The 2013 model counts account charges; the 2014 model counts
+        /// bag items and already gets its push from the revive path, so this stays April-only.
         /// </summary>
         public void NotifyReviveScrolls()
         {
             if (Dialect == ClientDialect.Apr2013)
-                Send(Apr2013Dialect.PlayerReviveNumNTF2013(Views.ReviveScrollCount(Account)));
+                Send(GameResponses.UpdateReviveNum(Account.ReviveCharges));
         }
 
         public void OnDisconnected()
