@@ -595,6 +595,17 @@ public sealed class Apr2013DialectTests
         Assert.All(TestData2013.Data.DayRewardTracks, track => Assert.True(track.Count > 0));
     }
 
+    [Fact]
+    public void The2013TutorialMapCarriesEnoughKillsForTheDoorMilestones()
+    {
+        // The April client opens the village doors at tutorial kill milestones 2, 11 and 22
+        // (TutorialLogic.UpdateTutrialLogicByHunt); the 2014 layout only spawns 17.
+        static int Kills(GameData data) =>
+            data.Spawners["Hub_Village_Tutorial"].Sum(sp => sp.Groups.Sum(g => g.Count));
+        Assert.True(Kills(TestData2013.Data) >= 22, $"April tutorial spawns {Kills(TestData2013.Data)} monsters");
+        Assert.Equal(17, Kills(TestData.Data)); // the fork widened only the April table
+    }
+
     private sealed class RecordingSink : Akaneiro.Server.Net.IPacketSink
     {
         public List<Packet> Packets { get; } = new List<Packet>();
