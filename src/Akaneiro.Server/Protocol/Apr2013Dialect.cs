@@ -337,13 +337,21 @@ namespace Akaneiro.Server.Protocol
             vectorSAcceptMissionRelate list = new vectorSAcceptMissionRelate();
             vectorSAcceptMissionRelate.Read(ins, out list);
 
-            // ids move to the 2013 family; the fourth mission of a region did not exist in 2013
+            // ids move to the 2013 family; the fourth mission of a region did not exist in 2013.
+            // The tutorial never appears on the April bounty map (its client opens the tutorial
+            // through the village NPC via TutorialEnterReq), and an id of the 0-region breaks the
+            // panel's slot math (id % 100 / 10 - 1 = -1), which leaves the region's slots unfilled.
             var kept = new List<SAcceptMissionRelate2>();
             foreach (SAcceptMissionRelate2 m in list)
             {
-                m.missionID = ToClientMissionId(m.missionID);
-                if (m.missionID != 0)
+                if (m.missionID / 100 % 10 == 0)
+                    continue;
+                int client = ToClientMissionId(m.missionID);
+                if (client != 0)
+                {
+                    m.missionID = client;
                     kept.Add(m);
+                }
             }
 
             Packet os = Begin(ProtocolGame_METHOD.uMethodID_MissionListAck);

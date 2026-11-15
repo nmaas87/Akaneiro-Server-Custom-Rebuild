@@ -62,6 +62,10 @@ namespace Akaneiro.Server.Data
         /// <summary>Missions the character has finished, by mission id.</summary>
         public List<int> CompletedMissions { get; set; } = new List<int>();
 
+        /// <summary>Mission areas bought with karma by the 2013-era clients (unLockAreaReq);
+        /// the 2014 progression never fills this (it chains maps through completed missions).</summary>
+        public List<int> UnlockedAreas { get; set; } = new List<int>();
+
         /// <summary>Experience of each spirit kind (PetPrice id / 100), kept across rentals.</summary>
         public Dictionary<int, ulong> SpiritExp { get; set; } = new Dictionary<int, ulong>();
 

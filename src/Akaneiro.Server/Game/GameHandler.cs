@@ -630,8 +630,12 @@ namespace Akaneiro.Server.Game
                 {
                     int areaId = _s.Dialect == ClientDialect.Apr2013
                         ? Apr2013Dialect.ToClientAreaId(m.missionID) : m.missionID;
+                    // the tutorial's area (5000) has no region icon on the April world map;
+                    // the January client's push keeps its entries untouched
+                    if (_s.Dialect == ClientDialect.Apr2013 && areaId / 100 % 10 == 0)
+                        continue;
                     if (seen.Add(areaId))
-                        areas.Add(new SMissionAreaRelate { areaID = areaId, isBuy = false });
+                        areas.Add(new SMissionAreaRelate { areaID = areaId, isBuy = _s.Character.UnlockedAreas.Contains(areaId) });
                 }
                 _s.Send(GameResponses.MissionListAck(list));
                 _s.Send(GameResponses.MissionAreaInfoAck(areas));
@@ -640,6 +644,50 @@ namespace Akaneiro.Server.Game
             {
                 _s.Send(GameResponses.MissionListAck(list));
             }
+        }
+
+        /// <summary>
+        /// The 2013-era clients buy whole mission regions with karma on the bounty map
+        /// ("Jawbone Ravine - Unlock 50 shards", MissionArea.Area: IsFree / Buykarma); the 2014
+        /// client gates regions through mission chains instead and never sends this. The ack is
+        /// (areaID, error): the client only lights the region icon up on eSuccess, and
+        /// eMission_have_buy_area (119) / eMission_not_enough_badge (118, the karma shortage code)
+        /// pop up a message.
+        /// </summary>
+        public override void unLockAreaReq(int areaID)
+        {
+            if (_s.Character == null || _s.Account == null)
+                return;
+
+            if (!_s.Data.MissionAreas.TryGetValue(areaID, out GameData.AreaRow area))
+            {
+                _s.Log.LogWarning("   unlock area {Area}: not in the area table", areaID);
+                _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(115))); // eMission_Not_exist
+                return;
+            }
+
+            if (_s.Character.UnlockedAreas.Contains(areaID))
+            {
+                _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(EServerErrorType.eSuccess)));
+                return;
+            }
+
+            if (!area.IsFree && _s.Account.Karma < area.BuyKarma)
+            {
+                _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(118))); // not enough karma
+                _s.SendMoney();
+                return;
+            }
+
+            int cost = area.IsFree ? 0 : area.BuyKarma;
+            _s.Account.Karma -= cost;
+            _s.Character.UnlockedAreas.Add(areaID);
+            _s.SaveAccount();
+            _s.Log.LogInformation("   area {Area} unlocked for {Cost} karma", areaID, cost);
+            _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(EServerErrorType.eSuccess)));
+            _s.SendMoney();
+            // the fresh list + area push lights the region up without another panel open
+            MissionListReq();
         }
 
         /// <summary>Objectives the client reports itself: reaching a place or talking to an NPC.</summary>

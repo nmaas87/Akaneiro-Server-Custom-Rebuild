@@ -20,6 +20,19 @@ public sealed class MissionMapTests
     }
 
     [Fact]
+    public void BuyingARegionOpensItsWholeMap()
+    {
+        // the 2013-era clients buy a whole region with karma (unLockAreaReq, area 5200 = act 2)
+        var hunter = new CharacterData { UnlockedAreas = { 5200 } };
+
+        var open = MissionMap.Unlocked(hunter, TestData.Data);
+
+        Assert.Contains(5211, open); // Jawbone Ravine
+        Assert.Contains(5214, open); // and its threats, the region opens as a whole
+        Assert.DoesNotContain(5311, open); // act 3 stays closed
+    }
+
+    [Fact]
     public void FinishingAMissionOpensTheNextMapAndThreat()
     {
         var hunter = new CharacterData { CompletedMissions = { 5111 } };

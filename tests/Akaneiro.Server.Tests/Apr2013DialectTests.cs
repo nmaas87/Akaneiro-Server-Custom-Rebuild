@@ -6,6 +6,7 @@ using Akaneiro.Server.Game;
 using Akaneiro.Server.Protocol;
 using Akaneiro.Server.Tests.Harness;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -363,16 +364,19 @@ public sealed class Apr2013DialectTests
         Assert.True(count > 0);
         for (int i = 0; i < count; i++)
         {
-            ids.Add(list.ReadInt()); // the map in the 2013 table family (101 tutorial, 111 area 1)
+            ids.Add(list.ReadInt()); // the area 1 map in the 2013 table family (111); the tutorial is not listed
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
             // completed, triggered, star, lastPassTime, canAcceptMaxLvl - the April entry,
             // no coolDownTime after the id and no lastPassLvl at the end
         }
-        Assert.All(ids, id => Assert.InRange(id, 101, 183));
+        // the tutorial entry is dropped: its id family (0-region) breaks the panel's slot math
+        // (id % 100 / 10 - 1 = -1) and leaves the bounty panel's mission slots dead
+        Assert.DoesNotContain(101, ids);
+        Assert.All(ids, id => Assert.InRange(id, 111, 183));
 
-        // the push addresses whole areas (tutorial 5000, area n -> 5000 + n * 100); maps of one
-        // region collapse into a single entry, and isBuy marks karma-bought areas (unlocked is
-        // unlocked either way)
+        // the push addresses whole areas (area n -> 5000 + n * 100); maps of one region collapse
+        // into a single entry, and isBuy marks karma-bought areas (unlocked is unlocked either
+        // way); the tutorial's area has no region icon on the April map and is not pushed
         Packet areas = Reader(recording.Packets[1]);
         var areaIds = new List<int>();
         int areaCount = areas.ReadInt();
@@ -382,7 +386,101 @@ public sealed class Apr2013DialectTests
             areas.ReadBool();
         }
         Assert.Equal(ids.Select(id => 5000 + id / 10 % 10 * 100).Distinct(), areaIds);
-        Assert.Contains(5000, areaIds); // the tutorial map's area is on the list for a fresh hunter
+        Assert.DoesNotContain(5000, areaIds); // no tutorial area on the 2013 bounty map
+    }
+
+    [Fact]
+    public void A2013ClientBuysARegionWithKarmaAndItOpens()
+    {
+        // "Jawbone Ravine - Unlock 50 shards" (April MissionArea.Area: 5200 costs 50 karma, not
+        // free). The client sends unLockAreaReq(areaID); the ack is (areaID, error) and only
+        // eSuccess lights the region icon up. The refreshed list/push then carry the open region
+        // in the client's own id families: mission 121, area 5200 marked bought.
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-unlock-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data,
+        };
+        var account = Account(); // 500 karma
+        var character = Character();
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = character,
+        };
+
+        apr.HandlePacket(ProtocolGame_SendRequest.unLockAreaReq(5200).GetByteStream()[6..]);
+
+        // the handler answers: ack, money bar, refreshed list, refreshed area push
+        Packet ack = Reader(recording.Packets[0]);
+        Assert.Equal(5200, ack.ReadInt());
+        Assert.Equal(0, ack.ReadInt()); // eSuccess
+        Assert.Equal(450, account.Karma); // the table's 50 shards
+        Assert.Equal(new[] { 5200 }, character.UnlockedAreas);
+
+        var ids = new List<int>();
+        Packet list = Reader(recording.Packets[2]);
+        int count = list.ReadInt();
+        for (int i = 0; i < count; i++)
+        {
+            ids.Add(list.ReadInt());
+            list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
+        }
+        Assert.Contains(111, ids); // act 1, still there
+        Assert.Contains(121, ids); // act 2 opened by the purchase
+
+        Packet areas = Reader(recording.Packets[3]);
+        var bought = new Dictionary<int, bool>();
+        int areaCount = areas.ReadInt();
+        for (int i = 0; i < areaCount; i++)
+        {
+            int areaId = areas.ReadInt();
+            bought[areaId] = areas.ReadBool();
+        }
+        Assert.Equal(new[] { 5100, 5200 }, bought.Keys.OrderBy(id => id));
+        Assert.True(bought[5200]); // flagged as karma-bought
+
+        // asking again charges nothing and the area stays owned once (already-owned ack, no resend)
+        apr.HandlePacket(ProtocolGame_SendRequest.unLockAreaReq(5200).GetByteStream()[6..]);
+        Packet again = Reader(recording.Packets[^1]);
+        Assert.Equal(5200, again.ReadInt());
+        Assert.Equal(0, again.ReadInt());
+        Assert.Equal(450, account.Karma);
+        Assert.Equal(new[] { 5200 }, character.UnlockedAreas);
+    }
+
+    [Fact]
+    public void A2013ClientWithoutKarmaGetsTheShortfallAck()
+    {
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-poor-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data,
+        };
+        var account = Account();
+        account.Karma = 49; // one shard under the 50 Jawbone costs
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = Character(),
+        };
+
+        apr.HandlePacket(ProtocolGame_SendRequest.unLockAreaReq(5200).GetByteStream()[6..]);
+
+        Packet ack = Reader(recording.Packets[0]);
+        Assert.Equal(5200, ack.ReadInt());
+        Assert.Equal(118, ack.ReadInt()); // eMission_not_enough_badge: the karma-shortfall code
+        Assert.Equal(49, account.Karma);
+        Assert.Empty(recording.Packets.Where(p => p.GetByteStream().Length > 0
+                                                  && BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_MissionAreaInfoAck));
     }
 
     [Fact]

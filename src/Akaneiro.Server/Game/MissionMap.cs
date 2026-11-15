@@ -45,6 +45,17 @@ namespace Akaneiro.Server.Game
                 if (done % 10 is >= 1 and < 4)
                     open.Add(done + 1);
             }
+            // The 2013-era clients buy whole regions with karma (unLockAreaReq); owning a region
+            // opens every mission in it. (2014 characters never own areas, so this is a no-op there.)
+            foreach (int area in character.UnlockedAreas)
+            {
+                int region = area / 100 % 10;
+                if (region < 1)
+                    continue;
+                foreach (int id in data.Missions.Keys)
+                    if (id / 100 % 10 == region)
+                        open.Add(id);
+            }
             // A map that is open at all is open on Low.
             foreach (int id in open.ToList())
                 open.Add(BaseId(id) + 1);

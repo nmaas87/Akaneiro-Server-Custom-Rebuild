@@ -382,6 +382,18 @@ namespace Akaneiro.Server.Game
         /// <summary>The three abilities a character starts with, by discipline (character "style").</summary>
         public IReadOnlyDictionary<int, IReadOnlyList<int>> StartAbilities { get; }
 
+        /// <summary>One row of MissionArea.Area: a whole mission region and what it costs to open.</summary>
+        public sealed class AreaRow
+        {
+            public int AreaId;
+            public bool IsFree;
+            public int BuyKarma;
+            public int LevelCap;
+        }
+
+        /// <summary>Mission regions by area id (5100 = act 1 ... 5800 = act 8, 5000 = tutorial).</summary>
+        public IReadOnlyDictionary<int, AreaRow> MissionAreas { get; }
+
         /// <summary>All abilities by id (client table Ability.Ability).</summary>
         public IReadOnlyDictionary<int, AbilityRow> Abilities { get; }
 
@@ -721,6 +733,20 @@ namespace Akaneiro.Server.Game
                     starts[style] = new[] { row.Int("Ability1"), row.Int("Ability2"), row.Int("Ability3") };
             }
             StartAbilities = starts;
+
+            // MissionArea.Area: the 2013-era clients gate whole regions behind karma purchases
+            // ("Jawbone Ravine - Unlock 50 shards"). The 2014 client's copy of the table is empty
+            // (that progression runs on mission chains), so the dictionary simply stays empty there.
+            MissionAreas = ReadTable(Path.Combine(tables, "MissionArea.Area.EN.txt"))
+                .Where(r => r.Int("AreaID") > 0)
+                .Select(r => new AreaRow
+                {
+                    AreaId = r.Int("AreaID"),
+                    IsFree = r.Int("IsFree") != 0,
+                    BuyKarma = r.Int("Buykarma"),
+                    LevelCap = r.Int("UnlockPlayerMaxLvl"),
+                })
+                .ToDictionary(a => a.AreaId);
 
             Abilities = ReadTable(Path.Combine(tables, "Ability.Ability.EN.txt"))
                 .Where(r => r.Int("ID") != 0)
