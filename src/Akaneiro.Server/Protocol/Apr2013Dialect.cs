@@ -344,15 +344,17 @@ namespace Akaneiro.Server.Protocol
             vectorSAcceptMissionRelate list = new vectorSAcceptMissionRelate();
             vectorSAcceptMissionRelate.Read(ins, out list);
 
-            // The entries keep the server's map ids (the panel's region/slot math works on them);
-            // only the field list is April's (no coolDownTime after the id, no lastPassLvl).
-            // The tutorial map is dropped (it never shows on the bounty map; the client opens it
-            // through the village NPC) as is the each region's fourth mission (arrived in 2014).
+            // The entries are the server's own ids (the panel's math runs on them) but written
+            // with April's field list (no coolDownTime after the id, no lastPassLvl). Slots are
+            // armed by MissionLevelToID, which searches each map's THREAT-1 id (5111, never the
+            // 5110 map base the 2014 client uses), so the base moves up one. The tutorial map is
+            // dropped (the village NPC starts it) as is each region's fourth mission (2014-only).
             var kept = new List<SAcceptMissionRelate2>();
             foreach (SAcceptMissionRelate2 m in list)
             {
                 if (m.missionID / 100 % 10 == 0 || m.missionID % 100 / 10 == 4)
                     continue;
+                m.missionID += 1;
                 kept.Add(m);
             }
 

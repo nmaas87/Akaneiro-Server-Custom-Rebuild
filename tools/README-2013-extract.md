@@ -49,5 +49,6 @@ type-tree-less player files `Win/Akaneiro_Data/*` (only read by the report comma
   Assembly-CSharp, accepted only on exact end-of-object match) and prints the world-map RegionIDs
   and the per-area mission id rows. Findings: 8 regions with RegionID 5100..5800 (the tutorial
   area 5000 and testbox 6000 have no world-map region), and the `_UI_CS_RegionLevel` MissionID
-  arrays serialize as zeros - the UI filled them at runtime from the MissionDescription table,
-  so mission ids exist only there (111..183 plus 999), not in scene prefabs.
+  arrays serialize as zeros - `MissionMaster.MissionLevelToID` arms them at runtime from the
+  server's mission list, matching each map's THREAT-1 id (5111, not the 2014 client's 5110 map
+  base); the table rows (111..183 plus 999) only feed names and descriptions.

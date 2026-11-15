@@ -169,16 +169,16 @@ public sealed class Apr2013DialectTests
     {
         var list = new vectorSAcceptMissionRelate
         {
-            new SAcceptMissionRelate2 { missionID = 5111, coolDownTime = 99, IsHaveCompleted = 1,
+            new SAcceptMissionRelate2 { missionID = 5110, coolDownTime = 99, IsHaveCompleted = 1,
                 IsHaveTriggered = true, star = 2, lastPassTime = 7, canAcceptMaxLvl = 10, lastPassLvl = 6 },
-            new SAcceptMissionRelate2 { missionID = 5121, coolDownTime = 5, lastPassLvl = 3 },
+            new SAcceptMissionRelate2 { missionID = 5120, coolDownTime = 5, lastPassLvl = 3 },
         };
         Packet cs = GameResponses.MissionListAck(list);
         Packet apr = Translated(cs);
 
         Packet ins = Reader(apr);
         Assert.Equal(2, ins.ReadInt());
-        Assert.Equal(5111, ins.ReadInt()); // the server's own id: the client's region/slot math runs on it
+        Assert.Equal(5111, ins.ReadInt()); // threat-1 id: the client arms its slots by matching these
         Assert.Equal(1, ins.ReadInt());   // IsHaveCompleted right after the id: coolDownTime is gone
         Assert.True(ins.ReadBool());
         Assert.Equal(2, ins.ReadInt());
@@ -201,7 +201,7 @@ public sealed class Apr2013DialectTests
         };
         Packet ins = Reader(Translated(GameResponses.MissionListAck(list)));
         Assert.Equal(1, ins.ReadInt());
-        Assert.Equal(5110, ins.ReadInt());
+        Assert.Equal(5111, ins.ReadInt()); // written as the threat-1 id the client's lookup expects
     }
 
     [Fact]
@@ -387,15 +387,15 @@ public sealed class Apr2013DialectTests
         Assert.True(count > 0);
         for (int i = 0; i < count; i++)
         {
-            ids.Add(list.ReadInt()); // the server's map base for act 1 (5110); the tutorial is not listed
+            ids.Add(list.ReadInt()); // threat-1 id of the act 1 map (5111); the tutorial is not listed
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
             // completed, triggered, star, lastPassTime, canAcceptMaxLvl - the April entry,
             // no coolDownTime after the id and no lastPassLvl at the end
         }
-        // the client's region math (missionID / 100 % 10) runs on these ids, and the tutorial
-        // (0-region) is dropped: it never shows on the bounty map
+        // the client arms its mission slots by matching these ids (MissionLevelToID searches the
+        // threat-1 variant) and opens regions by id / 100 % 10; the tutorial (0-region) is dropped
         Assert.DoesNotContain(5010, ids);
-        Assert.All(ids, id => Assert.InRange(id, 5110, 5840));
+        Assert.All(ids, id => Assert.InRange(id, 5111, 5843));
 
         // the push addresses whole areas (area n -> 5000 + n * 100); maps of one region collapse
         // into a single entry, and isBuy marks karma-bought areas (unlocked is unlocked either
@@ -453,8 +453,8 @@ public sealed class Apr2013DialectTests
             ids.Add(list.ReadInt());
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
         }
-        Assert.Contains(5110, ids); // act 1, still there
-        Assert.Contains(5210, ids); // act 2 opened by the purchase
+        Assert.Contains(5111, ids); // act 1, still there
+        Assert.Contains(5211, ids); // act 2 opened by the purchase
 
         Packet areas = Reader(recording.Packets[3]);
         var bought = new Dictionary<int, bool>();
