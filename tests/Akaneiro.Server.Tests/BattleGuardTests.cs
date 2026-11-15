@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
+using Akaneiro.Server.Protocol;
 using Akaneiro.Server.Tests.Harness;
 using Xunit.Abstractions;
 
@@ -194,6 +195,38 @@ public sealed class BattleGuardTests
         Assert.False(player.Session.IsDead);
         Assert.Equal(1, player.Character.Bag.Single(i => i.ItemId == ReviveScroll).Count);
         Assert.Equal(1, player.Take("On_UpdateReviveNum").Arg<int>(0)); // one scroll left on the account
+    }
+
+    [Fact]
+    public void TheAprilRevivalPrayerCostsOneShard()
+    {
+        using var player = DieNextToMonsters();
+        player.Session.Dialect = ClientDialect.Apr2013;
+        player.Session.Account.Crystals = 5;
+        player.ClearInbox();
+
+        // The April menu's middle option: stand up where you fell, one crystal (shard) gone.
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+
+        Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
+        Assert.False(player.Session.IsDead);
+        Assert.Equal(4, player.Session.Account.Crystals);
+    }
+
+    [Fact]
+    public void TheAprilShinigamiScrollButtonSpendsTheScroll()
+    {
+        using var player = DieNextToMonsters();
+        player.Session.Dialect = ClientDialect.Apr2013;
+        Give(player, ReviveScroll, 0, count: 1);
+        player.ClearInbox();
+
+        // Both scroll buttons (the build sends 4 and 3) pay with the bag's Shinigami Scroll.
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(4)));
+
+        Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
+        Assert.False(player.Session.IsDead);
+        Assert.Equal(0, player.Character.Bag.Count(i => i.ItemId == ReviveScroll));
     }
 
     [Fact]

@@ -1225,7 +1225,21 @@ namespace Akaneiro.Server.Game
                 return;
 
             int type = reviveType.Get();
+            bool apr = _s.Dialect == ClientDialect.Apr2013;
             int cost = type == ReviveWithKarma ? _s.Data.RevivalCost(_s.Character.Level, _s.Revivals) : 0;
+
+            // The April menu: "Escape Prayer" is a plain scene exit (the client sends EnterScene
+            // itself, no revive at all), "Revival Prayer" (type 1) stands up the hunter where they
+            // fell for one crystal (the 2013 build called them shards), and "Shinigami Scroll"
+            // pays with the same-named item out of the bag (its two buttons send 4 and 3).
+            int crystals = apr && type == ReviveFree ? 1 : 0;
+
+            if (crystals > 0 && _s.Account.Crystals < crystals)
+            {
+                _s.Log.LogInformation("   revival refused: {Cost} crystals needed, {Have} available", crystals, _s.Account.Crystals);
+                _s.Send(BattleResponses.ReviveResult(reviveType, _s.Err((int)EServerErrorType.eGS_LessMoney_karma), new vectorAttrChange()));
+                return;
+            }
 
             if (type == ReviveWithKarma && _s.Account.Karma < cost)
             {
@@ -1235,11 +1249,12 @@ namespace Akaneiro.Server.Game
             }
 
             // A scroll revival pays with a Shinigami Scroll out of the bag; without one it fails,
-            // like it did on the original (eGS_LessReviveItem).
-            ItemData scroll = type == ReviveWithItem
+            // like it did on the original (eGS_LessReviveItem). The April client only lights that
+            // button when it sees a scroll, but the server still checks its own books.
+            ItemData scroll = type == ReviveWithItem || (apr && type == 4)
                 ? _s.Character.Bag.FirstOrDefault(i => i.ItemId == Views.ReviveScrollItem)
                 : null;
-            if (type == ReviveWithItem && scroll == null)
+            if ((type == ReviveWithItem || (apr && type == 4)) && scroll == null)
             {
                 _s.Log.LogInformation("   revival refused: no Shinigami Scroll in the bag");
                 _s.Send(BattleResponses.ReviveResult(reviveType, _s.Err((int)EServerErrorType.eGS_LessReviveItem), new vectorAttrChange()));
@@ -1251,7 +1266,13 @@ namespace Akaneiro.Server.Game
                 _s.Account.Karma -= cost;
                 _s.SendMoney();
             }
-            // Crystal revivals cost the real-money currency, which is free on this server.
+            if (crystals > 0)
+            {
+                _s.Account.Crystals -= crystals; // the April Revival Prayer: one shard
+                _s.SendMoney();
+            }
+            // Modern crystal revivals (type 2) cost the real-money currency, which is free on
+            // this server.
 
             if (scroll != null)
             {

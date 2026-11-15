@@ -644,7 +644,14 @@ namespace Akaneiro.Server.Game
                 result.skillEffectVec.Add(effect);
             }
 
-            _s.Send(BattleResponses.UseNormalAttackResult(false, result));
+            // The April 2013 client never routes monster swings through UseNormalAttackResult -
+            // its CS_SceneInfo.AttackPlayer is an empty stub, so a hit sent that way animates but
+            // never bites. Its live damage path is UseFightSkillResult: the monster's own ability
+            // state (On_UseFightSkillResult -> NpcBase.abilityManager) consumes the result and
+            // applies the ATTR_CurHP change to the targeted player.
+            _s.Send(_s.Dialect == Protocol.ClientDialect.Apr2013
+                ? BattleResponses.UseFightSkillResult(result)
+                : BattleResponses.UseNormalAttackResult(false, result));
 
             if (allyTarget != null)
             {

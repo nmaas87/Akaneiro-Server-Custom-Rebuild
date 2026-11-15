@@ -1,4 +1,5 @@
 using Akaneiro.Server.Game;
+using Akaneiro.Server.Protocol;
 using Akaneiro.Server.Tests.Harness;
 using Xunit.Abstractions;
 
@@ -33,6 +34,27 @@ public sealed class MonsterAiTests
         player.Take("On_UpdateAnimationNotify", m => m.Arg<int>(0) == monster.objectID && m.Arg<short>(2) == AniChase);
         var attack = player.Take("On_UseNormalAttackResult", m => FromMonster(m, monster.objectID)).Arg<SUseSkillResult>(1);
         Assert.Equal(1, attack.destObejctID);
+    }
+
+    [Fact]
+    public void TheAprilBuildTakesMonsterSwingsAsFightSkillResults()
+    {
+        var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Session.Dialect = ClientDialect.Apr2013;
+        player.EnterTutorial();
+        var monster = player.AnnouncedMonsters()[0];
+        player.MoveTo(monster.pos);
+        player.Wait(3);
+
+        // CS_SceneInfo.AttackPlayer is an empty stub in the April build: a monster swing sent as
+        // a normal attack result animates but never bites. Its live damage path is
+        // UseFightSkillResult, which the monster's own ability state consumes and applies.
+        Assert.False(player.Has("On_UseNormalAttackResult", m => FromMonster(m, monster.objectID)),
+            "the April session still got the 2014 packet shape");
+        var hit = player.Take("On_UseFightSkillResult",
+            m => m.Arg<SUseSkillResult>(0).sourceObjectID == monster.objectID).Arg<SUseSkillResult>(0);
+        Assert.Equal(1, hit.destObejctID);
+        Assert.NotEmpty(hit.skillEffectVec);
     }
 
     [Fact]
