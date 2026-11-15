@@ -1,0 +1,5 @@
+{
+  "2": { "ThreatUp": 50, "ThreatDown": 50 },
+  "3": { "ThreatUp": 100, "ThreatDown": 100 },
+  "4": { "ThreatUp": 200, "ThreatDown": 200 }
+}

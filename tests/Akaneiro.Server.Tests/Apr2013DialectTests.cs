@@ -613,6 +613,78 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void TheAprilThreatButtonsTradeKarmaShardsOnADoublingLadder()
+    {
+        // The 2013 panel's tips: "Spend Karma Shards to raise/lower the threat level." The
+        // amounts were 2013 server-side data (no mission components in the April bundles), so
+        // the revival's ladder mirrors the region prices: 50 / 100 / 200 per target threat.
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-threat-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data,
+        };
+        var account = Account(); // 500 karma
+        var character = Character();
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = character,
+        };
+
+        apr.HandlePacket(ProtocolGame_SendRequest.buyThreatLevelByKarma(5110, 1).GetByteStream()[6..]);
+
+        Packet ack = Reader(recording.Packets[^1]);
+        Assert.Equal(0, ack.ReadInt()); // eSuccess
+        Assert.Equal(5110, ack.ReadInt());
+        Assert.Equal(1, ack.ReadInt());
+        Assert.Equal(0, ack.ReadInt()); // nextThreatTime: 2013 had no rotating threat cycle
+        Assert.Equal(450, account.Karma); // up to threat 2: 50 shards
+        Assert.Equal(2, character.ThreatLevel);
+
+        apr.HandlePacket(ProtocolGame_SendRequest.buyThreatLevelByKarma(5110, 1).GetByteStream()[6..]);
+        Assert.Equal(350, account.Karma); // up to threat 3: 100 shards
+        Assert.Equal(3, character.ThreatLevel);
+
+        apr.HandlePacket(ProtocolGame_SendRequest.buyThreatLevelByKarma(5110, -1).GetByteStream()[6..]);
+        Assert.Equal(300, account.Karma); // lowering spends too: down to threat 2 costs 50
+        Assert.Equal(2, character.ThreatLevel);
+
+        // An unknown map is refused with April's mission-not-exist code (113).
+        apr.HandlePacket(ProtocolGame_SendRequest.buyThreatLevelByKarma(9990, 1).GetByteStream()[6..]);
+        Packet bad = Reader(recording.Packets[^1]);
+        Assert.Equal(113, bad.ReadInt());
+        Assert.Equal(300, account.Karma);
+    }
+
+    [Fact]
+    public void ModernThreatSwitchesStayFreeAndUntouched()
+    {
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-threat-mod-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")));
+        var account = Account();
+        var character = Character();
+        var recording = new RecordingSink();
+        var modern = new Session(world, recording, NullLogger.Instance)
+        {
+            Account = account,
+            Character = character,
+        };
+
+        modern.HandlePacket(ProtocolGame_SendRequest.buyThreatLevelByKarma(5110, 1).GetByteStream()[6..]);
+
+        Packet ack = Reader(recording.Packets[^1]);
+        Assert.Equal(0, ack.ReadInt()); // success, no charge: modern had no threat trade
+        Assert.Equal(500, account.Karma);
+        Assert.Equal(2, character.ThreatLevel); // still tracked, so accepts stay consistent
+    }
+
+    [Fact]
     public void The2013TutorialMapCarriesEnoughKillsForTheDoorMilestones()
     {
         // The April client opens the village doors at tutorial kill milestones 2, 11 and 22

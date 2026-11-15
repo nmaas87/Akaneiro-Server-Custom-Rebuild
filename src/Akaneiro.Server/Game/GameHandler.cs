@@ -651,6 +651,56 @@ namespace Akaneiro.Server.Game
         }
 
         /// <summary>
+        /// The bounty panel's threat +/- buttons. The client floors CurrentMissionID to the
+        /// threat-0 base and sends the direction; on a success ack it re-arms its own threat
+        /// slot (ChangeMissionThreat) and the next hunt accepts the full threat id. The 2013
+        /// panel tips say the switch trades karma shards - the amounts were 2013 server-side
+        /// data, so threatcosts.json carries the ladder; other eras keep the switch free.
+        /// </summary>
+        public override void buyThreatLevelByKarma(int missionID, int AddOrSub)
+        {
+            if (_s.Character == null)
+                return;
+
+            int baseId = missionID - missionID % 10;
+            if (!_s.Data.Missions.TryGetValue(baseId + 1, out _))
+            {
+                _s.Send(GameResponses.buyThreatLevelByKarmaAck(
+                    _s.Err((int)EServerErrorType.eMission_Not_exist), missionID, AddOrSub, 0));
+                return;
+            }
+
+            int current = Math.Clamp(_s.Character.ThreatLevel, 1, 4);
+            int target = Math.Clamp(current + (AddOrSub > 0 ? 1 : -1), 1, 4);
+
+            int cost = 0;
+            if (_s.Dialect == ClientDialect.Apr2013 &&
+                _s.Data.ThreatCosts.TryGetValue(target, out GameData.ThreatCostRow row))
+                cost = AddOrSub > 0 ? row.ThreatUp : row.ThreatDown;
+
+            if (cost > 0 && _s.Account.Karma < cost)
+            {
+                _s.Log.LogInformation("   threat change refused: {Cost} karma needed, {Have} available",
+                    cost, _s.Account.Karma);
+                _s.Send(GameResponses.buyThreatLevelByKarmaAck(
+                    _s.Err((int)EServerErrorType.eGS_LessMoney_karma), missionID, AddOrSub, 0));
+                return;
+            }
+
+            if (cost > 0)
+            {
+                _s.Account.Karma -= cost;
+                _s.SendMoney();
+            }
+            _s.Character.ThreatLevel = target;
+            _s.SaveAccount();
+            _s.Log.LogInformation("   threat {Current} -> {Target} for {Cost} karma (mission {Mission})",
+                current, target, cost, baseId);
+            _s.Send(GameResponses.buyThreatLevelByKarmaAck(
+                Proto.Error(EServerErrorType.eSuccess), missionID, AddOrSub, 0));
+        }
+
+        /// <summary>
         /// The missions the player may pick on the world map. The client opens its mission screen
         /// when this arrives (On_MissionListAck).
         /// <para>
@@ -868,6 +918,8 @@ namespace Akaneiro.Server.Game
             }
 
             _s.Mission = new MissionProgress(mission);
+            if (missionID >= 5000)
+                _s.Character.ThreatLevel = Math.Clamp(missionID % 10, 1, 4); // panel and server stay in step
             _s.Log.LogInformation("   accept mission {Mission} '{Name}' ({Branches} branches)",
                 missionID, mission.Name, mission.Branches.Count);
 

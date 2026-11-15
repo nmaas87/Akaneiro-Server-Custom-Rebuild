@@ -324,6 +324,14 @@ namespace Akaneiro.Server.Game
             public List<SpawnerLink> Links { get; set; } = new List<SpawnerLink>();
         }
 
+        /// <summary>One row of the 2013 bounty panel's threat pricing: the karma-shard price
+        /// shown on its raise (+) and lower (-) buttons for that mission row.</summary>
+        public sealed class ThreatCostRow
+        {
+            public int ThreatUp { get; set; }
+            public int ThreatDown { get; set; }
+        }
+
         /// <summary>
         /// An interactive object of a scene (InteractiveHandler / InteractiveObj): the client builds it
         /// from its own prefab by TypeId once the server announces it; hitting it until its health is
@@ -411,6 +419,13 @@ namespace Akaneiro.Server.Game
 
         /// <summary>Trigger volumes per scene (doors, barriers, ambushes).</summary>
         public IReadOnlyDictionary<string, List<TriggerInfo>> Triggers { get; }
+
+        /// <summary>The 2013 bounty panel's threat +/- pricing (buyThreatLevelByKarma), keyed by
+        /// the target threat level: the panel tips say "Spend Karma Shards", but the amounts were
+        /// 2013-server-side data (no mission components exist in the April bundles), so this
+        /// ladder - doubling like the region karma prices - is the server's own. Empty for other
+        /// eras, which keep threat switches free.</summary>
+        public IReadOnlyDictionary<int, ThreatCostRow> ThreatCosts { get; }
 
         /// <summary>Baskets, chests, switches per scene (InteractiveObj), placed by the server.</summary>
         public IReadOnlyDictionary<string, List<BreakableInfo>> Breakables { get; }
@@ -1034,6 +1049,14 @@ namespace Akaneiro.Server.Game
             Spawners = JsonSerializer.Deserialize<Dictionary<string, List<SpawnerInfo>>>(Json("spawners.json"));
 
             Triggers = JsonSerializer.Deserialize<Dictionary<string, List<TriggerInfo>>>(Json("triggers.json"));
+
+            // The threat +/- prices of the 2013 bounty panel: the client only carries the tip
+            // text ("Spend Karma Shards to raise/lower the threat level"); the amounts were
+            // 2013 server-side data, so threatcosts.json is the revival's own ladder.
+            string threatCosts = Pick(dataDir, fallbackData, "threatcosts.json");
+            ThreatCosts = File.Exists(threatCosts)
+                ? JsonSerializer.Deserialize<Dictionary<int, ThreatCostRow>>(File.ReadAllText(threatCosts))
+                : new Dictionary<int, ThreatCostRow>();
 
             string breakableFile = Pick(dataDir, fallbackData, "breakables.json");
             Breakables = File.Exists(breakableFile)

@@ -66,6 +66,11 @@ namespace Akaneiro.Server.Data
         /// the 2014 progression never fills this (it chains maps through completed missions).</summary>
         public List<int> UnlockedAreas { get; set; } = new List<int>();
 
+        /// <summary>Threat level the bounty panel currently stands on (1..4, last digit of the
+        /// mission id). Moved by buyThreatLevelByKarma and by every mission accept, so the
+        /// karma price of the next threat switch is known without asking the client.</summary>
+        public int ThreatLevel { get; set; } = 1;
+
         /// <summary>Experience of each spirit kind (PetPrice id / 100), kept across rentals.</summary>
         public Dictionary<int, ulong> SpiritExp { get; set; } = new Dictionary<int, ulong>();
 

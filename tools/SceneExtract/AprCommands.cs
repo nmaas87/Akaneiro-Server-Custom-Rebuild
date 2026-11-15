@@ -42,6 +42,7 @@ internal static class AprCommands
             case "apr-monsters": return Monsters(bundles, args[2]);
             case "apr-missions": return Missions(bundles, args[2]);
             case "apr-breakables": return Breakables(bundles, args[2]);
+            case "apr-threats": return Threats(bundles);
             default:
                 Console.Error.WriteLine("unknown command " + args[0]);
                 return 1;
@@ -84,6 +85,38 @@ internal static class AprCommands
             Console.WriteLine($"{mb.Script,-34} {mb.GameObjectName,-40} ({mb.WorldPosition.X:0.00}, {mb.WorldPosition.Y:0.00}, {mb.WorldPosition.Z:0.00}) [{mb.File.Path.Split('/')[^1]}]");
             if (args.Length > 4)
                 Console.WriteLine(JsonSerializer.Serialize(mb.Fields, new JsonSerializerOptions { WriteIndented = true }));
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// Per-map StringHolder "Relation" tables: TypeId -> prefab bundle for the monsters and
+    /// breakable props of that map (the 2013 server addressed content through these ids).
+    /// </summary>
+    private static int Threats(string bundles)
+    {
+        // The bounty panel's per-mission threat rows: _UI_CS_MapInfo prefabs carry levelList[]
+        // with ID/threatUp/threatDown - the karma shard prices the panel shows on its + and -
+        // buttons (buyThreatLevelByKarma).
+        foreach (string bundlePath in Directory.EnumerateFiles(bundles, "*.*")
+            .Where(f => f.EndsWith(".unity3d", StringComparison.OrdinalIgnoreCase) ||
+                        f.EndsWith(".assetbundle", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(f => f))
+        {
+            AprBundle bundle;
+            try { bundle = AprBundle.Load(bundlePath); }
+            catch { continue; }
+            foreach (var mb in bundle.AllMonoBehaviours())
+            {
+                if (!mb.Fields.TryGetValue("levelList", out object list) || list is not List<object> items)
+                    continue;
+                bool interesting = items.Any(i => i is Dictionary<string, object> d &&
+                    (d.ContainsKey("threatUp") || d.ContainsKey("threatDown")));
+                if (!interesting)
+                    continue;
+                Console.WriteLine($"# {mb.Script} on {mb.GameObjectName} [{Path.GetFileName(bundlePath)}]");
+                Console.WriteLine(JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = false }));
+            }
         }
         return 0;
     }
