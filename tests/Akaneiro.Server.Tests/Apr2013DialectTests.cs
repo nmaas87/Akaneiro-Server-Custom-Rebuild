@@ -596,6 +596,23 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void AprilCharactersStartWithTheirDisciplineAbility()
+    {
+        // The April bundle's CreateCharaInfo table has no ability columns; the grant falls
+        // back to the modern id family, whose tier-one starters all exist in the April
+        // Ability table (10501 Rain of Blows I, 11101, 11401) - no April hunter may start
+        // with an empty ability bar.
+        var starts = TestData2013.Data.StartAbilities;
+        Assert.NotEmpty(starts);
+        Assert.All(starts.Values, ids => Assert.True(ids.Any(id => id != 0)));
+        var all = starts.Values.SelectMany(ids => ids).Where(id => id != 0).ToList();
+        Assert.Contains(10501, all);
+        Assert.Contains(11101, all);
+        Assert.Contains(11401, all);
+        Assert.NotEmpty(TestData.Data.StartAbilities); // modern grant untouched
+    }
+
+    [Fact]
     public void The2013TutorialMapCarriesEnoughKillsForTheDoorMilestones()
     {
         // The April client opens the village doors at tutorial kill milestones 2, 11 and 22

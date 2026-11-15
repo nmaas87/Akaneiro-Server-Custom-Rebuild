@@ -729,13 +729,22 @@ namespace Akaneiro.Server.Game
 
             Scenes = JsonSerializer.Deserialize<Dictionary<string, SceneInfo>>(sceneFile);
 
-            // The character creation screen lists each discipline's three starting abilities.
+            // The character creation screen lists each discipline's starting abilities. The April
+            // 2013 bundle's CreateCharaInfo table carries only descriptions - no Name/Ability
+            // columns - but its Ability table holds the same id family (10501, 11101, 11401 are
+            // all rows), so the modern table seeds the starts and the era's own table overwrites
+            // them wherever it carries the columns.
             var starts = new Dictionary<int, IReadOnlyList<int>>();
-            foreach (Row row in ReadTable(Path.Combine(tables, "CreateCharaInfo.Description.EN.txt")))
+            foreach (string dir in new[] { fallbackTables, tables })
             {
-                int style = DisciplineStyle(row.Str("Name"));
-                if (style != 0)
-                    starts[style] = new[] { row.Int("Ability1"), row.Int("Ability2"), row.Int("Ability3") };
+                if (dir == null)
+                    continue;
+                foreach (Row row in ReadTable(Path.Combine(dir, "CreateCharaInfo.Description.EN.txt")))
+                {
+                    int style = DisciplineStyle(row.Str("Name"));
+                    if (style != 0)
+                        starts[style] = new[] { row.Int("Ability1"), row.Int("Ability2"), row.Int("Ability3") };
+                }
             }
             StartAbilities = starts;
 
