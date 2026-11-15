@@ -94,6 +94,11 @@ namespace Akaneiro.Server.Game
         {
             foreach (GameData.NpcPlacement npc in scene.Npcs)
             {
+                // The 2014 hub also places the stash keeper (1011), an NPC the April cut never
+                // shipped: its NpcInfo registry ends at WELL and calls 1011 NOTHING, so placing
+                // it only makes the client log "On_npcEnter npcID null" once. April has no stash.
+                if (_s.Dialect == ClientDialect.Apr2013 && npc.NpcId == 1011)
+                    continue;
                 var info = Proto.New<SNpcEnter>();
                 info.objectID = _s.Scene.NewObjectId();
                 info.npcID = npc.NpcId;
@@ -1257,26 +1262,17 @@ namespace Akaneiro.Server.Game
                 return;
             }
 
-            if (crystals > 0 && _s.Account.Crystals < crystals)
-            {
-                _s.Log.LogInformation("   revival refused: no scroll and {Cost} crystals needed, {Have} available",
-                    crystals, _s.Account.Crystals);
-                _s.Send(BattleResponses.ReviveResult(reviveType, _s.Err((int)EServerErrorType.eGS_LessReviveItem), new vectorAttrChange()));
-                return;
-            }
-
             if (cost > 0)
             {
                 _s.Account.Karma -= cost;
                 _s.SendMoney();
             }
+            // Crystals are never checked or spent: the real-money currency is waived for every
+            // era on this server (modern crystal revivals are free, the shop pays crystal prices
+            // without balance checks), so the April scroll button without a scroll just revives.
+            // The karma shard ladder and the scroll itself stay real costs.
             if (crystals > 0)
-            {
-                _s.Account.Crystals -= crystals; // the April scroll button without a scroll: crystals
-                _s.SendMoney();
-            }
-            // Modern crystal revivals (type 2) cost the real-money currency, which is free on
-            // this server.
+                _s.Log.LogInformation("   paid {Cost} crystals for the revive (waived, like every crystal price)", crystals);
 
             if (scroll != null)
             {

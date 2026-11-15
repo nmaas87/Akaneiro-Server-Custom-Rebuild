@@ -45,6 +45,28 @@ namespace Akaneiro.Server.Game
         public int BuyPrice(ItemData item) =>
             Data.ItemValues.TryGetValue(item.ItemId, out float baseValue) ? (int)(item.Level * baseValue) : 0;
 
+        /// <summary>
+        /// What the April client's Transmute button expects to be paid: its tooltip already shows
+        /// GetItemValue(TRANSMUTE) = level * (1 + element + enchant + gem bonus) * (item value *
+        /// 0.2f), computed from the value columns of its own tables (see GameData.EnchantValues).
+        /// Materials have no item value there, so their transmute shows and pays 0.
+        /// </summary>
+        public int TransmuteValue(ItemData item)
+        {
+            int kind = (item.ItemId / 1000) switch { 1 => 0, 2 => 1, 3 => 2, _ => -1 };
+            if (kind < 0 || !Data.ItemValues.TryGetValue(item.ItemId, out float baseValue) || baseValue <= 0)
+                return 0;
+
+            float bonus = 1f;
+            if (item.Element != 0 && Data.ElementValues.TryGetValue((kind, item.Element), out float ele))
+                bonus += ele;
+            if (item.Enchant != 0 && Data.EnchantValues.TryGetValue((kind, item.Enchant), out float enc))
+                bonus += enc;
+            if (item.Gem != 0 && Data.GemEffectValues.TryGetValue(item.Gem, out float gem))
+                bonus += gem;
+            return (int)(item.Level * bonus * (baseValue * 0.2f));
+        }
+
         // ---- stock --------------------------------------------------------------------------------
 
         /// <summary>The current offers, rolled anew when they are 12 hours old or the character leveled.</summary>

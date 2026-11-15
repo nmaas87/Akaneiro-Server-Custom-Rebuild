@@ -707,6 +707,87 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void AprilTransmuteInstantlySellsGearForKarmaShards()
+    {
+        // Right-click Transmute is the only thing that makes the April build send DelItem at
+        // all; the tooltip already showed GetItemValue(TRANSMUTE) = level * (1 + element +
+        // enchant + gem bonus) * (item value * 0.2f), so the delete must pay that much.
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-transmute-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data, // April's own tables: Katana worth 8, Ruby 2.5, Raging I 1.5
+        };
+        var account = Account();
+        var character = Character();
+        character.Bag.Add(new ItemData { Slot = 6, ItemId = 1001, PrefabId = 1, Level = 4, Count = 1 });
+        account.Karma = 0;
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = character,
+        };
+
+        apr.HandlePacket(ProtocolGame_SendRequest.DelItem(Views.BagBase, 6).GetByteStream()[6..]);
+
+        // (the fixture character also carries its slot-0 katana; only slot 6 is transmuted)
+        Assert.Equal(6, account.Karma); // 4 * (8 * 0.2) = 6.4 -> 6 shards, the client's rounding
+        Assert.DoesNotContain(character.Bag, i => i.Slot == 6);
+
+        // With the April Ruby (gem effect 2.5) and Raging I (enchant 1.5) the tooltip would
+        // show and the server must pay level 1 * (1 + 1.5 + 2.5) * 1.6 = 8.
+        character.Bag.Add(new ItemData { Slot = 7, ItemId = 1001, PrefabId = 1, Level = 1, Count = 1, Gem = 1, Enchant = 101 });
+        apr.HandlePacket(ProtocolGame_SendRequest.DelItem(Views.BagBase, 7).GetByteStream()[6..]);
+        Assert.Equal(14, account.Karma); // 6 + 8
+        Assert.DoesNotContain(character.Bag, i => i.Slot == 7);
+    }
+
+    [Fact]
+    public void ModernDiscardStaysFreeAndModernDeleteNeverPays()
+    {
+        // (covered by InventoryTests.DeletingEmptiesTheSlot for the wire; here the era split:
+        // the same handler with the modern dialect discards without a payout.)
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-transmute-mod-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")));
+        var account = Account(); // 500 karma
+        var character = Character();
+        character.Bag.Add(new ItemData { Slot = 6, ItemId = 1001, PrefabId = 1, Level = 4, Count = 1 });
+        var recording = new RecordingSink();
+        var modern = new Session(world, recording, NullLogger.Instance)
+        {
+            Account = account,
+            Character = character,
+        };
+
+        modern.HandlePacket(ProtocolGame_SendRequest.DelItem(Views.BagBase, 6).GetByteStream()[6..]);
+
+        Assert.DoesNotContain(character.Bag, i => i.Slot == 6); // deleted...
+        Assert.Equal(500, account.Karma); // ...but nothing paid
+    }
+
+    [Fact]
+    public void TheAprilVillageSkipsTheStashKeeperThatCutNeverShipped()
+    {
+        // April's NpcInfo registry ends at WELL (1010); the id after it is NOTHING, and the cut
+        // has no stash at all. Placing the 2014 stash keeper only earns the warning
+        // "On_npcEnter npcID null !!!!" once per visit, so the April hub places eight NPCs,
+        // the modern hub still nine.
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Session.Dialect = ClientDialect.Apr2013;
+        player.ClearInbox();
+        player.EnterScene("Hub_Village");
+
+        var ids = player.Inbox.Where(m => m.Name == "On_npcEnter")
+            .Select(m => m.Arg<SNpcEnter>(0).npcID).OrderBy(id => id).ToList();
+        Assert.Equal(new[] { 1001, 1002, 1003, 1004, 1005, 1007, 1009, 1010 }, ids);
+    }
+
+    [Fact]
     public void The2013TutorialMapCarriesEnoughKillsForTheDoorMilestones()
     {
         // The April client opens the village doors at tutorial kill milestones 2, 11 and 22

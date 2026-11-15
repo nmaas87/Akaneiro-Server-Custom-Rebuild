@@ -263,7 +263,11 @@ namespace Akaneiro.Server.Game
             _s.Send(GameResponses.NotifyItemSwap(srcBag, srcSlot, dstBag, dstSlot));
         }
 
-        /// <summary>Throws an item away (also how crafting consumes the item it transmutes).</summary>
+        /// <summary>
+        /// Throws an item away. The April build only ever sends DelItem from its Transmute button
+        /// (instant sell: the tooltip already showed the client's half-value formula), so for that
+        /// era the deletion pays karma shards; other eras keep DelItem as a plain discard.
+        /// </summary>
         public void Delete(byte bagId, uint slot)
         {
             List<ItemData> bag = Bag(bagId);
@@ -273,13 +277,20 @@ namespace Akaneiro.Server.Game
                 _s.Send(GameResponses.DelItemFailed(_s.Err((int)EServerErrorType.eItemError_NoExist)));
                 return;
             }
+            int paid = _s.Dialect == ClientDialect.Apr2013 ? _s.Shop.TransmuteValue(item) : 0;
             bag.Remove(item);
-            _s.Log.LogInformation("   deleted item {Item} from bag {Bag} slot {Slot}", item.ItemId, bagId, slot);
+            if (paid > 0)
+                _s.Account.Karma += paid;
+            _s.Log.LogInformation(paid > 0
+                ? "   transmuted {Item} into {Value} karma shards (bag {Bag} slot {Slot})"
+                : "   deleted item {Item} from bag {Bag} slot {Slot}", item.ItemId, paid, bagId, slot);
             if (bagId == Views.BagEquip)
                 GearChanged();
             else
                 _s.SaveAccount();
             _s.Send(GameResponses.NotifyItemDestroy(bagId, slot));
+            if (paid > 0)
+                _s.SendMoney();
         }
 
         /// <summary>Takes <paramref name="count"/> of a stack away; the slot empties when nothing is left.</summary>

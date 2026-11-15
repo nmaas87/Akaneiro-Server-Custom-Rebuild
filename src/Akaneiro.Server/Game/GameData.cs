@@ -704,6 +704,15 @@ namespace Akaneiro.Server.Game
         public IReadOnlyDictionary<(int Kind, int Id), int> ElementStatus { get; private set; } = new Dictionary<(int, int), int>();
         public IReadOnlyDictionary<int, (int Talent, float Value)> Gems { get; private set; } = new Dictionary<int, (int, float)>();
 
+        /// <summary>The bonus numbers the client multiplies an item's worth by (tooltip value and
+        /// transmute formula): enchantments are column 5 of each kind's Enchant table; elements sit
+        /// at a per-kind column (weapon 8, armor 9, accessory 7); the gem effect the client calls
+        /// gemEffectVal is column 6 of the gem table. Keys are (kind, id) in loot kind order:
+        /// 0 weapon, 1 armor, 2 accessory.</summary>
+        public IReadOnlyDictionary<(int Kind, int Id), float> EnchantValues { get; private set; } = new Dictionary<(int, int), float>();
+        public IReadOnlyDictionary<(int Kind, int Id), float> ElementValues { get; private set; } = new Dictionary<(int, int), float>();
+        public IReadOnlyDictionary<int, float> GemEffectValues { get; private set; } = new Dictionary<int, float>();
+
         /// <summary>What each mastery level does (EquipMastery.level, second Description column).</summary>
         public IReadOnlyDictionary<int, string> MasteryEffects { get; private set; } = new Dictionary<int, string>();
 
@@ -1115,6 +1124,27 @@ namespace Akaneiro.Server.Game
                 .Where(c => Cell(c, 0) != 0)
                 .GroupBy(c => Cell(c, 0))
                 .ToDictionary(g => g.Key, g => (Cell(g.First(), 4), CellFloat(g.First(), 8)));
+
+            // The worth multipliers the client's tooltip and transmute formulas read - same
+            // columns, in the same (broken) per-kind layout the client itself parses:
+            // enchant col 5 everywhere; element weapon 8 / armor 9 / accessory 7; gem col 6.
+            EnchantValues = Enumerable.Range(0, files.Length)
+                .SelectMany(kind => ReadCells(Path.Combine(tables, files[kind] + ".Enchant.EN.txt"))
+                    .Where(c => Cell(c, 0) != 0)
+                    .Select(c => (Key: (kind, Cell(c, 0)), Value: CellFloat(c, 5))))
+                .GroupBy(p => p.Key)
+                .ToDictionary(g => g.Key, g => g.First().Value);
+            int[] elementColumns = { 8, 9, 7 };
+            ElementValues = Enumerable.Range(0, files.Length)
+                .SelectMany(kind => ReadCells(Path.Combine(tables, files[kind] + ".Element.EN.txt"))
+                    .Where(c => Cell(c, 0) != 0)
+                    .Select(c => (Key: (kind, Cell(c, 0)), Value: CellFloat(c, elementColumns[kind]))))
+                .GroupBy(p => p.Key)
+                .ToDictionary(g => g.Key, g => g.First().Value);
+            GemEffectValues = ReadCells(Path.Combine(tables, "WeaponAttribute.Gem.EN.txt"))
+                .Where(c => Cell(c, 0) != 0)
+                .GroupBy(c => Cell(c, 0))
+                .ToDictionary(g => g.Key, g => CellFloat(g.First(), 6));
 
             // ID EquipClass MasteryLevel MasteryType karmaCost BaseStatLvNeeded BuffID Name Description Description ...
             MasteryEffects = ReadCells(Path.Combine(tables, "EquipMastery.level.EN.txt"))

@@ -223,19 +223,22 @@ public sealed class BattleGuardTests
     }
 
     [Fact]
-    public void TheAprilScrollButtonFallsBackToThreeCrystals()
+    public void TheAprilScrollButtonFallsBackToCrystalsWithoutTouchingTheBalance()
     {
         using var player = DieNextToMonsters();
         player.Session.Dialect = ClientDialect.Apr2013;
         player.Session.Account.Crystals = 10;
         player.ClearInbox();
 
-        // No scroll in any bag: the April scroll button still revives, for three crystals.
+        // No scroll in any bag: the April scroll button still revives. Crystals are the
+        // real-money currency, waived on this server for every era (like the modern crystal
+        // revival and the shop's crystal-priced goods), so the balance is neither checked nor
+        // spent - "unlimited crystals", exactly the full client's feel.
         player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(4)));
 
         Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
         Assert.False(player.Session.IsDead);
-        Assert.Equal(7, player.Session.Account.Crystals);
+        Assert.Equal(10, player.Session.Account.Crystals);
     }
 
     [Fact]

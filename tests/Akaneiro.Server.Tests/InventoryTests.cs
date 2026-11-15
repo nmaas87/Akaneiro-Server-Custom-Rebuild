@@ -1,5 +1,6 @@
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
+using Akaneiro.Server.Protocol;
 using Akaneiro.Server.Tests.Harness;
 using Xunit.Abstractions;
 
@@ -184,11 +185,13 @@ public sealed class InventoryTests
     {
         using var player = InVillage();
         Give(player, Katana, 6);
+        int karma = player.Session.Account.Karma;
 
         player.Send(ProtocolGame_SendRequest.DelItem(Bag, 6));
 
         Assert.Equal(new object[] { Bag, 6u }, player.Take("On_NotifyItemDestroy").Args);
         Assert.Empty(player.Session.Character.Bag);
+        Assert.Equal(karma, player.Session.Account.Karma); // modern DelItem is a plain discard
     }
 
     [Fact]
