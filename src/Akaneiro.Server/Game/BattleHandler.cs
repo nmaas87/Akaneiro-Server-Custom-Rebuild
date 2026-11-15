@@ -1307,7 +1307,10 @@ namespace Akaneiro.Server.Game
 
             _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eSuccess),
                 Views.Attributes(_s.Character, _s.Data, full)));
-            _s.Send(BattleResponses.PlayerReviveNumNTF(0, _s.Revivals));
+            if (_s.Dialect == ClientDialect.Apr2013)
+                _s.Send(Apr2013Dialect.PlayerReviveNumNTF2013(Views.ReviveScrollCount(_s.Account)));
+            else
+                _s.Send(BattleResponses.PlayerReviveNumNTF(0, _s.Revivals));
         }
 
         // ---- movement -----------------------------------------------------------------------

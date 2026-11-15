@@ -153,6 +153,17 @@ namespace Akaneiro.Server.Protocol
             return os;
         }
 
+        /// <summary>PlayerReviveNumNTF under the 2013 protocol: a single int, the number of
+        /// Shinigami Scrolls the death panel shows (Revival.RevivalCount). The 2014 twin of
+        /// this packet carries the crystal and karma revive counts instead.</summary>
+        public static Packet PlayerReviveNumNTF2013(int reviveNum)
+        {
+            Packet os = Begin(ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF);
+            os.WriteInt(reviveNum);
+            os.Patch(os.get_used_size() - 6, 0);
+            return os;
+        }
+
         private static Packet Finish(Packet os)
         {
             os.Patch(os.get_used_size() - 6, 0);

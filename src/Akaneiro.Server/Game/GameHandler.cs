@@ -216,7 +216,23 @@ namespace Akaneiro.Server.Game
             // The bag info makes the client build the player model (equipment and gender).
             _s.Send(GameResponses.SendBagInfo(Views.Bags(character)));
             // Abilities and their shortcut slots; the client answers with RoleMasteryListReq.
-            _s.Send(GameResponses.SendSkillInfo(Views.Skills(character)));
+            SPlayerSkillInfo skills = Views.Skills(character);
+            if (_s.Dialect == ClientDialect.Apr2013)
+            {
+                // The 2013 get-up animation is the revive shockwave itself: On_ReviveResult
+                // launches 12001 through UseAbilityFromID, which only works when the state is
+                // registered, and registration follows exactly this skill list. The original
+                // server must have carried it as an innate entry; the incoming slam was already
+                // accepted unmapped (BattleHandler.IsReviveShockwave).
+                skills.skillInfoVec.Add(new SSkillInfo
+                {
+                    skillID = BattleHandler.ReviveShockwave,
+                    level = 1,
+                    skillExp = 0,
+                    coldTime = 0,
+                });
+            }
+            _s.Send(GameResponses.SendSkillInfo(skills));
             _s.Trainer.SendTimers();
         }
 

@@ -623,6 +623,18 @@ public sealed class Apr2013DialectTests
         Assert.Equal(17, Kills(TestData.Data)); // the fork widened only the April table
     }
 
+    [Fact]
+    public void The2013ReviveNumPacketCarriesASingleScrollCount()
+    {
+        // The 2014 PlayerReviveNumNTF carries two counters (crystal/karma revivals); the
+        // April build reads one int - its death panel's Shinigami Scroll count.
+        Packet p = Apr2013Dialect.PlayerReviveNumNTF2013(7);
+        byte[] bytes = p.GetByteStream();
+        Assert.Equal((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF, BitConverter.ToInt32(bytes, 6));
+        Assert.Equal(7, BitConverter.ToInt32(bytes, 10));
+        Assert.Equal(14, bytes.Length); // size+tag+method and exactly one payload int
+    }
+
     private sealed class RecordingSink : Akaneiro.Server.Net.IPacketSink
     {
         public List<Packet> Packets { get; } = new List<Packet>();

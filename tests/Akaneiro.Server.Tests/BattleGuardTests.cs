@@ -211,6 +211,11 @@ public sealed class BattleGuardTests
         Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
         Assert.False(player.Session.IsDead);
         Assert.Equal(4, player.Session.Account.Crystals);
+
+        // And the 2013-shaped scroll count notice (one int, scrolls on the account): the 2014
+        // harness receiver can't decode it, so it waits in the raw bin.
+        byte[] ntf = Assert.Single(player.RawPackets((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF));
+        Assert.Equal(8, ntf.Length); // method id + exactly one payload int
     }
 
     [Fact]
@@ -227,6 +232,26 @@ public sealed class BattleGuardTests
         Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
         Assert.False(player.Session.IsDead);
         Assert.Equal(0, player.Character.Bag.Count(i => i.ItemId == ReviveScroll));
+    }
+
+    [Fact]
+    public void TheAprilSkillListCarriesTheInnateReviveShockwave()
+    {
+        using var apr = new TestPlayer(_output).LoginNewCharacter();
+        apr.Session.Dialect = ClientDialect.Apr2013;
+        apr.ClearInbox();
+        apr.Send(ProtocolGame_SendRequest.UserSelectCharacter(apr.Character.Id));
+
+        // UseAbilityFromID only finds a state that this list registered - without 12001 the
+        // client's revive stand-up is a silent no-op and the hunter stays on the ground.
+        var skills = apr.Take<SPlayerSkillInfo>("On_SendSkillInfo");
+        Assert.Contains(skills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
+
+        using var modern = new TestPlayer(_output).LoginNewCharacter();
+        modern.ClearInbox();
+        modern.Send(ProtocolGame_SendRequest.UserSelectCharacter(modern.Character.Id));
+        var modernSkills = modern.Take<SPlayerSkillInfo>("On_SendSkillInfo");
+        Assert.DoesNotContain(modernSkills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
     }
 
     [Fact]
