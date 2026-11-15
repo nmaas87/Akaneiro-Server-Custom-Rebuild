@@ -258,7 +258,7 @@ namespace Akaneiro.Server.Game
             if (!_s.Inventory.CanAdd(item))
             {
                 _s.Send(GameResponses.GetMailItemResult(
-                    Proto.Error(EServerErrorType.eItemError_BagFull), mailID, itemSlotID));
+                    _s.Err((int)EServerErrorType.eItemError_BagFull), mailID, itemSlotID));
                 return;
             }
 
@@ -299,7 +299,7 @@ namespace Akaneiro.Server.Game
                 _s.Log.LogInformation("   mail #{Mail}: bag full after {Count} items, {Left} stay on the letter",
                     mailID, claimed, mail.Items.Count);
                 _s.Send(GameResponses.GetMailAllItemsResult(mailID,
-                    Proto.Error(EServerErrorType.eItemError_BagFull)));
+                    _s.Err((int)EServerErrorType.eItemError_BagFull)));
                 return;
             }
 

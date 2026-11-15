@@ -199,7 +199,7 @@ namespace Akaneiro.Server.Game
             CharacterData character = _s.Account?.Characters.FirstOrDefault(c => c.Id == characterID);
             if (character == null)
             {
-                _s.Send(GameResponses.UserSelectCharacterFailed(Proto.Error(EServerErrorType.eGS_NoCharacter)));
+                _s.Send(GameResponses.UserSelectCharacterFailed(_s.Err((int)EServerErrorType.eGS_NoCharacter)));
                 return;
             }
 
@@ -278,7 +278,7 @@ namespace Akaneiro.Server.Game
 
             if (account == null || _s.Character == null || account.DayRewardLastDate == today || days.Count == 0)
             {
-                reward.returnCode = Proto.Error(EServerErrorType.eDayRewardError_AlreadyGet);
+                reward.returnCode = _s.Err((int)EServerErrorType.eDayRewardError_AlreadyGet);
                 _s.Send(GameResponses.RequestDayRewardOK(reward));
                 return;
             }
@@ -359,7 +359,7 @@ namespace Akaneiro.Server.Game
                 return;
             if (talent1 < 0 || talent2 < 0 || talent3 < 0 || talent1 + talent2 + talent3 > Views.FreeTalentPoints(c))
             {
-                _s.Send(GameResponses.assignTalentAck(Proto.Error(EServerErrorType.eLeftTalentPoint_lack)));
+                _s.Send(GameResponses.assignTalentAck(_s.Err((int)EServerErrorType.eLeftTalentPoint_lack)));
                 return;
             }
             c.TalentProwess += talent1;
@@ -662,7 +662,7 @@ namespace Akaneiro.Server.Game
             if (!_s.Data.MissionAreas.TryGetValue(areaID, out GameData.AreaRow area))
             {
                 _s.Log.LogWarning("   unlock area {Area}: not in the area table", areaID);
-                _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(115))); // eMission_Not_exist
+                _s.Send(GameResponses.unLockAreaAck(areaID, _s.Err((int)EServerErrorType.eMission_Not_exist)));
                 return;
             }
 
@@ -674,7 +674,7 @@ namespace Akaneiro.Server.Game
 
             if (!area.IsFree && _s.Account.Karma < area.BuyKarma)
             {
-                _s.Send(GameResponses.unLockAreaAck(areaID, Proto.Error(118))); // not enough karma
+                _s.Send(GameResponses.unLockAreaAck(areaID, _s.Err((int)EServerErrorType.eGS_LessMoney_karma)));
                 _s.SendMoney();
                 return;
             }

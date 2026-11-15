@@ -178,7 +178,7 @@ public sealed class Apr2013DialectTests
 
         Packet ins = Reader(apr);
         Assert.Equal(2, ins.ReadInt());
-        Assert.Equal(111, ins.ReadInt()); // the 2013 table family, not the 5RTM server id
+        Assert.Equal(5111, ins.ReadInt()); // the server's own id: the client's region/slot math runs on it
         Assert.Equal(1, ins.ReadInt());   // IsHaveCompleted right after the id: coolDownTime is gone
         Assert.True(ins.ReadBool());
         Assert.Equal(2, ins.ReadInt());
@@ -189,10 +189,26 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void TheAprilListDropsTheTutorialAndFourthMissions()
+    {
+        // the tutorial never shows on the bounty map (the village NPC starts it), and each
+        // region's fourth mission arrived with the 2014 client
+        var list = new vectorSAcceptMissionRelate
+        {
+            new SAcceptMissionRelate2 { missionID = 5010 },
+            new SAcceptMissionRelate2 { missionID = 5140 },
+            new SAcceptMissionRelate2 { missionID = 5110 },
+        };
+        Packet ins = Reader(Translated(GameResponses.MissionListAck(list)));
+        Assert.Equal(1, ins.ReadInt());
+        Assert.Equal(5110, ins.ReadInt());
+    }
+
+    [Fact]
     public void TheMissionProcessKeepsOneReliveCounter()
     {
         var process = Proto.New<SMissionProcess>();
-        process.missionID = 5011; // tutorial: 101 in the 2013 family
+        process.missionID = 5011; // the id crosses untouched (the panel math works on it)
         process.crystalReliveNum = 1;
         process.karmaReliveNum = 2;
         process.exp = 999;
@@ -201,7 +217,7 @@ public sealed class Apr2013DialectTests
         Packet apr = Translated(cs);
 
         Packet ins = Reader(apr);
-        Assert.Equal(101u, ins.ReadUint());
+        Assert.Equal(5011u, ins.ReadUint());
         vectorSBranch.Read(ins, out _);
 
         Assert.Equal(2, ins.ReadInt()); // the karma relives - what the April relive shop spent
@@ -306,38 +322,45 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
-    public void MissionIdsTranslateBetweenTheTwoFamilies()
+    public void HuntRequestsFromTheClientTablesLandOnServerMissions()
     {
-        // server 5RTM (region, mission, threat variant) <-> 2013 1RM (its MissionDescription rows)
-        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5111));
-        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5113)); // threat variants collapse: no threat missions in 2013
-        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5110)); // map base ids answer too
-        Assert.Equal(112, Apr2013Dialect.ToClientMissionId(5121));
-        Assert.Equal(0, Apr2013Dialect.ToClientMissionId(5141));   // the 4th mission of a region came later
-        Assert.Equal(101, Apr2013Dialect.ToClientMissionId(5011)); // the tutorial
-        Assert.Equal(5111, Apr2013Dialect.ToServerMissionId(111)); // back: the threat 1 variant
-        Assert.Equal(5011, Apr2013Dialect.ToServerMissionId(101));
+        // the hunt buttons send the April table ids (1RM from the shipped region prefabs); the
+        // server's own 5RTM ids - which the panel's region math uses - pass through untouched
+        Assert.Equal(5111, Apr2013Dialect.ToServerMissionId(111)); // the threat 1 variant
+        Assert.Equal(5011, Apr2013Dialect.ToServerMissionId(101)); // the tutorial
         Assert.Equal(5141, Apr2013Dialect.ToServerMissionId(114)); // an id the tables lack stays mappable anyway
+        Assert.Equal(5110, Apr2013Dialect.ToServerMissionId(5110)); // map bases
+        Assert.Equal(5112, Apr2013Dialect.ToServerMissionId(5112)); // threat variants too
         Assert.Equal(5100, Apr2013Dialect.ToClientAreaId(5112));   // areas are whole regions
         Assert.Equal(5000, Apr2013Dialect.ToClientAreaId(5011));
     }
 
     [Fact]
-    public void MissionNotificationsSpeakTheAprilIds()
+    public void MissionNotificationsCarryTheServerIdsUntouched()
     {
-        Packet branch = Reader(Translated(GameResponses.branchCompleteNTF(5111, 2, 3, 40, 50)));
-        Assert.Equal(111, branch.ReadInt());
-        foreach (int expected in new[] { 2, 3, 40, 50 }) // branch, task, exp, karma follow untouched
-            Assert.Equal(expected, branch.ReadInt());
+        // the client matches these against the ids it got in the list (5RTM): rewriting them to
+        // the table family strands the progress panel
+        Packet branch = GameResponses.branchCompleteNTF(5111, 2, 3, 40, 50);
+        Assert.Same(branch, Apr2013Dialect.Translate(branch));
+        Packet done = GameResponses.MissionCompleteNTF(5121, 100, 60);
+        Assert.Same(done, Apr2013Dialect.Translate(done));
+        Packet fail = GameResponses.MissionFailAck(5131, 1);
+        Assert.Same(fail, Apr2013Dialect.Translate(fail));
+    }
 
-        Packet done = Reader(Translated(GameResponses.MissionCompleteNTF(5121, 100, 60)));
-        Assert.Equal(112, done.ReadInt());
-        Assert.Equal(100, done.ReadInt());
-        Assert.Equal(60, done.ReadInt());
-
-        Packet fail = Reader(Translated(GameResponses.MissionFailAck(5131, 1)));
-        Assert.Equal(113, fail.ReadInt());
-        Assert.Equal(1, fail.ReadInt());
+    [Fact]
+    public void ErrorCodesMoveToTheAprilBuildsNumbering()
+    {
+        // both builds' TypeDefine blocks, diffed: 2014 inserted codes, everything after shifts.
+        // Sending 109 ("already got the day reward") shows as the April client's 109
+        // "eMission_Dont_Have_ReqLevel" - the mystery popup on every hub visit after claiming.
+        Assert.Equal(0, Apr2013Dialect.ToClientError(0));    // eSuccess matches
+        Assert.Equal(1, Apr2013Dialect.ToClientError(1));    // eUnknownError matches
+        Assert.Equal(51, Apr2013Dialect.ToClientError(51));  // less karma: same number in both
+        Assert.Equal(107, Apr2013Dialect.ToClientError(109)); // day reward already got
+        Assert.Equal(92, Apr2013Dialect.ToClientError(94));   // bag full
+        Assert.Equal(113, Apr2013Dialect.ToClientError(115)); // mission/area not in the table
+        Assert.Equal(120, Apr2013Dialect.ToClientError(123)); // unassigned talent points
     }
 
     [Fact]
@@ -364,15 +387,15 @@ public sealed class Apr2013DialectTests
         Assert.True(count > 0);
         for (int i = 0; i < count; i++)
         {
-            ids.Add(list.ReadInt()); // the area 1 map in the 2013 table family (111); the tutorial is not listed
+            ids.Add(list.ReadInt()); // the server's map base for act 1 (5110); the tutorial is not listed
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
             // completed, triggered, star, lastPassTime, canAcceptMaxLvl - the April entry,
             // no coolDownTime after the id and no lastPassLvl at the end
         }
-        // the tutorial entry is dropped: its id family (0-region) breaks the panel's slot math
-        // (id % 100 / 10 - 1 = -1) and leaves the bounty panel's mission slots dead
-        Assert.DoesNotContain(101, ids);
-        Assert.All(ids, id => Assert.InRange(id, 111, 183));
+        // the client's region math (missionID / 100 % 10) runs on these ids, and the tutorial
+        // (0-region) is dropped: it never shows on the bounty map
+        Assert.DoesNotContain(5010, ids);
+        Assert.All(ids, id => Assert.InRange(id, 5110, 5840));
 
         // the push addresses whole areas (area n -> 5000 + n * 100); maps of one region collapse
         // into a single entry, and isBuy marks karma-bought areas (unlocked is unlocked either
@@ -394,8 +417,8 @@ public sealed class Apr2013DialectTests
     {
         // "Jawbone Ravine - Unlock 50 shards" (April MissionArea.Area: 5200 costs 50 karma, not
         // free). The client sends unLockAreaReq(areaID); the ack is (areaID, error) and only
-        // eSuccess lights the region icon up. The refreshed list/push then carry the open region
-        // in the client's own id families: mission 121, area 5200 marked bought.
+        // eSuccess lights the region icon up. The refreshed list then opens act 2 (base 5210)
+        // and the push carries area 5200 marked bought.
         string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-unlock-" + Guid.NewGuid().ToString("N"));
         var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
             new AccountStore(dir), TestData.Data, new WebUserStore(dir),
@@ -430,8 +453,8 @@ public sealed class Apr2013DialectTests
             ids.Add(list.ReadInt());
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
         }
-        Assert.Contains(111, ids); // act 1, still there
-        Assert.Contains(121, ids); // act 2 opened by the purchase
+        Assert.Contains(5110, ids); // act 1, still there
+        Assert.Contains(5210, ids); // act 2 opened by the purchase
 
         Packet areas = Reader(recording.Packets[3]);
         var bought = new Dictionary<int, bool>();
@@ -477,7 +500,7 @@ public sealed class Apr2013DialectTests
 
         Packet ack = Reader(recording.Packets[0]);
         Assert.Equal(5200, ack.ReadInt());
-        Assert.Equal(118, ack.ReadInt()); // eMission_not_enough_badge: the karma-shortfall code
+        Assert.Equal(51, ack.ReadInt()); // eGS_LessMoney_karma: the karma-shortfall code (51 in both eras)
         Assert.Equal(49, account.Karma);
         Assert.Empty(recording.Packets.Where(p => p.GetByteStream().Length > 0
                                                   && BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_MissionAreaInfoAck));

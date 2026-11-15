@@ -364,6 +364,11 @@ namespace Akaneiro.Server.Game
             _connection.Send(packet);
         }
 
+        /// <summary>A 2014 error number as this session's client build counts it
+        /// (the 2013 builds' EServerErrorType numbering drifted; see Apr2013Dialect.ToClientError).</summary>
+        public EServerErrorType Err(int code2014) =>
+            Proto.Error(Dialect == ClientDialect.Apr2013 ? Apr2013Dialect.ToClientError(code2014) : code2014);
+
         public void SaveAccount()
         {
             // A session whose account was taken over holds an outdated copy; saving it would

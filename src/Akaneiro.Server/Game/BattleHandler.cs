@@ -426,7 +426,7 @@ namespace Akaneiro.Server.Game
             FriendAlly ally = Friends.Hire(_s.Character, _s.Data, friendCharID);
             if (ally == null)
             {
-                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eFriendError_NoExist)));
+                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, _s.Err((int)EServerErrorType.eFriendError_NoExist)));
                 return;
             }
             if (_s.FriendAlly != null && _s.FriendAlly.Present && _s.FriendAlly.ObjectId != 0
@@ -434,7 +434,7 @@ namespace Akaneiro.Server.Game
                 _s.Send(BattleResponses.AllyRegenerate(_s.FriendAlly.ObjectId, 0, 0)); // expired, not yet ticked out
             if (_s.FriendAlly != null && _s.FriendAlly.HiredUntil > now && _s.FriendAlly.Present)
             {
-                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eAlreadyHaveAlly)));
+                _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, _s.Err((int)EServerErrorType.eAlreadyHaveAlly)));
                 return;
             }
 
@@ -533,14 +533,14 @@ namespace Akaneiro.Server.Game
             int abilityId = (int)skillID;
             if (!ally.Skills.Contains(abilityId) || !_s.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
             {
-                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, Proto.Error(EServerErrorType.eGS_SkillNotExist)));
+                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, _s.Err((int)EServerErrorType.eGS_SkillNotExist)));
                 return;
             }
 
             DateTime now = _s.World.Clock.UtcNow;
             if (ally.Cooldowns.TryGetValue(abilityId, out DateTime ready) && now < ready)
             {
-                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, Proto.Error(EServerErrorType.eGS_SkillColding)));
+                _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, _s.Err((int)EServerErrorType.eGS_SkillColding)));
                 return;
             }
 
@@ -1168,7 +1168,7 @@ namespace Akaneiro.Server.Game
             if (!_s.Inventory.CanAdd(item))
             {
                 _s.Log.LogInformation("   bag full, item {Item} stays on the ground", item.ItemId);
-                _s.Send(BattleResponses.PickupItemFailed(objectID, Proto.Error(EServerErrorType.eItemError_BagFull)));
+                _s.Send(BattleResponses.PickupItemFailed(objectID, _s.Err((int)EServerErrorType.eItemError_BagFull)));
                 return;
             }
 
@@ -1230,7 +1230,7 @@ namespace Akaneiro.Server.Game
             if (type == ReviveWithKarma && _s.Account.Karma < cost)
             {
                 _s.Log.LogInformation("   revival refused: {Cost} karma needed, {Have} available", cost, _s.Account.Karma);
-                _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eGS_LessMoney_karma), new vectorAttrChange()));
+                _s.Send(BattleResponses.ReviveResult(reviveType, _s.Err((int)EServerErrorType.eGS_LessMoney_karma), new vectorAttrChange()));
                 return;
             }
 
@@ -1242,7 +1242,7 @@ namespace Akaneiro.Server.Game
             if (type == ReviveWithItem && scroll == null)
             {
                 _s.Log.LogInformation("   revival refused: no Shinigami Scroll in the bag");
-                _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eGS_LessReviveItem), new vectorAttrChange()));
+                _s.Send(BattleResponses.ReviveResult(reviveType, _s.Err((int)EServerErrorType.eGS_LessReviveItem), new vectorAttrChange()));
                 return;
             }
 

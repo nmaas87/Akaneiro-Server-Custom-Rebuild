@@ -180,7 +180,7 @@ namespace Akaneiro.Server.Game
             ItemData item = bagId == Views.BagBase ? Character.Bag.FirstOrDefault(i => i.Slot == slot) : null;
             if (item == null)
             {
-                _s.Send(GameResponses.SaleItemFailed(Proto.Error(EServerErrorType.eItemError_CantSellItem)));
+                _s.Send(GameResponses.SaleItemFailed(_s.Err((int)EServerErrorType.eItemError_CantSellItem)));
                 return;
             }
             int value = SellValue(item);

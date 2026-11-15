@@ -82,9 +82,6 @@ namespace Akaneiro.Server.Protocol
                 ProtocolGame_METHOD.uMethodID_SendBagInfo => SendBagInfo(cs),
                 ProtocolGame_METHOD.uMethodID_SendMissionProcess => SendMissionProcess(cs),
                 ProtocolGame_METHOD.uMethodID_MissionListAck => MissionListAck(cs),
-                ProtocolGame_METHOD.uMethodID_branchCompleteNTF => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_branchCompleteNTF, 5),
-                ProtocolGame_METHOD.uMethodID_MissionCompleteNTF => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_MissionCompleteNTF, 3),
-                ProtocolGame_METHOD.uMethodID_MissionFailAck => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_MissionFailAck, 2),
                 ProtocolGame_METHOD.uMethodID_ProcessRedeemGiftResult => ProcessRedeemGiftResult(cs),
                 _ => packet,
             };
@@ -94,26 +91,19 @@ namespace Akaneiro.Server.Protocol
 
         // ---- mission id families -------------------------------------------------------------
         //
-        // The 2014 server numbers every mission 5RTM: region 1-8, mission 1-4, threat variant 1-4
-        // (the tutorial sits at 5011..5014, its map base ids look like 5110). The 2013 client's
-        // tables know only 1RM ids (its MissionDescription rows are 111..183; threat is not a
-        // separate mission back then but karma bought on the map) and addresses whole areas as
-        // 5R00 (5000 tutorial, 5100..5800). Every mission id that crosses to or from the client
-        // passes through these three.
+        // The client's own bounty-panel math (isOpenRegion: missionID / 100 % 10 == region + 1;
+        // SetLevelInfo: missionID % 100 / 10 - 1 = slot, % 10 - 1 = threat) runs on the server's
+        // 5RTM map ids - the shipped region-level prefabs' 1RM table ids (111..183) only appear
+        // where the client fills CurrentMissionID from its own prefab data, so mission ids cross
+        // inbound through ToServerMissionId and stay untouched going out. World map regions are
+        // addressed as 5R00 areas (5100..5800, tutorial 5000), which the area push rewrites.
 
-        /// <summary>Server mission or map-base id to the 2013 table id; 0 = mission unknown in 2013
-        /// (the fourth mission of each region arrived later).</summary>
-        public static int ToClientMissionId(int serverId)
-        {
-            int region = serverId / 100 % 10, mission = serverId % 100 / 10;
-            if (region == 0) return 100 + mission;                 // tutorial
-            if (region is < 1 or > 8 || mission is < 1 or > 3) return 0;
-            return 100 + region * 10 + mission;
-        }
-
-        /// <summary>2013 table id back to the server mission (threat 1 variant).</summary>
+        /// <summary>A 2013 table id (1RM, tutorial 101) back to the server mission (threat 1
+        /// variant); the server's own 5RTM ids pass through.</summary>
         public static int ToServerMissionId(int clientMissionId)
         {
+            if (clientMissionId >= 5000)
+                return clientMissionId;
             int region = clientMissionId / 10 % 10, mission = clientMissionId % 10;
             return region is < 0 or > 8 || mission is < 1 or > 4 ? clientMissionId
                 : 5000 + region * 100 + mission * 10 + 1;
@@ -122,16 +112,32 @@ namespace Akaneiro.Server.Protocol
         /// <summary>Server mission or map-base id to the 2013 area id the world map regions use.</summary>
         public static int ToClientAreaId(int serverId) => 5000 + serverId / 100 % 10 * 100;
 
-        /// <summary>Rewrite a small all-int notification, replacing its first (mission) id.</summary>
-        private static Packet MissionIdInts(byte[] cs, int methodId, int fieldCount)
+        // ---- error code eras -----------------------------------------------------------------
+        //
+        // EServerErrorType numbers drifted between the 2013 build and 2014 (codes inserted in the
+        // item/mission/pet blocks). Sending 2014 numbers makes the April client render the wrong
+        // popup - 109 (2014's "already got the day reward") prints as its 109
+        // "eMission_Dont_Have_ReqLevel". The pairs below are read off both builds' TypeDefine.
+
+        private static readonly Dictionary<int, int> ErrorByEra = new()
         {
-            Packet ins = Body(cs);
-            Packet os = Begin(methodId);
-            os.WriteInt(ToClientMissionId(ins.ReadInt()));
-            for (int i = 1; i < fieldCount; i++)
-                os.WriteInt(ins.ReadInt());
-            return Finish(os);
-        }
+            [(int)EServerErrorType.eGS_LessReviveItem] = 52,
+            [(int)EServerErrorType.eGS_SkillNotExist] = 54,
+            [(int)EServerErrorType.eFriendError_NoExist] = 68,
+            [(int)EServerErrorType.eAlreadyHaveAlly] = 78,
+            [(int)EServerErrorType.eItemError_NoExist] = 85,
+            [(int)EServerErrorType.eItemError_CantSellItem] = 89,
+            [(int)EServerErrorType.eItemError_BagFull] = 92,
+            [(int)EServerErrorType.eItemError_CantBeSwapped] = 96,
+            [(int)EServerErrorType.eDayRewardError_AlreadyGet] = 107,
+            [(int)EServerErrorType.eMission_Not_exist] = 113,
+            [(int)EServerErrorType.eMission_have_buy_area] = 117,
+            [(int)EServerErrorType.eLeftTalentPoint_lack] = 120,
+        };
+
+        /// <summary>A 2014 error number as the April 2013 build counts it; unmapped codes (and
+        /// eSuccess/eUnknownError, which match in both eras) pass through.</summary>
+        public static int ToClientError(int code) => ErrorByEra.TryGetValue(code, out int era) ? era : code;
 
         private static HashSet<int> UnknownIds() => _unknownIds ??= new HashSet<int>(
             GameResponses.Names.Keys.Where(id => !Known.Contains(GameResponses.Names[id])));
@@ -323,9 +329,10 @@ namespace Akaneiro.Server.Protocol
             // (2014's exp, karma and materialMap are simply not read back)
 
             // Like the January build, this client has one relive counter; the karma one is what
-            // its relive shop spent. The mission id moves to the 2013 table family.
+            // its relive shop spent. The mission id stays the server's (the client's panel math
+            // works on it directly).
             Packet os = Begin(ProtocolGame_METHOD.uMethodID_SendMissionProcess);
-            os.WriteUint((uint)ToClientMissionId((int)missionID));
+            os.WriteUint(missionID);
             vectorSBranch.Write(os, branches);
             os.WriteInt(karmaReliveNum);
             return Finish(os);
@@ -337,21 +344,16 @@ namespace Akaneiro.Server.Protocol
             vectorSAcceptMissionRelate list = new vectorSAcceptMissionRelate();
             vectorSAcceptMissionRelate.Read(ins, out list);
 
-            // ids move to the 2013 family; the fourth mission of a region did not exist in 2013.
-            // The tutorial never appears on the April bounty map (its client opens the tutorial
-            // through the village NPC via TutorialEnterReq), and an id of the 0-region breaks the
-            // panel's slot math (id % 100 / 10 - 1 = -1), which leaves the region's slots unfilled.
+            // The entries keep the server's map ids (the panel's region/slot math works on them);
+            // only the field list is April's (no coolDownTime after the id, no lastPassLvl).
+            // The tutorial map is dropped (it never shows on the bounty map; the client opens it
+            // through the village NPC) as is the each region's fourth mission (arrived in 2014).
             var kept = new List<SAcceptMissionRelate2>();
             foreach (SAcceptMissionRelate2 m in list)
             {
-                if (m.missionID / 100 % 10 == 0)
+                if (m.missionID / 100 % 10 == 0 || m.missionID % 100 / 10 == 4)
                     continue;
-                int client = ToClientMissionId(m.missionID);
-                if (client != 0)
-                {
-                    m.missionID = client;
-                    kept.Add(m);
-                }
+                kept.Add(m);
             }
 
             Packet os = Begin(ProtocolGame_METHOD.uMethodID_MissionListAck);

@@ -222,7 +222,7 @@ namespace Akaneiro.Server.Game
             if (moving == null || to == null || srcBag == Views.BagEquip || dstSlot >= Capacity(dstBag)
                 || (srcBag == dstBag && srcSlot == dstSlot))
             {
-                _s.Send(GameResponses.SwapItemFailed(Proto.Error(EServerErrorType.eItemError_CantBeSwapped)));
+                _s.Send(GameResponses.SwapItemFailed(_s.Err((int)EServerErrorType.eItemError_CantBeSwapped)));
                 return;
             }
 
@@ -270,7 +270,7 @@ namespace Akaneiro.Server.Game
             ItemData item = bag == null ? null : At(bag, slot);
             if (item == null)
             {
-                _s.Send(GameResponses.DelItemFailed(Proto.Error(EServerErrorType.eItemError_NoExist)));
+                _s.Send(GameResponses.DelItemFailed(_s.Err((int)EServerErrorType.eItemError_NoExist)));
                 return;
             }
             bag.Remove(item);
