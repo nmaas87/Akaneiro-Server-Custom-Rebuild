@@ -14,6 +14,38 @@ The game client is never changed. Everything happens on the server side: a stand
 game's old login service (mw.angry-red.com) and the game server itself.
 
 
+SUPPORTED CLIENT VERSIONS
+-------------------------
+
+    20140416 English - the Steam build (and its standalone fat client)
+        The main target, full support: everything in WHAT WORKS below.
+
+    20130416 English - the "04162" fat client (win04162.zip)
+        Playable. It speaks the April 2013 cut of the protocol; the server translates every
+        packet to that dialect and plays the session on the era's own content tables (items,
+        level curve, daily rewards read from the client's own bundle). Actively polished; the
+        features the cut itself never shipped (mail, stash, crafting UI, redeem gifts) are
+        absent by design - see KNOWN-ISSUES.txt.
+
+    20130130 Chinese (ZH) - the oldest fat client
+        Barely tested. The server speaks its January 2013 protocol cut (dropping messages it
+        has no parser for and rewriting structs to its older field lists), and login plus core
+        gameplay work at packet level, but this client is served from the 2014 content tables
+        and nobody has played it end to end - expect rough edges.
+
+Downloads of the retired standalone clients (unofficial community archives on archive.org):
+
+    20130130 Chinese:                       https://archive.org/details/AkaneiroDemonHunters-LivBs
+    20130416 English (04162) and 20140416:  https://archive.org/details/AkaneiroDemonHunters
+
+If you can find a 20130130 build in English, please open an issue (or otherwise let me know) -
+it would close the one gap in the version matrix above.
+
+The fat clients log in with an account name and password instead of Steam: while the server is
+running, create one at http://127.0.0.1/register.html, then log in and create your character.
+(The Steam build creates its account automatically from your Steam session - see QUICK START.)
+
+
 WHAT WORKS
 ----------
 
@@ -90,7 +122,7 @@ TESTS
 
     dotnet test tests/Akaneiro.Server.Tests
 
-Runs the game logic in-process (about 800 tests in a few seconds): a TestPlayer talks to a server
+Runs the game logic in-process (over 900 tests in a few seconds): a TestPlayer talks to a server
 session with the client's own protocol code, and a manual clock makes monster fights, cooldowns
 and delayed level events run without waiting. The level data tests check every mission on every
 threat level for reachable monsters.
