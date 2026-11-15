@@ -36,7 +36,7 @@ namespace Akaneiro.Server.Game
             // Bosses always leave materials, other monsters now and then.
             int count = !materials ? 0 : monster.IsBoss ? 1 + rng.Next(2) : rng.Next(100) < MaterialChance ? 1 : 0;
             for (int i = 0; i < count; i++)
-                drops.Add(RollMaterial(rng));
+                drops.Add(RollMaterial(data, rng));
             return drops;
         }
 
@@ -51,7 +51,7 @@ namespace Akaneiro.Server.Game
             int level = Math.Max(1, obj.LootLevel);
             Roll(drops, level, loot.EquipmentDrops, loot.ConsumableDrops, loot.Materials, loot.UniqueDrops, data, rng);
             if (rng.Next(100) < ObjectMaterialChance)
-                drops.Add(RollMaterial(rng));
+                drops.Add(RollMaterial(data, rng));
             return drops;
         }
 
@@ -91,14 +91,26 @@ namespace Akaneiro.Server.Game
         /// gems (7001-7009) and element cores (8001-8004) rarer, the Karma Core (9001) the rarest.
         /// PrefabId is the client's icon index, not a model variant (ItemType.IsModelIndex): the
         /// crafting panel and material lists build these as GetItemObject(id, 1, 0, 0, 0, 1).
+        ///
+        /// An era whose own bundle never shipped the recipe table (April 2013: no crafting UI,
+        /// no UpgradeRecipes file) also never shipped icon bundles for the 6xxx enchantment
+        /// materials - its client shows a placeholder for them and has no way to craft with them
+        /// anyway. Such a client is rolled gems and element cores instead, all of which carry
+        /// real icon bundles (ICN_Gem_*, Core_*) and are sellable loot in a build without crafting.
         /// </summary>
-        public static ItemData RollMaterial(Random rng)
+        public static ItemData RollMaterial(GameData data, Random rng)
         {
             int roll = rng.Next(100);
-            int itemId = roll < 55 ? 6001 + rng.Next(9)
-                : roll < 80 ? 7001 + rng.Next(9)
-                : roll < 97 ? 8001 + rng.Next(4)
-                : 9001;
+            int itemId;
+            if (data.EraHasCrafting)
+                itemId = roll < 55 ? 6001 + rng.Next(9)
+                    : roll < 80 ? 7001 + rng.Next(9)
+                    : roll < 97 ? 8001 + rng.Next(4)
+                    : 9001;
+            else
+                itemId = roll < 55 ? 7001 + rng.Next(9)
+                    : roll < 97 ? 8001 + rng.Next(4)
+                    : 9001;
             return new ItemData { ItemId = itemId, PrefabId = 1, Level = 1, Count = 1 };
         }
 

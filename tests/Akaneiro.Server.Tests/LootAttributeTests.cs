@@ -40,7 +40,7 @@ public sealed class LootAttributeTests
     public void MaterialsAreCraftingIngredients()
     {
         var rng = new Random(3);
-        var ids = Enumerable.Range(0, 500).Select(_ => Loot.RollMaterial(rng).ItemId).ToHashSet();
+        var ids = Enumerable.Range(0, 500).Select(_ => Loot.RollMaterial(TestData.Data, rng).ItemId).ToHashSet();
 
         Assert.All(ids, id => Assert.True(id is >= 6001 and <= 6009 or >= 7001 and <= 7009 or >= 8001 and <= 8004 or 9001, $"{id}"));
         Assert.Contains(ids, id => id / 1000 == 6);

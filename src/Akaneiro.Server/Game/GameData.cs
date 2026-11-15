@@ -427,6 +427,15 @@ namespace Akaneiro.Server.Game
         /// eras, which keep threat switches free.</summary>
         public IReadOnlyDictionary<int, ThreatCostRow> ThreatCosts { get; }
 
+        /// <summary>Whether this era's own bundle really carries the crafting recipe table. The
+        /// 2014 client does; the April 2013 cut's bundle does not - its crafting UI was cut (the
+        /// protocol constants survive, no client code sends them) and the era's client never got
+        /// icon bundles for the enchantment materials (6xxx) either: the registry entry resolves
+        /// to a bundle that was not shipped, so those items show a placeholder in the bag. A
+        /// client like that should be handed materials it can actually display and that it has a
+        /// use for - gems and element cores carry their own icon bundles.</summary>
+        public bool EraHasCrafting { get; }
+
         /// <summary>Baskets, chests, switches per scene (InteractiveObj), placed by the server.</summary>
         public IReadOnlyDictionary<string, List<BreakableInfo>> Breakables { get; }
 
@@ -1057,6 +1066,11 @@ namespace Akaneiro.Server.Game
             ThreatCosts = File.Exists(threatCosts)
                 ? JsonSerializer.Deserialize<Dictionary<int, ThreatCostRow>>(File.ReadAllText(threatCosts))
                 : new Dictionary<int, ThreatCostRow>();
+
+            // Crafting is era real only when the era's own bundle carries the recipe table; the
+            // April 2013 tables dir does not (its UI was cut, and its material icons never
+            // shipped), so that era rolls materials the client can actually show.
+            EraHasCrafting = File.Exists(Path.Combine(tables, "UpgradeRecipes.Recipes.EN.txt"));
 
             string breakableFile = Pick(dataDir, fallbackData, "breakables.json");
             Breakables = File.Exists(breakableFile)

@@ -274,7 +274,7 @@ public sealed class MailTests
         Assert.Equal(1, player.Character.Bag.Single(i => i.ItemId == 20058).PrefabId);
 
         // Dropped by a monster (Loot.RollConsumable / RollMaterial).
-        var rolled = Loot.RollMaterial(player.World.Random);
+        var rolled = Loot.RollMaterial(player.World.Data, player.World.Random);
         Assert.Equal(1, rolled.PrefabId);
 
         // Equipment keeps its real model variant: EnsurePrefab never touches it.

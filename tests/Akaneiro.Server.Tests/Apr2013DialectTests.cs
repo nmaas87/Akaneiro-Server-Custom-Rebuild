@@ -685,6 +685,28 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void TheAprilMaterialRollsStickToItemsThatClientCanShow()
+    {
+        // The April bundle ships icon bundles for every gem (ICN_Gem_Ruby..Golden) and element
+        // core (Core_Ice..Storm, Core_Karma) but never shipped one for the 6xxx enchantment
+        // materials - the client's registry entry loads a bundle that does not exist, so pelt
+        // and scrap stacks sit in the bag as placeholders. The era also has no crafting UI
+        // (no UpgradeRecipes table in its bundle), so enchantment materials would be dead
+        // weight regardless. April loot rolls gems and cores instead: every id below has both
+        // a Props.General row and a real icon bundle in that client.
+        var rng = new Random(7);
+        var ids = Enumerable.Range(0, 500).Select(_ => Loot.RollMaterial(TestData2013.Data, rng).ItemId).ToHashSet();
+
+        Assert.All(ids, id => Assert.True(id is >= 7001 and <= 7009 or >= 8001 and <= 8004 or 9001, $"{id}"));
+        Assert.False(TestData2013.Data.EraHasCrafting); // April's own tables carry no recipe file
+        Assert.True(TestData.Data.EraHasCrafting);      // 2014 rolls stay exactly as shipped
+
+        string props = File.ReadAllText(Path.Combine(
+            TestData.FindClientAssets("client-source-2013"), "Resources", "Localization", "EN", "Props.General.EN.txt"));
+        Assert.All(ids, id => Assert.Contains($"\n{id}\t", props)); // every roll resolves in April's table
+    }
+
+    [Fact]
     public void The2013TutorialMapCarriesEnoughKillsForTheDoorMilestones()
     {
         // The April client opens the village doors at tutorial kill milestones 2, 11 and 22
