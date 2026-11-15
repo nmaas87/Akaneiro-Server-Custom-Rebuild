@@ -52,9 +52,10 @@ namespace Akaneiro.Server.Game
         public World World { get; }
         public ILogger Log { get; }
 
-        /// <summary>True for a connection the web login marked as the 2013 client build; every
-        /// send then goes through Zh2013Dialect (drop unknown methods, rewrite old struct layouts).</summary>
-        public bool ZhClient { get; set; }
+        /// <summary>Which protocol cut this connection speaks (decided at web login). Every send
+        /// then goes through the matching dialect filter (drop unknown methods, rewrite old
+        /// struct layouts); Modern sends the 2014 wire unchanged.</summary>
+        public ClientDialect Dialect { get; set; } = ClientDialect.Modern;
 
         public AccountData Account { get; set; }
         public CharacterData Character { get; set; }
@@ -330,13 +331,20 @@ namespace Akaneiro.Server.Game
 
         public void Send(Packet packet)
         {
-            // The 2013 Chinese client build understands a subset of the protocol with older struct
-            // layouts; everything goes through the dialect filter before it hits the wire.
-            if (ZhClient)
+            // Older client builds understand a subset of the protocol with different struct
+            // layouts; everything goes through the matching dialect filter before it hits the wire.
+            switch (Dialect)
             {
-                if (!Zh2013Dialect.Supports(packet))
-                    return; // a method this client never had a parser for (mail, well, gifts...)
-                packet = Zh2013Dialect.Translate(packet);
+                case ClientDialect.Zh2013:
+                    if (!Zh2013Dialect.Supports(packet))
+                        return; // a method this client never had a parser for (mail, well, gifts...)
+                    packet = Zh2013Dialect.Translate(packet);
+                    break;
+                case ClientDialect.Apr2013:
+                    if (!Apr2013Dialect.Supports(packet))
+                        return; // no parser for it in the April 2013 build (mail, char slots...)
+                    packet = Apr2013Dialect.Translate(packet);
+                    break;
             }
             if (World.Options.LogPackets)
             {

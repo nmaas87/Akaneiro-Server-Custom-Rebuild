@@ -80,10 +80,13 @@ server (the summon window's friend ally is covered under ASSUMPTIONS):
   (HOSTING.txt, "Web login"); its account service is this server, tokens live only in memory and
   there is no password-recovery mail. The browser-based WebPlayer variant (WebLoginCtrl, a GET
   with ip:port answer) is not implemented: it needs the actual WebPlayer build plus a host page.
-- The 2013 Chinese client build gets packets in its own era's layout through a server-side
-  dialect layer (Zh2013Dialect), chosen by the "other" version field its login omits. That
-  build knows no mailbox, no stash and no well, so welcome letters (including the rare catalog
-  letter) are only visible from a 2014 client - claiming them must happen there.
+- Pre-2014 client builds get packets in their own era's layout through server-side dialect
+  layers, chosen by the "other" version field of the web login: the 2013 Chinese build omits the
+  field (Zh2013Dialect), the April 2013 English download client posts it empty (Apr2013Dialect),
+  2014 clients post a version and get the plain wire. The January 2013 build knows no mailbox,
+  no stash and no well, the April 2013 build only no mailbox/stash/slots - welcome letters
+  (including the rare catalog letter) are therefore only visible from a 2014 client, and
+  claiming them must happen there.
 
 Several players can use one server at the same time, but each plays in their own world and they
 never meet.

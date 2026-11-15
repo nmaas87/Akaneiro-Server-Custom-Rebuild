@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Akaneiro.Server.Protocol;
 
 namespace Akaneiro.Server.Data
 {
@@ -89,29 +90,30 @@ namespace Akaneiro.Server.Data
         private WebUserData FindUid(string uid) => _users.FirstOrDefault(u => u.Uid == uid);
 
         /// <summary>gameCode issued by the web login: token -> uid + expiry + client dialect.</summary>
-        private readonly Dictionary<string, (string Uid, DateTimeOffset Until, bool Legacy2013)> _tokens =
-            new Dictionary<string, (string, DateTimeOffset, bool)>();
+        private readonly Dictionary<string, (string Uid, DateTimeOffset Until, ClientDialect Dialect)> _tokens =
+            new Dictionary<string, (string, DateTimeOffset, ClientDialect)>();
 
         /// <summary>
-        /// Hands out a gameCode for a TCP login (see Http/WebLoginService.cs). legacy2013 marks the
-        /// 2013 client build (the Chinese fat client sends no "other" version field) so the game
-        /// connection can switch to the Zh2013Dialect packet layout.
+        /// Hands out a gameCode for a TCP login (see Http/WebLoginService.cs). The dialect marks
+        /// which client build the login POST came from so the game connection can switch to the
+        /// matching packet layout (Zh2013Dialect / Apr2013Dialect).
         /// </summary>
-        public string IssueToken(string uid, DateTimeOffset now, TimeSpan lifetime, bool legacy2013 = false)
+        public string IssueToken(string uid, DateTimeOffset now, TimeSpan lifetime,
+            ClientDialect dialect = ClientDialect.Modern)
         {
             string token = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16));
-            _tokens[token] = (uid, now + lifetime, legacy2013);
+            _tokens[token] = (uid, now + lifetime, dialect);
             return token;
         }
 
         /// <summary>
         /// Checks a gameCode from the web login: known, unexpired, and issued to this uid. A Steam
-        /// login never produces a token here, so the two paths can never be confused. legacy2013
+        /// login never produces a token here, so the two paths can never be confused. dialect
         /// reports which client build the login POST came from.
         /// </summary>
-        public bool ValidateToken(string token, string uid, DateTimeOffset now, out bool legacy2013)
+        public bool ValidateToken(string token, string uid, DateTimeOffset now, out ClientDialect dialect)
         {
-            legacy2013 = false;
+            dialect = ClientDialect.Modern;
             if (string.IsNullOrEmpty(token) || !_tokens.TryGetValue(token, out var entry))
                 return false;
             if (now > entry.Until)
@@ -121,7 +123,7 @@ namespace Akaneiro.Server.Data
             }
             if (entry.Uid != uid)
                 return false;
-            legacy2013 = entry.Legacy2013;
+            dialect = entry.Dialect;
             return true;
         }
 

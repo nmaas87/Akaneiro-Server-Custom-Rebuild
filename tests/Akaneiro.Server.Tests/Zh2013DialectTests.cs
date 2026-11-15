@@ -283,12 +283,13 @@ public sealed class Zh2013DialectTests
         var user = player.World.WebUsers.Create("zh@example.com", "pw123");
 
         string modern = player.World.WebUsers.IssueToken(user.Uid, player.Clock.UtcNow, TimeSpan.FromHours(12));
-        string legacy = player.World.WebUsers.IssueToken(user.Uid, player.Clock.UtcNow, TimeSpan.FromHours(12), legacy2013: true);
+        string legacy = player.World.WebUsers.IssueToken(user.Uid, player.Clock.UtcNow, TimeSpan.FromHours(12),
+            ClientDialect.Zh2013);
 
-        Assert.True(player.World.WebUsers.ValidateToken(modern, user.Uid, player.Clock.UtcNow, out bool modernLegacy));
-        Assert.False(modernLegacy);
-        Assert.True(player.World.WebUsers.ValidateToken(legacy, user.Uid, player.Clock.UtcNow, out bool legacyFlag));
-        Assert.True(legacyFlag);
+        Assert.True(player.World.WebUsers.ValidateToken(modern, user.Uid, player.Clock.UtcNow, out ClientDialect modernDialect));
+        Assert.Equal(ClientDialect.Modern, modernDialect);
+        Assert.True(player.World.WebUsers.ValidateToken(legacy, user.Uid, player.Clock.UtcNow, out ClientDialect legacyDialect));
+        Assert.Equal(ClientDialect.Zh2013, legacyDialect);
     }
 
     [Fact]
@@ -296,7 +297,7 @@ public sealed class Zh2013DialectTests
     {
         using var player = new Akaneiro.Server.Tests.Harness.TestPlayer(_output, webLogin: true);
         var recording = new RecordingSink();
-        var session = new Session(player.World, recording, NullLogger.Instance) { ZhClient = true };
+        var session = new Session(player.World, recording, NullLogger.Instance) { Dialect = ClientDialect.Zh2013 };
 
         session.Send(GameResponses.RecvNewMail(new vectorMailInfos()));
         session.Send(GameResponses.UserCharacterInfo(Views.CharacterBasic(Character())));

@@ -275,9 +275,30 @@ Its game text (item names, tooltips, ability names, quest dialogue) can be switc
 
        python tools/zhclient-english-tables/make_english_tables.py <zh client>\Akaneiro_Data <2014 client>\Akaneiro_Data
 
-(it needs "pip install unitypy"), then copy the written resources.english.assets over the
+(int it needs "pip install unitypy"), then copy the written resources.english.assets over the
 client's resources.assets. Table data only - the menu buttons and other UI chrome are compiled
 into the client and stay Chinese.
+
+
+THE APRIL 2013 ENGLISH CLIENT (SAME LOGIN, MIDDLE PROTOCOL CUT)
+---------------------------------------------------------------
+
+The oldest surviving ENGLISH standalone build - the April 16, 2013 download client - was
+recovered from the Wayback Machine (it was the spicyhorse CDN at the time):
+
+    https://web.archive.org/web/20130502151518id_/http://cdn.angry-red.com/Win04162.zip
+    (523 MB, SHA-256 650a4a7504e16cb4ef625774e4c66661f0a67e12f53dd6bd217d8834f8a78961)
+    a Mac build of the same day is at .../20130502151518id_/http://cdn.angry-red.com/Mac04162.zip
+
+Unzip it anywhere (it unpacks to a "Win" folder with Akaneiro.exe); it needs the same hosts
+entry as the others (spicyworld.spicyhorse.com -> your server) and logs in through the same
+client.php account flow. This build posts an "other" field but leaves it empty - that marks its
+gameCode as the April 2013 dialect, a middle cut between the January 2013 client above and the
+2014 wire: it already has the well, redeem gifts and ping (they work against this server), but
+no mailbox, no stash, no char slots, no rename/gender and no cooldown speedups, so those packets
+are dropped and the few structs still in their 2013 shape (account block, login/character
+blocks, bag group, mission process/list, gift block) are rewritten. Text is English in this
+build out of the box - no table swap needed.
 
 
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK

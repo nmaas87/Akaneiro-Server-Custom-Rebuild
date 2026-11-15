@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
+using Akaneiro.Server.Protocol;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +54,8 @@ namespace Akaneiro.Server.Http
                 string email = request.Form["email"].ToString();
                 string password = request.Form["password"].ToString();
                 string game = request.Form["game"].ToString();
-                string version = request.Form["other"].ToString();
+                bool postsVersion = request.Form.TryGetValue("other", out Microsoft.Extensions.Primitives.StringValues otherField);
+                string version = otherField.ToString();
 
                 if (!string.Equals(game, "akaneiro", StringComparison.OrdinalIgnoreCase) &&
                     !string.Equals(game, "akaneiro_test", StringComparison.OrdinalIgnoreCase))
@@ -83,10 +85,14 @@ namespace Akaneiro.Server.Http
                     }
 
                     WebUserData user = world.WebUsers.Find(email);
-                    // The 2014 clients (Steam/web "client ver") always post an "other" version field;
-                    // the 2013 Chinese fat client does not - that absence is its dialect marker.
-                    string token = world.WebUsers.IssueToken(user.Uid, DateTimeOffset.UtcNow, TokenLifetime,
-                        legacy2013: string.IsNullOrWhiteSpace(version));
+                    // The "other" form field marks the client build: the 2014 clients post their
+                    // version string; the April 2013 download client posts the field but leaves it
+                    // empty (its WebLoginCtrl.MyVersion is never filled outside the browser); the
+                    // January 2013 Chinese fat client does not post the field at all.
+                    ClientDialect dialect = !postsVersion ? ClientDialect.Zh2013
+                        : string.IsNullOrWhiteSpace(version) ? ClientDialect.Apr2013
+                        : ClientDialect.Modern;
+                    string token = world.WebUsers.IssueToken(user.Uid, DateTimeOffset.UtcNow, TokenLifetime, dialect);
                     string server = $"{options.PublicHost}:{options.GamePort}";
                     log.LogInformation("web login {Email} (uid {Uid}) -> {Server} (client version {Version})", email, user.Uid, server, version);
 

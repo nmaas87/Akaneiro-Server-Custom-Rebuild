@@ -25,14 +25,21 @@ namespace Akaneiro.Server.Game
             // Web login ("client ver"): client.php handed out a gameCode for this uid; it arrives
             // here as the token. This runs before the Steam path and only activates for tokens this
             // server issued through WebLoginService, so Steam logins take exactly the old branch.
-            // The 2013 Chinese client is marked on its gameCode: every send then goes through the
-            // Zh2013Dialect rewrite/drop filter.
-            bool legacy2013 = false;
+            // Older client builds are marked on their gameCode: every send then goes through the
+            // matching dialect rewrite/drop filter.
+            ClientDialect dialect = ClientDialect.Modern;
             bool webAuthenticated = _s.World.Options.WebLogin
-                && _s.World.WebUsers.ValidateToken(tocken, account, _s.World.Clock.UtcNow, out legacy2013);
-            _s.ZhClient = webAuthenticated && legacy2013;
-            if (_s.ZhClient)
-                _s.Log.LogInformation("   login {Account}: 2013 client build, switching packet dialect", account);
+                && _s.World.WebUsers.ValidateToken(tocken, account, _s.World.Clock.UtcNow, out dialect);
+            _s.Dialect = webAuthenticated ? dialect : ClientDialect.Modern;
+            switch (_s.Dialect)
+            {
+                case ClientDialect.Zh2013:
+                    _s.Log.LogInformation("   login {Account}: January 2013 client build, switching packet dialect", account);
+                    break;
+                case ClientDialect.Apr2013:
+                    _s.Log.LogInformation("   login {Account}: April 2013 client build, switching packet dialect", account);
+                    break;
+            }
 
             // A uid that belongs to a web account must not be usable without its gameCode; every
             // other account string (Steam IDs and anything the editor path sends) keeps behaving as before.
