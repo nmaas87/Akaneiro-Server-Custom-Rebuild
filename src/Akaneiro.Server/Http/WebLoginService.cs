@@ -85,13 +85,7 @@ namespace Akaneiro.Server.Http
                     }
 
                     WebUserData user = world.WebUsers.Find(email);
-                    // The "other" form field marks the client build: the 2014 clients post their
-                    // version string; the April 2013 download client posts the field but leaves it
-                    // empty (its WebLoginCtrl.MyVersion is never filled outside the browser); the
-                    // January 2013 Chinese fat client does not post the field at all.
-                    ClientDialect dialect = !postsVersion ? ClientDialect.Zh2013
-                        : string.IsNullOrWhiteSpace(version) ? ClientDialect.Apr2013
-                        : ClientDialect.Modern;
+                    ClientDialect dialect = DialectOf(postsVersion, version);
                     string token = world.WebUsers.IssueToken(user.Uid, DateTimeOffset.UtcNow, TokenLifetime, dialect);
                     string server = $"{options.PublicHost}:{options.GamePort}";
                     log.LogInformation("web login {Email} (uid {Uid}) -> {Server} (client version {Version})", email, user.Uid, server, version);
@@ -105,6 +99,22 @@ namespace Akaneiro.Server.Http
         }
 
         private static IResult Plain(string body) => Results.Text(body, "text/plain");
+
+        /// <summary>
+        /// The "other" form field of the login POST marks the client build: the January 2013
+        /// Chinese fat client does not post the field at all; the April 2013 download client
+        /// posts its build version "20130416" (the login scene hands it to WebLoginCtrl as
+        /// MyVersion); every other client (the 2014 web and Steam builds post 2014-era version
+        /// strings) gets the plain 2014 wire. A posted but empty field can only be a pre-2014
+        /// build whose version was never filled, so it also gets the April 2013 dialect.
+        /// </summary>
+        public static ClientDialect DialectOf(bool postsVersionField, string version)
+        {
+            if (!postsVersionField)
+                return ClientDialect.Zh2013;
+            version = (version ?? "").Trim();
+            return version.Length == 0 || version == "20130416" ? ClientDialect.Apr2013 : ClientDialect.Modern;
+        }
 
         /// <summary>
         /// The registration page at GET /register.html. Self-contained HTML + a few lines of plain

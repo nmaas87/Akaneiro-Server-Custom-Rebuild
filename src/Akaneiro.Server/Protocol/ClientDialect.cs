@@ -16,8 +16,9 @@ namespace Akaneiro.Server.Protocol
 
         /// <summary>
         /// April 2013 protocol cut - the English download client (Win04162, "win04162.zip").
-        /// Posts an empty "other" field: it knows the well, redeem gifts and the shop visibility
-        /// flags, but not mail, char slots, rename/gender, cooldowns or the stash bag.
+        /// Marks itself with the version "20130416" in its login POST: it knows the well, redeem
+        /// gifts and the shop visibility flags, but not mail, char slots, rename/gender,
+        /// cooldowns or the stash bag.
         /// </summary>
         Apr2013,
     }

@@ -90,6 +90,23 @@ public sealed class WebLoginTests
         player.Dispose();
     }
 
+    /// <summary>The login POST's "other" field selects the packet dialect (see WebLoginService).</summary>
+    [Fact]
+    public void TheOtherFormFieldSelectsTheClientDialect()
+    {
+        // the January 2013 Chinese fat client: no field at all
+        Assert.Equal(Akaneiro.Server.Protocol.ClientDialect.Zh2013,
+            Akaneiro.Server.Http.WebLoginService.DialectOf(postsVersionField: false, version: null));
+        // the April 2013 download client: version "20130416" (and defensively: a posted but empty field)
+        Assert.Equal(Akaneiro.Server.Protocol.ClientDialect.Apr2013,
+            Akaneiro.Server.Http.WebLoginService.DialectOf(postsVersionField: true, version: "20130416"));
+        Assert.Equal(Akaneiro.Server.Protocol.ClientDialect.Apr2013,
+            Akaneiro.Server.Http.WebLoginService.DialectOf(postsVersionField: true, version: ""));
+        // 2014 web and Steam builds post their 2014-era protocol version
+        Assert.Equal(Akaneiro.Server.Protocol.ClientDialect.Modern,
+            Akaneiro.Server.Http.WebLoginService.DialectOf(postsVersionField: true, version: "20140110"));
+    }
+
     [Fact]
     public void WebStoreKeepsPasswordsHashed()
     {

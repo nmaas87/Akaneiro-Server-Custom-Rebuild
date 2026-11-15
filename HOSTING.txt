@@ -292,10 +292,11 @@ recovered from the Wayback Machine (it was the spicyhorse CDN at the time):
 
 Unzip it anywhere (it unpacks to a "Win" folder with Akaneiro.exe); it needs the same hosts
 entry as the others (spicyworld.spicyhorse.com -> your server) and logs in through the same
-client.php account flow. This build posts an "other" field but leaves it empty - that marks its
-gameCode as the April 2013 dialect, a middle cut between the January 2013 client above and the
-2014 wire: it already has the well, redeem gifts and ping (they work against this server), but
-no mailbox, no stash, no char slots, no rename/gender and no cooldown speedups, so those packets
+client.php account flow. This build posts its build version "20130416" as the login's "other"
+field - that marks its gameCode as the April 2013 dialect, a middle cut between the January
+2013 client above and the 2014 wire: it already has the well, redeem gifts and ping (they work
+against this server), but no mailbox, no stash, no char slots, no rename/gender and no cooldown
+speedups, so those packets
 are dropped and the few structs still in their 2013 shape (account block, login/character
 blocks, bag group, mission process/list, gift block) are rewritten. Text is English in this
 build out of the box - no table swap needed.
