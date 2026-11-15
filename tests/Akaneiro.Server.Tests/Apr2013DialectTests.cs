@@ -794,23 +794,26 @@ public sealed class Apr2013DialectTests
             Character = character,
         };
 
-        // Two scrolls from the elder's shop (its crystal price is waived on this server).
-        apr.HandlePacket(ProtocolGame_SendRequest.BuyConsumeItem(2, 20103, 2).GetByteStream()[6..]);
+        // The shop sells pack items 20100-20105 whose id encodes the amount (1/5/10/20/50/100
+        // scrolls, prices 3/10/17/30/60/100 crystals - waived here). Each purchase adds the
+        // amount to the counter; the bag stays empty.
+        apr.HandlePacket(ProtocolGame_SendRequest.BuyConsumeItem(2, 20101, 1).GetByteStream()[6..]); // 5-pack
+        apr.HandlePacket(ProtocolGame_SendRequest.BuyConsumeItem(2, 20104, 1).GetByteStream()[6..]); // 50-pack
 
-        Assert.Equal(2, account.ReviveCharges);
-        Assert.DoesNotContain(character.Bag, i => i.ItemId == 20103);
+        Assert.Equal(55, account.ReviveCharges);
+        Assert.DoesNotContain(character.Bag, i => Views.ScrollPackSize(i.ItemId) > 0);
         var counts = recording.Packets
             .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_UpdateReviveNum)
             .Select(p => BitConverter.ToInt32(p.GetByteStream(), 10))
             .ToList();
-        Assert.Equal(new[] { 2 }, counts);
+        Assert.Equal(new[] { 5, 55 }, counts);
 
-        // Scrolls a character still carries from 2014-era play become charges on April login,
-        // and the migration is idempotent.
-        character.Bag.Add(new ItemData { Slot = 1, ItemId = 20103, Count = 3 });
+        // Packs a character still carries from 2014-era play become charges (pack amount x
+        // stack count) on April login, and the migration is idempotent.
+        character.Bag.Add(new ItemData { Slot = 1, ItemId = 20101, Count = 3 }); // three 5-packs
         Assert.True(Views.MigrateAprilScrolls(account));
-        Assert.Equal(5, account.ReviveCharges);
-        Assert.DoesNotContain(character.Bag, i => i.ItemId == 20103);
+        Assert.Equal(70, account.ReviveCharges);
+        Assert.DoesNotContain(character.Bag, i => Views.ScrollPackSize(i.ItemId) > 0);
         Assert.False(Views.MigrateAprilScrolls(account));
     }
 

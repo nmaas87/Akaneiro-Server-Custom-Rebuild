@@ -31,6 +31,20 @@ namespace Akaneiro.Server.Game
         public const int ReviveScrollItem = 20103;
 
         /// <summary>
+        /// The shop sells scrolls as pack items 20100-20105 (Props.General): the id itself says
+        /// how many scrolls are inside - 1, 5, 10, 20, 50, 100 (the table has no amount column;
+        /// the name string "50 Shinigami Scrolls" is the only other place it appears). The 2013
+        /// model converts every pack straight into that many charges on the account counter;
+        /// the 2014 model leaves the packs as bag items.
+        /// </summary>
+        private static readonly Dictionary<int, int> ScrollPackSizes = new()
+        {
+            [20100] = 1, [20101] = 5, [20102] = 10, [20103] = 20, [20104] = 50, [20105] = 100,
+        };
+
+        public static int ScrollPackSize(int itemId) => ScrollPackSizes.GetValueOrDefault(itemId);
+
+        /// <summary>
         /// Revive scrolls lying in the bags of the account's characters (the 2014 model). The
         /// client shows this number on the revive screen ("left revive number", accountInfo.reviveNum
         /// and On_UpdateReviveNum); a scroll-type revival (eReviveType_Item) consumes one from the
@@ -49,11 +63,14 @@ namespace Akaneiro.Server.Game
             int moved = 0;
             foreach (CharacterData character in account.Characters)
                 for (int i = character.Bag.Count - 1; i >= 0; i--)
-                    if (character.Bag[i].ItemId == ReviveScrollItem)
+                {
+                    int size = ScrollPackSize(character.Bag[i].ItemId);
+                    if (size > 0)
                     {
-                        moved += character.Bag[i].Count;
+                        moved += size * character.Bag[i].Count;
                         character.Bag.RemoveAt(i);
                     }
+                }
             if (moved == 0)
                 return false;
             account.ReviveCharges += moved;

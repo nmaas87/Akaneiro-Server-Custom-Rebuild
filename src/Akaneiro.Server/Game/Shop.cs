@@ -178,8 +178,8 @@ namespace Akaneiro.Server.Game
             }
             var item = new ItemData { ItemId = itemId, Level = Character.Level, Count = count };
             Data.EnsurePrefab(item); // the client's consumable shop shows these with icon index 1
-            // 2013-model scrolls go to the account charge counter, no bag slot needed.
-            bool charges = _s.Dialect == ClientDialect.Apr2013 && itemId == Views.ReviveScrollItem;
+            // 2013-model scroll packs go to the account charge counter, no bag slot needed.
+            bool charges = _s.Dialect == ClientDialect.Apr2013 && Views.ScrollPackSize(itemId) > 0;
             if (!charges && !_s.Inventory.CanAdd(item))
             {
                 Fail(EServerErrorType.eItemError_BagFull);
