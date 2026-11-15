@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <None Update="GameData\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="GameData2013\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

@@ -52,6 +52,14 @@ public sealed class UnitySerializedFile
         ParseMetadata();
     }
 
+    /// <summary>Reads a serialized file from memory (the files inside a UnityCfsFile bundle).</summary>
+    public UnitySerializedFile(byte[] data, string displayName)
+    {
+        Path = displayName;
+        _data = data;
+        ParseMetadata();
+    }
+
     private void ParseMetadata()
     {
         var r = new Reader(_data) { BigEndian = true };

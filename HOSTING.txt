@@ -311,11 +311,13 @@ client-source-2013, extracted from its resources.assets with
 tools/win2013-client-tables/dump_tables.py) and April-dialect sessions are played on them:
 its level curve, its daily rewards, its prices. The dialect translates mission and area ids
 between the two families in both directions. Everything the 2013 bundle never had (crafting
-recipes, threat cycle, the scene maps themselves) falls back to the modern content - which
-means monster spawns per map are still the 2014 placements until April-era scene data is
-extracted into GameData2013 (see tools/regen-gamedata.sh for what such a folder holds). If
-you delete or rename client-source-2013 the server starts without it and April clients play
-on the modern content (the startup line says which content sets are loaded).
+recipes, threat cycle, and the whole monster/breakable PLACEMENT - the 2013 client ships none,
+that layout lived on the lost original server and all 140+ bundles were scanned to prove it)
+falls back to the modern content; the era's own monster stat definitions (92 types, from its
+Relation tables) do ship in GameData2013/monsters.json via tools/regen-gamedata-2013.sh. The
+maps themselves are the same geometry in both eras. If you delete or rename client-source-2013
+the server starts without it and April clients play on the modern content (the startup line
+says which content sets are loaded).
 
 
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK

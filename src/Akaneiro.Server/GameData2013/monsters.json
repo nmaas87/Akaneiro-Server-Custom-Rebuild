@@ -1,0 +1,6061 @@
+[
+  {
+    "TypeId": 100,
+    "Name": "Amano Imp",
+    "Prefab": "CH_Imp_AmnImp",
+    "Script": "Oni",
+    "MaxHealth": 30,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 6,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 8,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 8,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 101,
+    "Name": "Amano Brute",
+    "Prefab": "CH_Imp_AmnBrute",
+    "Script": "Oni",
+    "MaxHealth": 60,
+    "Level": 3,
+    "LootLevel": 4,
+    "Xp": 12,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 16,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 16,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 18,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 102,
+    "Name": "Amano Lobber",
+    "Prefab": "CH_Imp_AmnLobber",
+    "Script": "OniRanged",
+    "MaxHealth": 30,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 6,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 12,
+    "AttackRange": 10,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 1,
+        "MinDistance": 5,
+        "MaxDistance": 10
+      }
+    ],
+    "ThrowAbility": 30006,
+    "ThrowRelease": 1.0333333,
+    "ThrowCastLength": 1.6666667,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 104,
+    "Name": "Amano Wrangler",
+    "Prefab": "CH_Imp_AmnWrangler",
+    "Script": "Oni",
+    "MaxHealth": 54,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 9,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 4,
+    "AttackDamage": 12,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 15,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 15,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 106,
+    "Name": "Amano Trapper",
+    "Prefab": "CH_Imp_AmnTrap",
+    "Script": "Oni",
+    "MaxHealth": 390,
+    "Level": 10,
+    "LootLevel": 18,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 432,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 390,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 390,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 107,
+    "Name": "Amano Shaman",
+    "Prefab": "CH_Imp_AmnShaman",
+    "Script": "Oni",
+    "MaxHealth": 60,
+    "Level": 3,
+    "LootLevel": 4,
+    "Xp": 12,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 16,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 16,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 108,
+    "Name": "Amano Hunter",
+    "Prefab": "CH_Imp_AmnHunter",
+    "Script": "OniRanged",
+    "MaxHealth": 390,
+    "Level": 10,
+    "LootLevel": 18,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 400,
+    "AttackRange": 10,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 400,
+        "HitChance": 1,
+        "MinDistance": 2,
+        "MaxDistance": 10
+      }
+    ],
+    "ThrowAbility": 30006,
+    "ThrowRelease": 1.0333333,
+    "ThrowCastLength": 1.6666667,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 109,
+    "Name": "Bloodroot Thief",
+    "Prefab": "CH_Imp_BrtThief",
+    "Script": "Oni",
+    "MaxHealth": 105,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 15,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 108,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 110,
+    "Name": "Bonedancer Lex",
+    "Prefab": "CH_Imp_BoneDancer",
+    "Script": "Oni",
+    "MaxHealth": 294,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 42,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 90,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 90,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 111,
+    "Name": "Amano Captain",
+    "Prefab": "CH_Imp_AmnCaptain",
+    "Script": "Oni",
+    "MaxHealth": 75,
+    "Level": 4,
+    "LootLevel": 4,
+    "Xp": 15,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 15,
+    "WantedKarma": 5,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 20,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 112,
+    "Name": "Amano Thrall",
+    "Prefab": "CH_Imp_AmnThrall",
+    "Script": "Oni",
+    "MaxHealth": 54,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 9,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 35,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 35,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 113,
+    "Name": "Poxfinger",
+    "Prefab": "CH_Imp_Poxfinger",
+    "Script": "Oni",
+    "MaxHealth": 150,
+    "Level": 3,
+    "LootLevel": 4,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 30,
+    "WantedKarma": 3,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 16,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 16,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 18,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 114,
+    "Name": "Amano Messenger",
+    "Prefab": "CH_Imp_Messenger",
+    "Script": "Oni",
+    "MaxHealth": 105,
+    "Level": 3,
+    "LootLevel": 4,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 21,
+    "WantedKarma": 4,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 16,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 16,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 18,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 116,
+    "Name": "Koori Frostbiter",
+    "Prefab": "CH_Imp_KooFrostBiter",
+    "Script": "Oni",
+    "MaxHealth": 189,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 300,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 250,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 280,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 117,
+    "Name": "Koori Pelter",
+    "Prefab": "CH_Imp_KooPelter",
+    "Script": "OniRanged",
+    "MaxHealth": 189,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 300,
+    "AttackRange": 10,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 1,
+        "MinDistance": 2,
+        "MaxDistance": 10
+      }
+    ],
+    "ThrowAbility": 30006,
+    "ThrowRelease": 1.0333333,
+    "ThrowCastLength": 1.6666667,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 118,
+    "Name": "Koori Warden",
+    "Prefab": "CH_Imp_KooWarden",
+    "Script": "Oni",
+    "MaxHealth": 324,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 36,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 4,
+    "AttackDamage": 300,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 119,
+    "Name": "Koori Witch",
+    "Prefab": "CH_Imp_KooWitch",
+    "Script": "Oni",
+    "MaxHealth": 324,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 36,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 260,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 260,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 120,
+    "Name": "Shaman Lord Mag Yi",
+    "Prefab": "CH_Imp_ShamanMagYi",
+    "Script": "Oni",
+    "MaxHealth": 378,
+    "Level": 4,
+    "LootLevel": 15,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 42,
+    "WantedKarma": 4,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 300,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 121,
+    "Name": "Koori Witch",
+    "Prefab": "CH_Imp_WhisperWitch",
+    "Script": "Oni",
+    "MaxHealth": 378,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 260,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 260,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 122,
+    "Name": "Amano Hermit",
+    "Prefab": "CH_Imp_AmnHermit",
+    "Script": "Oni",
+    "MaxHealth": 480,
+    "Level": 3,
+    "LootLevel": 18,
+    "Xp": 48,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 48,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 4,
+    "AttackDamage": 400,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 400,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 124,
+    "Name": "Magjaw Spitfire",
+    "Prefab": "CH_Imp_MJSpitfire",
+    "Script": "Oni",
+    "MaxHealth": 576,
+    "Level": 3,
+    "LootLevel": 24,
+    "Xp": 48,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 768,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 768,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 700,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 125,
+    "Name": "Amano Harbinger",
+    "Prefab": "CH_Imp_AmanoHarbinger",
+    "Script": "Oni",
+    "MaxHealth": 30,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 6,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 0,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 0,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 0,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 0,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 126,
+    "Name": "Koori Messenger",
+    "Prefab": "CH_Imp_KooMessenger",
+    "Script": "Oni",
+    "MaxHealth": 378,
+    "Level": 3,
+    "LootLevel": 15,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 42,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 6,
+    "AttackDamage": 180,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 180,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 200,
+    "Name": "Demon Wolf Runt",
+    "Prefab": "CH_Wolf_Demon",
+    "Script": "Wolf",
+    "MaxHealth": 30,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 6,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 12,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 201,
+    "Name": "Demon Wolf Alpha",
+    "Prefab": "CH_Wolf_DemonAlpha",
+    "Script": "WolfElite",
+    "MaxHealth": 45,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 9,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 12,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 202,
+    "Name": "Coldsnap Wolf",
+    "Prefab": "CH_Wolf_Cold",
+    "Script": "Wolf",
+    "MaxHealth": 189,
+    "Level": 7,
+    "LootLevel": 15,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1.8,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 300,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 1.5
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 205,
+    "Name": "Tainted Wolf Alpha",
+    "Prefab": "CH_Wolf_TaintedAlpha",
+    "Script": "WolfElite",
+    "MaxHealth": 30,
+    "Level": 3,
+    "LootLevel": 3,
+    "Xp": 6,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 12,
+    "AttackRange": 1,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 1
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 12,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 1
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 206,
+    "Name": "Shade Beast",
+    "Prefab": "CH_Wolf_Shade",
+    "Script": "Wolf",
+    "MaxHealth": 54,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 9,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 48,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 207,
+    "Name": "Shade Terror",
+    "Prefab": "CH_Wolf_ShadeTerror",
+    "Script": "WolfElite",
+    "MaxHealth": 72,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 12,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 48,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 208,
+    "Name": "The Karmahound",
+    "Prefab": "CH_Wolf_Karmahound",
+    "Script": "Wolf",
+    "MaxHealth": 180,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 4,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 30,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 48,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 209,
+    "Name": "Filthy Maurice",
+    "Prefab": "CH_Wolf_FilthyMaurice",
+    "Script": "Wolf",
+    "MaxHealth": 105,
+    "Level": 4,
+    "LootLevel": 4,
+    "Xp": 21,
+    "KarmaMin": 1,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 21,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 20,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 210,
+    "Name": "Demon Wolf Ripper",
+    "Prefab": "CH_Wolf_DemonRipper",
+    "Script": "WolfElite",
+    "MaxHealth": 390,
+    "Level": 3,
+    "LootLevel": 18,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 432,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.75,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 212,
+    "Name": "Insane Wolf",
+    "Prefab": "CH_Wolf_Insane",
+    "Script": "Wolf",
+    "MaxHealth": 15,
+    "Level": 1,
+    "LootLevel": 1,
+    "Xp": 3,
+    "KarmaMin": 1,
+    "KarmaMax": 1,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1.8,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 0,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 0,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 0,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 1.5
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 300,
+    "Name": "Jinmenju Lasher",
+    "Prefab": "CH_Tree_JinLasher",
+    "Script": "Jinmenju",
+    "MaxHealth": 105,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 15,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 8,
+    "AlertDistance": 5,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 108,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 301,
+    "Name": "Jinmenju Scourger",
+    "Prefab": "CH_Tree_JinScourger",
+    "Script": "Jinmenju",
+    "MaxHealth": 147,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 108,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 303,
+    "Name": "The Shroom King",
+    "Prefab": "CH_Tree_ShroomKing",
+    "Script": "Jinmenju",
+    "MaxHealth": 840,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 120,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 120,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 108,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 305,
+    "Name": "Haunted Fungus",
+    "Prefab": "CH_Tree_HauntFungus",
+    "Script": "Jinmenju",
+    "MaxHealth": 105,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 15,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 108,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 306,
+    "Name": "Roots of Blood",
+    "Prefab": "CH_Tree_RootsBlood",
+    "Script": "Jinmenju",
+    "MaxHealth": 840,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 120,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 120,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 108,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 307,
+    "Name": "Jubokko Nest",
+    "Prefab": "CH_Tree_Jubokko",
+    "Script": "Jubokko",
+    "MaxHealth": 630,
+    "Level": 1,
+    "LootLevel": 1,
+    "Xp": 90,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 90,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 309,
+    "Name": "The Shroom Queen",
+    "Prefab": "CH_Tree_ShroomQueen",
+    "Script": "Jinmenju",
+    "MaxHealth": 1280,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 160,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 160,
+    "WantedKarma": 16,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 192,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 310,
+    "Name": "Frost Shrine",
+    "Prefab": "CH_Tree_FrostShrine",
+    "Script": "Jubokko",
+    "MaxHealth": 2700,
+    "Level": 1,
+    "LootLevel": 15,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 311,
+    "Name": "Frost Shrine",
+    "Prefab": "CH_Tree_HeartofIce ",
+    "Script": "Jubokko",
+    "MaxHealth": 2700,
+    "Level": 1,
+    "LootLevel": 15,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 313,
+    "Name": "Sprite Cage",
+    "Prefab": "CH_Tree_SpriteCage",
+    "Script": "Jubokko",
+    "MaxHealth": 390,
+    "Level": 1,
+    "LootLevel": 18,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 314,
+    "Name": "Stolen Idol",
+    "Prefab": "CH_Tree_StolenIdol",
+    "Script": "Jubokko",
+    "MaxHealth": 390,
+    "Level": 1,
+    "LootLevel": 15,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": [
+      {
+        "ItemId": 5003,
+        "PrefabId": 1,
+        "Chance": 100
+      }
+    ]
+  },
+  {
+    "TypeId": 315,
+    "Name": "Haunted Fungus",
+    "Prefab": "CH_Tree_HauntMoss",
+    "Script": "Jinmenju",
+    "MaxHealth": 420,
+    "Level": 9,
+    "LootLevel": 21,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 567,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 316,
+    "Name": "Fairy Soup Vat",
+    "Prefab": "CH_Tree_FairySoupVat",
+    "Script": "Jubokko",
+    "MaxHealth": 390,
+    "Level": 1,
+    "LootLevel": 15,
+    "Xp": 39,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 401,
+    "Name": "Pickled Head",
+    "Prefab": "CH_Bug_PickledHead",
+    "Script": "Fruit02_NPC",
+    "MaxHealth": 63,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 1,
+    "KarmaMin": 0,
+    "KarmaMax": 0,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 108,
+    "AttackRange": 1.2,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 1.2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 403,
+    "Name": "Koori Pincer",
+    "Prefab": "CH_Bug_KooPincer",
+    "Script": "Fruit02_NPC",
+    "MaxHealth": 81,
+    "Level": 7,
+    "LootLevel": 15,
+    "Xp": 1,
+    "KarmaMin": 0,
+    "KarmaMax": 0,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 300,
+    "AttackRange": 1.2,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 1.2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 500,
+    "Name": "Ghostclaw Zealot",
+    "Prefab": "CH_Werewolf_GCZealot",
+    "Script": "SpiritWerewolf",
+    "MaxHealth": 72,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 12,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 48,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 501,
+    "Name": "Ghostclaw Priest",
+    "Prefab": "CH_Werewolf_GCPriest",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 108,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 18,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 30,
+    "AttackRange": 9,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 30,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 502,
+    "Name": "Bloodfang Stalker",
+    "Prefab": "CH_Werewolf_BFStalker",
+    "Script": "Wolf",
+    "MaxHealth": 144,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 18,
+    "KarmaMin": 0,
+    "KarmaMax": 7,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 192,
+    "AttackRange": 2.25,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2.25
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2.25
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 503,
+    "Name": "Bloodfang Bandit",
+    "Prefab": "CH_Werewolf_BFBandit",
+    "Script": "WerewolfElite",
+    "MaxHealth": 240,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 192,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 504,
+    "Name": "Bloodfang Hexer",
+    "Prefab": "CH_Werewolf_BFHexer",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 240,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 7,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 192,
+    "AttackRange": 15,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.5000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 505,
+    "Name": "Ghostclaw Fanatic",
+    "Prefab": "CH_Werewolf_GCFanatic",
+    "Script": "SpiritWerewolf",
+    "MaxHealth": 90,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 15,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 1,
+    "AttackSpeed": 4,
+    "AttackDamage": 48,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 48,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 506,
+    "Name": "Albino Horror",
+    "Prefab": "CH_Werewolf_AlbinoHorror",
+    "Script": "Wolf",
+    "MaxHealth": 4800,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 600,
+    "KarmaMin": 0,
+    "KarmaMax": 7,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 600,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 192,
+    "AttackRange": 2.25,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2.25
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 216,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2.25
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 507,
+    "Name": "Bloodfang Emissary",
+    "Prefab": "CH_Werewolf_BFEmissary",
+    "Script": "Wolf",
+    "MaxHealth": 150,
+    "Level": 4,
+    "LootLevel": 4,
+    "Xp": 30,
+    "KarmaMin": 0,
+    "KarmaMax": 7,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 30,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 20,
+    "AttackRange": 2.25,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 20,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2.25
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 508,
+    "Name": "Blind Moro",
+    "Prefab": "CH_Werewolf_BlindMoro",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 3200,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 400,
+    "KarmaMin": 0,
+    "KarmaMax": 7,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 400,
+    "WantedKarma": 35,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 192,
+    "AttackRange": 15,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 192,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 509,
+    "Name": "Ghostclaw Agent",
+    "Prefab": "CH_Werewolf_GCAgent",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 480,
+    "Level": 12,
+    "LootLevel": 18,
+    "Xp": 48,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 48,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 480,
+    "AttackRange": 15,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 480,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 480,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 480,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.5000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 510,
+    "Name": "Ghostclaw Cultist",
+    "Prefab": "CH_Werewolf_GCCultist",
+    "Script": "WerewolfElite",
+    "MaxHealth": 480,
+    "Level": 12,
+    "LootLevel": 18,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 432,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 511,
+    "Name": "Ghostclaw Cultist",
+    "Prefab": "CH_Werewolf_GCCultist_Unique",
+    "Script": "WerewolfElite",
+    "MaxHealth": 480,
+    "Level": 12,
+    "LootLevel": 18,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 432,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 432,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": [
+      {
+        "ItemId": 5002,
+        "PrefabId": 1,
+        "Chance": 100
+      }
+    ]
+  },
+  {
+    "TypeId": 600,
+    "Name": "Ice Golem",
+    "Prefab": "CH_Zombie_Ice",
+    "Script": "FruitZombie",
+    "MaxHealth": 189,
+    "Level": 7,
+    "LootLevel": 15,
+    "Xp": 21,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0.4,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 300,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 601,
+    "Name": "Living Ice",
+    "Prefab": "CH_Zombie_LivingIce",
+    "Script": "FruitZombie",
+    "MaxHealth": 378,
+    "Level": 7,
+    "LootLevel": 15,
+    "Xp": 42,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 42,
+    "WantedKarma": 4,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0.4,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 300,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 602,
+    "Name": "Shambling Death",
+    "Prefab": "CH_Zombie_Shambling",
+    "Script": "FruitZombie",
+    "MaxHealth": 840,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 120,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 120,
+    "WantedKarma": 6,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0.4,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 117,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 108,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 603,
+    "Name": "Cryptwalker",
+    "Prefab": "CH_Zombie_Cryptwalker",
+    "Script": "FruitZombie",
+    "MaxHealth": 96,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 12,
+    "KarmaMin": 0,
+    "KarmaMax": 6,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0.4,
+    "InitState": 1,
+    "AttackSpeed": 5,
+    "AttackDamage": 117,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 700,
+    "Name": "Ushi Oni",
+    "Prefab": "CH_Boss_UshiOni",
+    "Script": "OniLord",
+    "MaxHealth": 750,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 150,
+    "KarmaMin": 2,
+    "KarmaMax": 8,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 150,
+    "WantedKarma": 5,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 70,
+    "AttackRange": 3.5,
+    "Attacks": [
+      {
+        "Chance": 40,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 70,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      },
+      {
+        "Chance": 40,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 90,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 701,
+    "Name": "Moroko",
+    "Prefab": "CH_Boss_Moroko",
+    "Script": "WolfLord",
+    "MaxHealth": 1800,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 300,
+    "KarmaMin": 3,
+    "KarmaMax": 9,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 300,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 99,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 168,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 168,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 702,
+    "Name": "Oni Poacher",
+    "Prefab": "CH_Boss_OniPoacher",
+    "Script": "OniLord",
+    "MaxHealth": 4500,
+    "Level": 1,
+    "LootLevel": 21,
+    "Xp": 450,
+    "KarmaMin": 7,
+    "KarmaMax": 13,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 450,
+    "WantedKarma": 13,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 500,
+    "AttackRange": 3.5,
+    "Attacks": [
+      {
+        "Chance": 40,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 500,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      },
+      {
+        "Chance": 40,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 703,
+    "Name": "Gashadokuro",
+    "Prefab": "CH_Boss_Gashadokuro",
+    "Script": "Gashadokuro",
+    "MaxHealth": 3500,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 500,
+    "KarmaMin": 5,
+    "KarmaMax": 10,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 500,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 2,
+    "AttackDamage": 200,
+    "AttackRange": 6,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 200,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 6
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 200,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 6
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 270,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 6
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 704,
+    "Name": "Chief Bloodfang",
+    "Prefab": "CH_Boss_BloodFang",
+    "Script": "BossBloodFang",
+    "MaxHealth": 6000,
+    "Level": 18,
+    "LootLevel": 18,
+    "Xp": 750,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 750,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 3,
+    "AttackDamage": 346,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 346,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 346,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 346,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 396,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 705,
+    "Name": "Thief Lord Min",
+    "Prefab": "CH_Boss_ThiefLordMin",
+    "Script": "Oni",
+    "MaxHealth": 2100,
+    "Level": 12,
+    "LootLevel": 12,
+    "Xp": 300,
+    "KarmaMin": 5,
+    "KarmaMax": 10,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 300,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 117,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 117,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 180,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 180,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 706,
+    "Name": "Spineripper",
+    "Prefab": "CH_Boss_SpineRipper",
+    "Script": "WolfElite",
+    "MaxHealth": 300,
+    "Level": 6,
+    "LootLevel": 6,
+    "Xp": 60,
+    "KarmaMin": 2,
+    "KarmaMax": 8,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 60,
+    "WantedKarma": 5,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 32,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 32,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 100,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 42,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 707,
+    "Name": "Giga Gashadokuro",
+    "Prefab": "CH_Boss_GigaGash",
+    "Script": "Gashadokuro",
+    "MaxHealth": 4550,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 650,
+    "KarmaMin": 5,
+    "KarmaMax": 10,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 650,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 2,
+    "AttackDamage": 200,
+    "AttackRange": 3,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 200,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 270,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 270,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 708,
+    "Name": "Bloodfang Sergeant",
+    "Prefab": "CH_Boss_BFSergeant",
+    "Script": "WerewolfElite",
+    "MaxHealth": 2880,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 360,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 360,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 4,
+    "AttackDamage": 285,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 709,
+    "Name": "Amano Warden",
+    "Prefab": "CH_Boss_AmnWarden",
+    "Script": "OniLord",
+    "MaxHealth": 2880,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 360,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 360,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 216,
+    "AttackRange": 3.5,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 216,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 3,
+        "MaxDistance": 3.5
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 710,
+    "Name": "Sleepy Edgar",
+    "Prefab": "CH_Boss_SleepyEdgar",
+    "Script": "WerewolfElite",
+    "MaxHealth": 3200,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 400,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 400,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 4,
+    "AttackDamage": 285,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 711,
+    "Name": "Verho the Berserker",
+    "Prefab": "CH_Boss_VerBerserker",
+    "Script": "WerewolfElite",
+    "MaxHealth": 2400,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 300,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 300,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 4,
+    "AttackDamage": 216,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 216,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 98
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 712,
+    "Name": "Grand Hexer Zartam",
+    "Prefab": "CH_Boss_GrandHexZar",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 2400,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 300,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 300,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 216,
+    "AttackRange": 15,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 216,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 2,
+        "MaxDistance": 15
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 98
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 713,
+    "Name": "Ker the Whisperer",
+    "Prefab": "CH_Boss_KerWhisper",
+    "Script": "Oni",
+    "MaxHealth": 2400,
+    "Level": 15,
+    "LootLevel": 15,
+    "Xp": 300,
+    "KarmaMin": 6,
+    "KarmaMax": 11,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 300,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 216,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 216,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 285,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 98
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 714,
+    "Name": "Ghostclaw Prophet",
+    "Prefab": "CH_Boss_GCProph",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 540,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 90,
+    "KarmaMin": 3,
+    "KarmaMax": 9,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 90,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 77,
+    "AttackRange": 9,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 77,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 715,
+    "Name": "Ghostclaw Scribe",
+    "Prefab": "CH_Boss_GCScribe",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 540,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 90,
+    "KarmaMin": 3,
+    "KarmaMax": 9,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 90,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 77,
+    "AttackRange": 9,
+    "Attacks": [
+      {
+        "Chance": 34,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 77,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 5,
+        "MaxDistance": 9
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 716,
+    "Name": "High Cultist Smallwind",
+    "Prefab": "CH_Boss_SmallWind",
+    "Script": "WerewolfRanged",
+    "MaxHealth": 720,
+    "Level": 9,
+    "LootLevel": 9,
+    "Xp": 120,
+    "KarmaMin": 3,
+    "KarmaMax": 9,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 120,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 77,
+    "AttackRange": 15,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 77,
+        "HitChance": 100,
+        "MinDistance": 6,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 6,
+        "MaxDistance": 15
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 6,
+        "MaxDistance": 15
+      }
+    ],
+    "ThrowAbility": 30007,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 1.6000001,
+    "ThrowSpeed": 12,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 718,
+    "Name": "Permafrost",
+    "Prefab": "CH_Boss_Permafrost",
+    "Script": "FruitZombie",
+    "MaxHealth": 3600,
+    "Level": 7,
+    "LootLevel": 18,
+    "Xp": 400,
+    "KarmaMin": 6,
+    "KarmaMax": 12,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 360,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0.4,
+    "InitState": 1,
+    "AttackSpeed": 3,
+    "AttackDamage": 414,
+    "AttackRange": 1.5,
+    "Attacks": [
+      {
+        "Chance": 25,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 414,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 360,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 380,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 1.5
+      },
+      {
+        "Chance": 25,
+        "AnimIndex": 3,
+        "ResetTime": 0.5,
+        "Damage": 414,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 3
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 719,
+    "Name": "Chef Morton",
+    "Prefab": "CH_Boss_ChefMorton",
+    "Script": "SpiritWerewolf",
+    "MaxHealth": 4500,
+    "Level": 6,
+    "LootLevel": 21,
+    "Xp": 450,
+    "KarmaMin": 7,
+    "KarmaMax": 13,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 450,
+    "WantedKarma": 13,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 5,
+    "AttackDamage": 520,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 520,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 720,
+    "Name": "Algernon the Risen",
+    "Prefab": "CH_Boss_Algernon",
+    "Script": "WerewolfElite",
+    "MaxHealth": 8000,
+    "Level": 12,
+    "LootLevel": 21,
+    "Xp": 800,
+    "KarmaMin": 7,
+    "KarmaMax": 13,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 800,
+    "WantedKarma": 13,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 567,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 720,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 723,
+    "Name": "Witching Tree",
+    "Prefab": "CH_Boss_WitchingTree",
+    "Script": "Jubokko",
+    "MaxHealth": 2250,
+    "Level": 1,
+    "LootLevel": 1,
+    "Xp": 250,
+    "KarmaMin": 5,
+    "KarmaMax": 10,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 250,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 0,
+    "InitState": 0,
+    "AttackSpeed": 0,
+    "AttackDamage": 0,
+    "AttackRange": 0,
+    "Attacks": [
+      {
+        "Chance": 0,
+        "AnimIndex": 0,
+        "ResetTime": 0,
+        "Damage": 0,
+        "HitChance": 0,
+        "MinDistance": 0,
+        "MaxDistance": 0
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 70
+      },
+      {
+        "Amount": 2,
+        "Chance": 30
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 724,
+    "Name": "Vile Tongue",
+    "Prefab": "CH_Boss_VileTongue",
+    "Script": "Oni",
+    "MaxHealth": 300,
+    "Level": 3,
+    "LootLevel": 6,
+    "Xp": 60,
+    "KarmaMin": 2,
+    "KarmaMax": 8,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 60,
+    "WantedKarma": 5,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 1,
+    "AttackSpeed": 4,
+    "AttackDamage": 32,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 33,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 32,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 33,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 42,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 34,
+        "AnimIndex": 2,
+        "ResetTime": 0.5,
+        "Damage": 42,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 726,
+    "Name": "Winter Banshee ",
+    "Prefab": "CH_Boss_WinterBanshee ",
+    "Script": "Oni",
+    "MaxHealth": 3600,
+    "Level": 3,
+    "LootLevel": 21,
+    "Xp": 400,
+    "KarmaMin": 6,
+    "KarmaMax": 12,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 360,
+    "WantedKarma": 10,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 3,
+    "AttackDamage": 380,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 380,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 414,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 1,
+        "Chance": 65
+      },
+      {
+        "Amount": 2,
+        "Chance": 25
+      },
+      {
+        "Amount": 3,
+        "Chance": 10
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 727,
+    "Name": "Executioner Silverfang",
+    "Prefab": "CH_Boss_Silverfang",
+    "Script": "WerewolfElite",
+    "MaxHealth": 8000,
+    "Level": 12,
+    "LootLevel": 21,
+    "Xp": 800,
+    "KarmaMin": 7,
+    "KarmaMax": 13,
+    "IsBoss": true,
+    "IsWanted": false,
+    "WantedXp": 800,
+    "WantedKarma": 13,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 2,
+    "InitState": 4,
+    "AttackSpeed": 5,
+    "AttackDamage": 567,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 50,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 50,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 567,
+        "HitChance": 100,
+        "MinDistance": 1.5,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 800,
+    "Name": "Infected Ainu Elder",
+    "Prefab": "CH_AinuElderInfected",
+    "Script": "Oni",
+    "MaxHealth": 15,
+    "Level": 1,
+    "LootLevel": 1,
+    "Xp": 3,
+    "KarmaMin": 1,
+    "KarmaMax": 100,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 1,
+    "WanderSpeed": 2,
+    "InitState": 0,
+    "AttackSpeed": 2,
+    "AttackDamage": 4,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 4,
+        "HitChance": 100,
+        "MinDistance": 1.25,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 900,
+    "Name": "The Bear",
+    "Prefab": "CH_Oni_Bear",
+    "Script": "OniLord",
+    "MaxHealth": 660,
+    "Level": 6,
+    "LootLevel": 9,
+    "Xp": 110,
+    "KarmaMin": 0,
+    "KarmaMax": 5,
+    "IsBoss": false,
+    "IsWanted": true,
+    "WantedXp": 110,
+    "WantedKarma": 5,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 80,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 40,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 80,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 40,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 99,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 901,
+    "Name": "Oni Masher",
+    "Prefab": "CH_Oni_Masher",
+    "Script": "OniLord",
+    "MaxHealth": 324,
+    "Level": 6,
+    "LootLevel": 15,
+    "Xp": 36,
+    "KarmaMin": 0,
+    "KarmaMax": 8,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 3,
+    "WanderSpeed": 1,
+    "InitState": 0,
+    "AttackSpeed": 4,
+    "AttackDamage": 300,
+    "AttackRange": 2,
+    "Attacks": [
+      {
+        "Chance": 40,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 0.8,
+        "MaxDistance": 2
+      },
+      {
+        "Chance": 40,
+        "AnimIndex": 1,
+        "ResetTime": 0.5,
+        "Damage": 300,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 2
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": true,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 92
+      },
+      {
+        "Amount": 1,
+        "Chance": 8
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  },
+  {
+    "TypeId": 999,
+    "Name": "Sneaky Looter",
+    "Prefab": "CH_Imp_Looter",
+    "Script": "Oni",
+    "MaxHealth": 400,
+    "Level": 1,
+    "LootLevel": 1,
+    "Xp": 24,
+    "KarmaMin": 1,
+    "KarmaMax": 100,
+    "IsBoss": false,
+    "IsWanted": false,
+    "WantedXp": 0,
+    "WantedKarma": 0,
+    "VisionRadius": 6,
+    "AlertDistance": 4,
+    "WanderSpeed": 2,
+    "InitState": 3,
+    "AttackSpeed": 6,
+    "AttackDamage": 18,
+    "AttackRange": 1.25,
+    "Attacks": [
+      {
+        "Chance": 100,
+        "AnimIndex": 0,
+        "ResetTime": 0.5,
+        "Damage": 18,
+        "HitChance": 100,
+        "MinDistance": 1,
+        "MaxDistance": 1.25
+      }
+    ],
+    "ThrowAbility": 0,
+    "ThrowRelease": 0,
+    "ThrowCastLength": 0,
+    "ThrowSpeed": 0,
+    "WakeUpSeconds": 0,
+    "SpawnSeconds": [],
+    "CanDropLoot": false,
+    "EquipmentDrops": [
+      {
+        "Amount": 0,
+        "Chance": 50
+      },
+      {
+        "Amount": 1,
+        "Chance": 50
+      }
+    ],
+    "ConsumableDrops": [],
+    "Materials": [],
+    "UniqueDrops": []
+  }
+]
