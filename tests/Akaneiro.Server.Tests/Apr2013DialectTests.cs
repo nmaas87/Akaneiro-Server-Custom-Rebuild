@@ -771,6 +771,49 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void BoughtShinigamiScrollsLandInTheDeathPanelCounter()
+    {
+        // The panel's scroll count is not recomputed from the bag - the client only mirrors the
+        // pushes - so buying (or looting/mailing) scrolls must re-push the 2013 PlayerReviveNumNTF,
+        // whose single int is the account-wide scroll number.
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-scrollcount-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")))
+        {
+            Data2013 = TestData2013.Data, // the scroll row (20103) is an April props entry
+        };
+        var account = Account();
+        var character = Character();
+        account.Characters.Add(character); // the scroll count is the account-wide sum over its characters
+        var recording = new RecordingSink();
+        var apr = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Account = account,
+            Character = character,
+        };
+
+        // Two scrolls from the elder's shop (its crystal price is waived on this server).
+        apr.HandlePacket(ProtocolGame_SendRequest.BuyConsumeItem(2, 20103, 2).GetByteStream()[6..]);
+
+        var counts = recording.Packets
+            .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF)
+            .Select(p => BitConverter.ToInt32(p.GetByteStream(), 10))
+            .ToList();
+        Assert.Equal(new[] { 2 }, counts);
+        Assert.Equal(2, character.Bag.Where(i => i.ItemId == 20103).Sum(i => i.Count));
+
+        // And spending one pulls the panel's number back down the same way.
+        apr.Inventory.Consume(Views.BagBase, character.Bag.Single(i => i.ItemId == 20103 && i.Count == 2));
+        var after = recording.Packets
+            .Where(p => BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF)
+            .Select(p => BitConverter.ToInt32(p.GetByteStream(), 10))
+            .ToList();
+        Assert.Equal(new[] { 2, 1 }, after);
+    }
+
+    [Fact]
     public void TheAprilVillageSkipsTheStashKeeperThatCutNeverShipped()
     {
         // April's NpcInfo registry ends at WELL (1010); the id after it is NOTHING, and the cut

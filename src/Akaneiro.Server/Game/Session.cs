@@ -388,6 +388,17 @@ namespace Akaneiro.Server.Game
             Send(GameResponses.UpdateMoneyInfo(money));
         }
 
+        /// <summary>
+        /// Re-push the death panel's Shinigami Scroll count (the whole account's scrolls). The
+        /// April panel keeps its own scroll slot and only learns the number through this push;
+        /// login and revival already send it, item flows call this for the April dialect.
+        /// </summary>
+        public void NotifyReviveScrolls()
+        {
+            if (Dialect == ClientDialect.Apr2013)
+                Send(Apr2013Dialect.PlayerReviveNumNTF2013(Views.ReviveScrollCount(Account)));
+        }
+
         public void OnDisconnected()
         {
             _aiTimer?.Dispose();

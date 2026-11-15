@@ -291,6 +291,8 @@ namespace Akaneiro.Server.Game
             _s.Send(GameResponses.NotifyItemDestroy(bagId, slot));
             if (paid > 0)
                 _s.SendMoney();
+            if (item.ItemId == Views.ReviveScrollItem)
+                _s.NotifyReviveScrolls();
         }
 
         /// <summary>Takes <paramref name="count"/> of a stack away; the slot empties when nothing is left.</summary>
@@ -300,10 +302,14 @@ namespace Akaneiro.Server.Game
             if (item.Count > 0)
             {
                 _s.Send(GameResponses.NotifyItemUpdate(bagId, Views.Item(item)));
+                if (item.ItemId == Views.ReviveScrollItem)
+                    _s.NotifyReviveScrolls();
                 return;
             }
             Bag(bagId).Remove(item);
             _s.Send(GameResponses.NotifyItemDestroy(bagId, (uint)item.Slot));
+            if (item.ItemId == Views.ReviveScrollItem)
+                _s.NotifyReviveScrolls();
         }
 
         // ---- adding ------------------------------------------------------------------------------
@@ -329,7 +335,7 @@ namespace Akaneiro.Server.Game
                     left -= moved;
                     _s.Send(GameResponses.NotifyItemUpdate(Views.BagBase, Views.Item(stack)));
                     if (left == 0)
-                        return true;
+                        return ScrollsMaybeChanged(item);
                 }
             }
             while (left > 0)
@@ -339,6 +345,19 @@ namespace Akaneiro.Server.Game
                 Character.Bag.Add(copy);
                 _s.Send(GameResponses.NotifyItemUpdate(Views.BagBase, Views.Item(copy)));
             }
+            return ScrollsMaybeChanged(item);
+        }
+
+        /// <summary>
+        /// The death panel's Shinigami Scroll counter mirrors the account's scroll bags; the
+        /// client only learns the number from the revive-count push (login and revival already
+        /// send it), so buying, looting or mailing scrolls re-pushes it immediately. April's
+        /// panel is the one that shows it as its own scroll slot, hence the April-only push.
+        /// </summary>
+        private bool ScrollsMaybeChanged(ItemData item)
+        {
+            if (item.ItemId == Views.ReviveScrollItem)
+                _s.NotifyReviveScrolls();
             return true;
         }
 
