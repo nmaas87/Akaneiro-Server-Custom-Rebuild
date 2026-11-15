@@ -198,24 +198,44 @@ public sealed class BattleGuardTests
     }
 
     [Fact]
-    public void TheAprilRevivalPrayerCostsOneShard()
+    public void TheAprilRevivalPrayerCostsKarmaShards()
     {
         using var player = DieNextToMonsters();
         player.Session.Dialect = ClientDialect.Apr2013;
-        player.Session.Account.Crystals = 5;
+        player.Session.Account.Karma = 5000;
+        player.Session.Account.Crystals = 100;
         player.ClearInbox();
 
-        // The April menu's middle option: stand up where you fell, one crystal (shard) gone.
+        // The April menu's middle option: stand up where you fell, on the same karma ladder
+        // the 2014 build uses for its karma revive; crystals stay untouched.
+        int cost = TestData.Data.RevivalCost(player.Character.Level, player.Session.Revivals);
         player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
 
         Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
         Assert.False(player.Session.IsDead);
-        Assert.Equal(4, player.Session.Account.Crystals);
+        Assert.Equal(5000 - cost, player.Session.Account.Karma);
+        Assert.Equal(100, player.Session.Account.Crystals);
 
         // And the 2013-shaped scroll count notice (one int, scrolls on the account): the 2014
         // harness receiver can't decode it, so it waits in the raw bin.
         byte[] ntf = Assert.Single(player.RawPackets((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF));
         Assert.Equal(8, ntf.Length); // method id + exactly one payload int
+    }
+
+    [Fact]
+    public void TheAprilScrollButtonFallsBackToThreeCrystals()
+    {
+        using var player = DieNextToMonsters();
+        player.Session.Dialect = ClientDialect.Apr2013;
+        player.Session.Account.Crystals = 10;
+        player.ClearInbox();
+
+        // No scroll in any bag: the April scroll button still revives, for three crystals.
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(4)));
+
+        Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
+        Assert.False(player.Session.IsDead);
+        Assert.Equal(7, player.Session.Account.Crystals);
     }
 
     [Fact]
@@ -242,16 +262,19 @@ public sealed class BattleGuardTests
         apr.ClearInbox();
         apr.Send(ProtocolGame_SendRequest.UserSelectCharacter(apr.Character.Id));
 
-        // UseAbilityFromID only finds a state that this list registered - without 12001 the
-        // client's revive stand-up is a silent no-op and the hunter stays on the ground.
+        // UseAbilityFromID only finds a state that this list registered - without 12001/12002
+        // the client's revive stand-up (plain and scroll/Prayer shockwave) is a silent no-op
+        // and the hunter stays on the ground.
         var skills = apr.Take<SPlayerSkillInfo>("On_SendSkillInfo");
         Assert.Contains(skills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
+        Assert.Contains(skills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.RevivePrayerShockwave);
 
         using var modern = new TestPlayer(_output).LoginNewCharacter();
         modern.ClearInbox();
         modern.Send(ProtocolGame_SendRequest.UserSelectCharacter(modern.Character.Id));
         var modernSkills = modern.Take<SPlayerSkillInfo>("On_SendSkillInfo");
         Assert.DoesNotContain(modernSkills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
+        Assert.DoesNotContain(modernSkills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.RevivePrayerShockwave);
     }
 
     [Fact]

@@ -219,18 +219,14 @@ namespace Akaneiro.Server.Game
             SPlayerSkillInfo skills = Views.Skills(character);
             if (_s.Dialect == ClientDialect.Apr2013)
             {
-                // The 2013 get-up animation is the revive shockwave itself: On_ReviveResult
-                // launches 12001 through UseAbilityFromID, which only works when the state is
-                // registered, and registration follows exactly this skill list. The original
-                // server must have carried it as an innate entry; the incoming slam was already
-                // accepted unmapped (BattleHandler.IsReviveShockwave).
-                skills.skillInfoVec.Add(new SSkillInfo
-                {
-                    skillID = BattleHandler.ReviveShockwave,
-                    level = 1,
-                    skillExp = 0,
-                    coldTime = 0,
-                });
+                // The 2013 get-up animations are the revive shockwaves themselves: On_ReviveResult
+                // launches 12001 (plain revive) or 12002 (ReviveEX, the scroll/Prayer path) via
+                // UseAbilityFromID, which only works when the state is registered, and registration
+                // follows exactly this skill list. The original server carried both as innate
+                // entries; the incoming slams were already accepted unmapped
+                // (BattleHandler.IsReviveShockwave).
+                foreach (int innate in new[] { BattleHandler.ReviveShockwave, BattleHandler.RevivePrayerShockwave })
+                    skills.skillInfoVec.Add(new SSkillInfo { skillID = innate, level = 1, skillExp = 0, coldTime = 0 });
             }
             _s.Send(GameResponses.SendSkillInfo(skills));
             _s.Trainer.SendTimers();
