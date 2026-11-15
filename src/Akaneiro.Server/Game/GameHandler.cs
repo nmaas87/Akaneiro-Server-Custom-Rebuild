@@ -614,6 +614,18 @@ namespace Akaneiro.Server.Game
             }
             _s.Log.LogInformation("   mission list: {Count} maps", list.Count);
             _s.Send(GameResponses.MissionListAck(list));
+
+            // 2013-era clients only bring their mission panel up when the matching area-info push
+            // follows (On_MissionAreaInfoAck -> UpdateMapLockState + initMissionMap); the 2014 UI
+            // already opens on the list answer itself. areaID = the map's base id, isBuy marks
+            // karma-purchased areas (the 2013 lock check ignores it - unlocked is unlocked).
+            if (_s.Dialect != ClientDialect.Modern)
+            {
+                var areas = new vectorSMissionAreaRelate();
+                foreach (SAcceptMissionRelate2 m in list)
+                    areas.Add(new SMissionAreaRelate { areaID = m.missionID, isBuy = false });
+                _s.Send(GameResponses.MissionAreaInfoAck(areas));
+            }
         }
 
         /// <summary>Objectives the client reports itself: reaching a place or talking to an NPC.</summary>

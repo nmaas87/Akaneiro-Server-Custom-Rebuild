@@ -302,6 +302,54 @@ public sealed class Apr2013DialectTests
             Len(recording.Packets[1]));
     }
 
+    [Fact]
+    public void A2013ClientGetsTheAreaPushThatOpensItsBountyPanel()
+    {
+        // the 2013 mission panel is only brought up by the area-info push that follows the list;
+        // read the raw wire here, the 2014 decode of the rewritten list would throw
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        var recording = new RecordingSink();
+        var apr = new Session(player.World, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Apr2013,
+            Character = player.Character,
+        };
+
+        Packet req = ProtocolGame_SendRequest.MissionListReq();
+        apr.HandlePacket(req.GetByteStream()[6..]);
+
+        Assert.Equal(2, recording.Packets.Count); // list, then area push (the 2013 UI opens on that)
+
+        Packet list = Reader(recording.Packets[0]);
+        var ids = new List<int>();
+        int count = list.ReadInt();
+        Assert.True(count > 0);
+        for (int i = 0; i < count; i++)
+        {
+            ids.Add(list.ReadInt()); // missionID (the map's base id)
+            list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
+            // completed, triggered, star, lastPassTime, canAcceptMaxLvl - the April entry,
+            // no coolDownTime after the id and no lastPassLvl at the end
+        }
+
+        Packet areas = Reader(recording.Packets[1]);
+        Assert.Equal(ids.Count, areas.ReadInt());
+        foreach (int id in ids)
+        {
+            Assert.Equal(id, areas.ReadInt()); // areaID = the same map base id
+            areas.ReadBool();                  // isBuy marks karma-bought areas: unlocked is unlocked
+        }
+    }
+
+    [Fact]
+    public void A2014ClientNeverSeesThe2013AreaPush()
+    {
+        using var player = new TestPlayer(_output).LoginNewCharacter();
+        player.Send(ProtocolGame_SendRequest.MissionListReq());
+        player.Take("On_MissionListAck");
+        Assert.False(player.Has("On_MissionAreaInfoAck"));
+    }
+
     private sealed class RecordingSink : Akaneiro.Server.Net.IPacketSink
     {
         public List<Packet> Packets { get; } = new List<Packet>();
