@@ -35,7 +35,7 @@ namespace Akaneiro.Server.Game
         public Trainer(Session session) => _s = session;
 
         private CharacterData Character => _s.Character;
-        private GameData Data => _s.World.Data;
+        private GameData Data => _s.Data;
         private long Now => new DateTimeOffset(_s.World.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds();
 
         /// <summary>POW, DEF or SKILL, whichever the discipline (1, 2, 4) trains.</summary>

@@ -82,11 +82,20 @@ server (the summon window's friend ally is covered under ASSUMPTIONS):
   with ip:port answer) is not implemented: it needs the actual WebPlayer build plus a host page.
 - Pre-2014 client builds get packets in their own era's layout through server-side dialect
   layers, chosen by the "other" version field of the web login: the 2013 Chinese build omits the
-  field (Zh2013Dialect), the April 2013 English download client posts it empty (Apr2013Dialect),
-  2014 clients post a version and get the plain wire. The January 2013 build knows no mailbox,
-  no stash and no well, the April 2013 build only no mailbox/stash/slots - welcome letters
-  (including the rare catalog letter) are therefore only visible from a 2014 client, and
-  claiming them must happen there.
+  field (Zh2013Dialect), the April 2013 English download client posts its build version
+  20130416 (Apr2013Dialect), 2014 clients post a 2014-era version and get the plain wire.
+  The January 2013 build knows no mailbox, no stash and no well, the April 2013 build only no
+  mailbox/stash/slots - welcome letters (including the rare catalog letter) are therefore only
+  visible from a 2014 client, and claiming them must happen there.
+- Content is per client era only as far as the era's files exist. April 2013 sessions play on
+  that client's own item/level/reward tables (client-source-2013) and their mission and area
+  ids are translated between the 2013 and 2014 families, but the maps themselves (spawner
+  placements, per-map monster counts) are still the extracted 2014 scene data: on the April
+  client the tutorial therefore spawns the 2014 wolf pack, which may not line up with the
+  kill counts its own mission text asks for. Extracting April-era scene JSON into
+  GameData2013/ (same names as GameData/) switches that over without further code changes.
+  Characters mixed across eras also keep their old ids: an item created under 2014 content can
+  be a row the 2013 client cannot draw (pictureless) until it is replaced.
 
 Several players can use one server at the same time, but each plays in their own world and they
 never meet.

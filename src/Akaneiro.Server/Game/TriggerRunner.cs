@@ -332,7 +332,7 @@ namespace Akaneiro.Server.Game
             {
                 if (scene != _s.Scene || scene.DisabledSpawners.Contains(spawner.Id))
                     return;
-                var (monsters, _) = scene.AddMonsters(spawner, true, _s.World.Data, _s.World.Random);
+                var (monsters, _) = scene.AddMonsters(spawner, true, _s.Data, _s.World.Random);
                 _s.Log.LogInformation("   spawner {Spawner} loops ({Count} monsters)", spawner.Id, monsters.Count);
                 Wake(scene, spawner.Id, monsters.Where(m => m.Wave == 0).ToList());
             });

@@ -684,9 +684,20 @@ namespace Akaneiro.Server.Game
             return costs[Math.Clamp(revivalsSoFar, 0, costs.Length - 1)];
         }
 
-        public GameData(string clientAssetsDir, string dataDir)
+        public GameData(string clientAssetsDir, string dataDir, string fallbackTables = null, string fallbackData = null)
         {
-            string sceneFile = Path.Combine(dataDir, "scenes.json");
+            // An older client era's content is mostly the current content: wherever that era's
+            // bundle never had a table (the April 2013 cut has no crafting recipes, no threat
+            // cycle, no stash) or the era's scene JSON folder does not exist yet, the modern
+            // file is read instead. A fork therefore only carries what actually changed.
+            string Pick(string dir, string fallback, string name) =>
+                fallback == null || File.Exists(Path.Combine(dir, name)) ? Path.Combine(dir, name) : Path.Combine(fallback, name);
+            List<Row> ReadTable(string path) =>
+                GameData.ReadTable(File.Exists(path) || fallbackTables == null
+                    ? path : Path.Combine(fallbackTables, Path.GetFileName(path)));
+            string Json(string name) => File.ReadAllText(Pick(dataDir, fallbackData, name));
+
+            string sceneFile = Json("scenes.json");
             string tables = Path.Combine(clientAssetsDir, "Resources", "Localization", "EN");
             Levels = ReadTable(Path.Combine(tables, "Level.level.EN.txt"))
                 .Select(r => new LevelRow
@@ -699,7 +710,7 @@ namespace Akaneiro.Server.Game
                 .OrderBy(r => r.Level)
                 .ToList();
 
-            Scenes = JsonSerializer.Deserialize<Dictionary<string, SceneInfo>>(File.ReadAllText(sceneFile));
+            Scenes = JsonSerializer.Deserialize<Dictionary<string, SceneInfo>>(sceneFile);
 
             // The character creation screen lists each discipline's three starting abilities.
             var starts = new Dictionary<int, IReadOnlyList<int>>();
@@ -968,22 +979,19 @@ namespace Akaneiro.Server.Game
                 .GroupBy(r => r.Int("Level"))
                 .ToDictionary(g => g.Key, g => g.First().Float("DamageModifier"));
 
-            Monsters = JsonSerializer.Deserialize<List<MonsterRow>>(File.ReadAllText(Path.Combine(dataDir, "monsters.json")))
+            Monsters = JsonSerializer.Deserialize<List<MonsterRow>>(Json("monsters.json"))
                 .ToDictionary(m => m.TypeId);
 
-            Spawners = JsonSerializer.Deserialize<Dictionary<string, List<SpawnerInfo>>>(
-                File.ReadAllText(Path.Combine(dataDir, "spawners.json")));
+            Spawners = JsonSerializer.Deserialize<Dictionary<string, List<SpawnerInfo>>>(Json("spawners.json"));
 
-            Triggers = JsonSerializer.Deserialize<Dictionary<string, List<TriggerInfo>>>(
-                File.ReadAllText(Path.Combine(dataDir, "triggers.json")));
+            Triggers = JsonSerializer.Deserialize<Dictionary<string, List<TriggerInfo>>>(Json("triggers.json"));
 
-            string breakableFile = Path.Combine(dataDir, "breakables.json");
+            string breakableFile = Pick(dataDir, fallbackData, "breakables.json");
             Breakables = File.Exists(breakableFile)
                 ? JsonSerializer.Deserialize<Dictionary<string, List<BreakableInfo>>>(File.ReadAllText(breakableFile))
                 : new Dictionary<string, List<BreakableInfo>>();
 
-            Missions = JsonSerializer.Deserialize<Dictionary<int, MissionDefinition>>(
-                File.ReadAllText(Path.Combine(dataDir, "missions.json")),
+            Missions = JsonSerializer.Deserialize<Dictionary<int, MissionDefinition>>(Json("missions.json"),
                 new JsonSerializerOptions { NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString });
 
             RevivalCosts = ReadTable(Path.Combine(tables, "RevivalCost.Costs.EN.txt"))

@@ -43,7 +43,7 @@ namespace Akaneiro.Server.Game
 
         /// <summary>The row this kind's shared experience has reached (level 1 at 0).</summary>
         private GameData.SpiritRow LevelRow(int kind, ulong experience) =>
-            _s.World.Data.Spirits.Values
+            _s.Data.Spirits.Values
                 .Where(s => Kind(s.Id) == kind && s.XpNeeded <= experience)
                 .OrderByDescending(s => s.Level)
                 .FirstOrDefault();
@@ -59,7 +59,7 @@ namespace Akaneiro.Server.Game
                 if (rental.PetId != LineId(rental.PetId))
                 {
                     int kind = Kind(rental.PetId);
-                    if (_s.World.Data.Spirits.TryGetValue(rental.PetId, out GameData.SpiritRow promoted))
+                    if (_s.Data.Spirits.TryGetValue(rental.PetId, out GameData.SpiritRow promoted))
                         Character.SpiritExp[kind] = Math.Max(Character.SpiritExp.GetValueOrDefault(kind), promoted.XpNeeded);
                     rental.PetId = LineId(rental.PetId);
                 }
@@ -97,7 +97,7 @@ namespace Akaneiro.Server.Game
         private int TryRent(int petId, int rent)
         {
             NormalizeRentals();
-            if (!_s.World.Data.Spirits.TryGetValue(petId, out GameData.SpiritRow spirit))
+            if (!_s.Data.Spirits.TryGetValue(petId, out GameData.SpiritRow spirit))
                 return EServerErrorType.eUnknownError;
             if (Character.Level < spirit.LevelRequired)
                 return EServerErrorType.eGS_LessLevel;

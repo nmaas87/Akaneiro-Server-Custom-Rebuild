@@ -31,7 +31,7 @@ namespace Akaneiro.Server.Game
         public Inventory(Session session) => _s = session;
 
         private CharacterData Character => _s.Character;
-        private GameData Data => _s.World.Data;
+        private GameData Data => _s.Data;
 
         /// <summary>The equipment part an item goes into, as the client decides it (InventoryCtrl.GetSlotFromType).</summary>
         public static int PartOf(int itemType) => itemType switch

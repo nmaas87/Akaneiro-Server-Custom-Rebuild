@@ -27,6 +27,13 @@ namespace Akaneiro.Server
         /// <summary>Folder with the client's data tables (Resources/Localization/EN): the repository's client-source, or the client project's Assets folder.</summary>
         public string ClientAssetsDir { get; set; } = "";
 
+        /// <summary>
+        /// Folder holding the April 16 2013 client's own content tables (same layout as
+        /// ClientAssetsDir: Resources/Localization/EN). If it is not present the April 2013
+        /// dialect still runs, but on the modern content.
+        /// </summary>
+        public string Apr2013AssetsDir { get; set; } = "client-source-2013";
+
         /// <summary>Log every packet (name only) in both directions.</summary>
         public bool LogPackets { get; set; } = true;
 

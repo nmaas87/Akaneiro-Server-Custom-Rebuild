@@ -156,7 +156,7 @@ namespace Akaneiro.Server.Game
                 return false;
 
             var mail = NewMail(character, KickstarterSender, CatalogTitle, CatalogText);
-            mail.Items.AddRange(CatalogItems(_s.World.Data));
+            mail.Items.AddRange(CatalogItems(_s.Data));
 
             character.Mail.Add(mail);
             character.CatalogMailGranted = true;

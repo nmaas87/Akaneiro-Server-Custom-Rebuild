@@ -1,0 +1,18 @@
+INT	INT	INT	STRING	INT	INT	INT	INT	INT	INT	INT	INT
+ID	TypeID	PrefabID	Name	Gem	Element	Enchant	LimitCount	Level	KarmaPrice	PepperPrice	Visible
+ID	TypeID	PrefabID	Name	Gem	Element	Enchant	LimitCount	Level	KarmaPrice	PepperPrice	Visible
+1019	1001	2	Amethyst Flame Katana	5	202	0	198	1	1404	0	1
+1020	2002	102	Malachite Priest Robe	6	302	0	198	1	2754	0	1
+1022	1006	3	Brutal Flame Great Axe	0	202	302	158	4	7560	0	1
+1023	2003	202	Healthy Spy Pants	0	302	102	158	4	9072	0	1
+1024	3002	5	Precise Malachite Necklace	6	0	302	118	8	18252	0	1
+1026	2001	303	Focused Garnet Ronin Helm	4	0	202	118	8	16848	0	1
+1029	1009	6	Amethyst Frost Cutlass	5	102	0	78	12	38556	0	1
+1030	2002	403	Malachite Bushido Plate	6	202	0	78	12	33048	0	1
+1032	3002	1	Hyper Storm Malachite Necklace	6	402	202	38	16	58968	0	1
+1034	2003	503	Focused Amethyst Wild Pants	5	202	202	38	16	54432	0	1
+1037	2010	15	Healthy Malachite Rough Cloak	6	102	102	38	16	54432	0	1
+1036	2001	902	Raging Jade Yasha Helm	9	103	103	18	20	97200	0	1
+1035	2010	17	Healthy Malachite Rough Cloak	9	203	203	18	20	145800	0	1
+1038	2002	503	Chest	4	103	303	18	24	209952	0	1
+1039	1005	8	Nodachi	4	103	103	18	24	207360	0	1

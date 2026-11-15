@@ -1,0 +1,13 @@
+INT	INT	INT	INT	STRING
+AreaID	IsFree	Buykarma	UnlockPlayerMaxLvl	DebugAreaName
+Mission Prefab ID Range	IsFree	KarmaCost	LevelCap	DebugAreaName
+6000	1	0	32	Testbox
+5000	1	0	4	Tutorial
+5100	1	0	4	A1
+5200	0	50	8	A2
+5300	0	100	12	A3
+5400	0	200	16	A4
+5500	0	400	20	A5
+5600	0	800	24	A6
+5700	0	1600	24	A7
+5800	0	3200	24	A8

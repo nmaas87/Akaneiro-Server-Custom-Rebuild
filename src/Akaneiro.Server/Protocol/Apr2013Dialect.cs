@@ -82,12 +82,56 @@ namespace Akaneiro.Server.Protocol
                 ProtocolGame_METHOD.uMethodID_SendBagInfo => SendBagInfo(cs),
                 ProtocolGame_METHOD.uMethodID_SendMissionProcess => SendMissionProcess(cs),
                 ProtocolGame_METHOD.uMethodID_MissionListAck => MissionListAck(cs),
+                ProtocolGame_METHOD.uMethodID_branchCompleteNTF => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_branchCompleteNTF, 5),
+                ProtocolGame_METHOD.uMethodID_MissionCompleteNTF => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_MissionCompleteNTF, 3),
+                ProtocolGame_METHOD.uMethodID_MissionFailAck => MissionIdInts(cs, ProtocolGame_METHOD.uMethodID_MissionFailAck, 2),
                 ProtocolGame_METHOD.uMethodID_ProcessRedeemGiftResult => ProcessRedeemGiftResult(cs),
                 _ => packet,
             };
         }
 
         private static int MethodId(Packet packet) => BitConverter.ToInt32(packet.GetByteStream(), 6);
+
+        // ---- mission id families -------------------------------------------------------------
+        //
+        // The 2014 server numbers every mission 5RTM: region 1-8, mission 1-4, threat variant 1-4
+        // (the tutorial sits at 5011..5014, its map base ids look like 5110). The 2013 client's
+        // tables know only 1RM ids (its MissionDescription rows are 111..183; threat is not a
+        // separate mission back then but karma bought on the map) and addresses whole areas as
+        // 5R00 (5000 tutorial, 5100..5800). Every mission id that crosses to or from the client
+        // passes through these three.
+
+        /// <summary>Server mission or map-base id to the 2013 table id; 0 = mission unknown in 2013
+        /// (the fourth mission of each region arrived later).</summary>
+        public static int ToClientMissionId(int serverId)
+        {
+            int region = serverId / 100 % 10, mission = serverId % 100 / 10;
+            if (region == 0) return 100 + mission;                 // tutorial
+            if (region is < 1 or > 8 || mission is < 1 or > 3) return 0;
+            return 100 + region * 10 + mission;
+        }
+
+        /// <summary>2013 table id back to the server mission (threat 1 variant).</summary>
+        public static int ToServerMissionId(int clientMissionId)
+        {
+            int region = clientMissionId / 10 % 10, mission = clientMissionId % 10;
+            return region is < 0 or > 8 || mission is < 1 or > 4 ? clientMissionId
+                : 5000 + region * 100 + mission * 10 + 1;
+        }
+
+        /// <summary>Server mission or map-base id to the 2013 area id the world map regions use.</summary>
+        public static int ToClientAreaId(int serverId) => 5000 + serverId / 100 % 10 * 100;
+
+        /// <summary>Rewrite a small all-int notification, replacing its first (mission) id.</summary>
+        private static Packet MissionIdInts(byte[] cs, int methodId, int fieldCount)
+        {
+            Packet ins = Body(cs);
+            Packet os = Begin(methodId);
+            os.WriteInt(ToClientMissionId(ins.ReadInt()));
+            for (int i = 1; i < fieldCount; i++)
+                os.WriteInt(ins.ReadInt());
+            return Finish(os);
+        }
 
         private static HashSet<int> UnknownIds() => _unknownIds ??= new HashSet<int>(
             GameResponses.Names.Keys.Where(id => !Known.Contains(GameResponses.Names[id])));
@@ -279,9 +323,9 @@ namespace Akaneiro.Server.Protocol
             // (2014's exp, karma and materialMap are simply not read back)
 
             // Like the January build, this client has one relive counter; the karma one is what
-            // its relive shop spent.
+            // its relive shop spent. The mission id moves to the 2013 table family.
             Packet os = Begin(ProtocolGame_METHOD.uMethodID_SendMissionProcess);
-            os.WriteUint(missionID);
+            os.WriteUint((uint)ToClientMissionId((int)missionID));
             vectorSBranch.Write(os, branches);
             os.WriteInt(karmaReliveNum);
             return Finish(os);
@@ -293,9 +337,18 @@ namespace Akaneiro.Server.Protocol
             vectorSAcceptMissionRelate list = new vectorSAcceptMissionRelate();
             vectorSAcceptMissionRelate.Read(ins, out list);
 
-            Packet os = Begin(ProtocolGame_METHOD.uMethodID_MissionListAck);
-            os.WriteInt(list.Count);
+            // ids move to the 2013 family; the fourth mission of a region did not exist in 2013
+            var kept = new List<SAcceptMissionRelate2>();
             foreach (SAcceptMissionRelate2 m in list)
+            {
+                m.missionID = ToClientMissionId(m.missionID);
+                if (m.missionID != 0)
+                    kept.Add(m);
+            }
+
+            Packet os = Begin(ProtocolGame_METHOD.uMethodID_MissionListAck);
+            os.WriteInt(kept.Count);
+            foreach (SAcceptMissionRelate2 m in kept)
                 MissionRelate(os, m);
             return Finish(os);
         }

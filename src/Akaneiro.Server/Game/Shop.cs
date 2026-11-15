@@ -29,7 +29,7 @@ namespace Akaneiro.Server.Game
         public Shop(Session session) => _s = session;
 
         private CharacterData Character => _s.Character;
-        private GameData Data => _s.World.Data;
+        private GameData Data => _s.Data;
 
         // ---- prices -------------------------------------------------------------------------------
 

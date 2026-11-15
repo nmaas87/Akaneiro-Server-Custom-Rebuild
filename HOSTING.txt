@@ -296,10 +296,26 @@ client.php account flow. This build posts its build version "20130416" as the lo
 field - that marks its gameCode as the April 2013 dialect, a middle cut between the January
 2013 client above and the 2014 wire: it already has the well, redeem gifts and ping (they work
 against this server), but no mailbox, no stash, no char slots, no rename/gender and no cooldown
-speedups, so those packets
-are dropped and the few structs still in their 2013 shape (account block, login/character
-blocks, bag group, mission process/list, gift block) are rewritten. Text is English in this
-build out of the box - no table swap needed.
+speedups, so those packets are dropped and the few structs still in their 2013 shape (account
+block, login/character blocks, bag group, mission process/list, gift block) are rewritten.
+Text is English in this build out of the box - no table swap needed.
+
+The CONTENT of that era differs from the 2014 one too, and that is not a wire problem: its
+tables hold different item rows (the 2014 daily reward items 4050+, Resin/Flux/Leather 6007+
+do not exist there and show up as pictureless items), a different level/XP curve (level 2 at
+832 exp, not 166), lower revival costs, and missions in another id family: the 2014 server
+numbers them 5RTM (region, mission, threat variant; tutorial 5011), the 2013 client's tables
+only know 1RM rows (111..183, three missions per region, threat bought on the map) and
+address whole areas as 5000/5100..5800. So the repo carries the client's own tables (folder
+client-source-2013, extracted from its resources.assets with
+tools/win2013-client-tables/dump_tables.py) and April-dialect sessions are played on them:
+its level curve, its daily rewards, its prices. The dialect translates mission and area ids
+between the two families in both directions. Everything the 2013 bundle never had (crafting
+recipes, threat cycle, the scene maps themselves) falls back to the modern content - which
+means monster spawns per map are still the 2014 placements until April-era scene data is
+extracted into GameData2013 (see tools/regen-gamedata.sh for what such a folder holds). If
+you delete or rename client-source-2013 the server starts without it and April clients play
+on the modern content (the startup line says which content sets are loaded).
 
 
 PLAYING ON SEVERAL PCS IN YOUR HOME NETWORK

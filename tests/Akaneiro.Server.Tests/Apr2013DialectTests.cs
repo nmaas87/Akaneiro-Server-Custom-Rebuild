@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
 using Akaneiro.Server.Protocol;
@@ -167,16 +168,16 @@ public sealed class Apr2013DialectTests
     {
         var list = new vectorSAcceptMissionRelate
         {
-            new SAcceptMissionRelate2 { missionID = 101, coolDownTime = 99, IsHaveCompleted = 1,
+            new SAcceptMissionRelate2 { missionID = 5111, coolDownTime = 99, IsHaveCompleted = 1,
                 IsHaveTriggered = true, star = 2, lastPassTime = 7, canAcceptMaxLvl = 10, lastPassLvl = 6 },
-            new SAcceptMissionRelate2 { missionID = 102, coolDownTime = 5, lastPassLvl = 3 },
+            new SAcceptMissionRelate2 { missionID = 5121, coolDownTime = 5, lastPassLvl = 3 },
         };
         Packet cs = GameResponses.MissionListAck(list);
         Packet apr = Translated(cs);
 
         Packet ins = Reader(apr);
         Assert.Equal(2, ins.ReadInt());
-        Assert.Equal(101, ins.ReadInt());
+        Assert.Equal(111, ins.ReadInt()); // the 2013 table family, not the 5RTM server id
         Assert.Equal(1, ins.ReadInt());   // IsHaveCompleted right after the id: coolDownTime is gone
         Assert.True(ins.ReadBool());
         Assert.Equal(2, ins.ReadInt());
@@ -190,7 +191,7 @@ public sealed class Apr2013DialectTests
     public void TheMissionProcessKeepsOneReliveCounter()
     {
         var process = Proto.New<SMissionProcess>();
-        process.missionID = 101;
+        process.missionID = 5011; // tutorial: 101 in the 2013 family
         process.crystalReliveNum = 1;
         process.karmaReliveNum = 2;
         process.exp = 999;
@@ -201,6 +202,7 @@ public sealed class Apr2013DialectTests
         Packet ins = Reader(apr);
         Assert.Equal(101u, ins.ReadUint());
         vectorSBranch.Read(ins, out _);
+
         Assert.Equal(2, ins.ReadInt()); // the karma relives - what the April relive shop spent
         // crystalReliveNum + exp + karma + empty materialMap are gone
         Assert.Equal(16, Len(cs) - Len(apr));
@@ -303,6 +305,41 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void MissionIdsTranslateBetweenTheTwoFamilies()
+    {
+        // server 5RTM (region, mission, threat variant) <-> 2013 1RM (its MissionDescription rows)
+        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5111));
+        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5113)); // threat variants collapse: no threat missions in 2013
+        Assert.Equal(111, Apr2013Dialect.ToClientMissionId(5110)); // map base ids answer too
+        Assert.Equal(112, Apr2013Dialect.ToClientMissionId(5121));
+        Assert.Equal(0, Apr2013Dialect.ToClientMissionId(5141));   // the 4th mission of a region came later
+        Assert.Equal(101, Apr2013Dialect.ToClientMissionId(5011)); // the tutorial
+        Assert.Equal(5111, Apr2013Dialect.ToServerMissionId(111)); // back: the threat 1 variant
+        Assert.Equal(5011, Apr2013Dialect.ToServerMissionId(101));
+        Assert.Equal(5141, Apr2013Dialect.ToServerMissionId(114)); // an id the tables lack stays mappable anyway
+        Assert.Equal(5100, Apr2013Dialect.ToClientAreaId(5112));   // areas are whole regions
+        Assert.Equal(5000, Apr2013Dialect.ToClientAreaId(5011));
+    }
+
+    [Fact]
+    public void MissionNotificationsSpeakTheAprilIds()
+    {
+        Packet branch = Reader(Translated(GameResponses.branchCompleteNTF(5111, 2, 3, 40, 50)));
+        Assert.Equal(111, branch.ReadInt());
+        foreach (int expected in new[] { 2, 3, 40, 50 }) // branch, task, exp, karma follow untouched
+            Assert.Equal(expected, branch.ReadInt());
+
+        Packet done = Reader(Translated(GameResponses.MissionCompleteNTF(5121, 100, 60)));
+        Assert.Equal(112, done.ReadInt());
+        Assert.Equal(100, done.ReadInt());
+        Assert.Equal(60, done.ReadInt());
+
+        Packet fail = Reader(Translated(GameResponses.MissionFailAck(5131, 1)));
+        Assert.Equal(113, fail.ReadInt());
+        Assert.Equal(1, fail.ReadInt());
+    }
+
+    [Fact]
     public void A2013ClientGetsTheAreaPushThatOpensItsBountyPanel()
     {
         // the 2013 mission panel is only brought up by the area-info push that follows the list;
@@ -326,19 +363,26 @@ public sealed class Apr2013DialectTests
         Assert.True(count > 0);
         for (int i = 0; i < count; i++)
         {
-            ids.Add(list.ReadInt()); // missionID (the map's base id)
+            ids.Add(list.ReadInt()); // the map in the 2013 table family (101 tutorial, 111 area 1)
             list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt();
             // completed, triggered, star, lastPassTime, canAcceptMaxLvl - the April entry,
             // no coolDownTime after the id and no lastPassLvl at the end
         }
+        Assert.All(ids, id => Assert.InRange(id, 101, 183));
 
+        // the push addresses whole areas (tutorial 5000, area n -> 5000 + n * 100); maps of one
+        // region collapse into a single entry, and isBuy marks karma-bought areas (unlocked is
+        // unlocked either way)
         Packet areas = Reader(recording.Packets[1]);
-        Assert.Equal(ids.Count, areas.ReadInt());
-        foreach (int id in ids)
+        var areaIds = new List<int>();
+        int areaCount = areas.ReadInt();
+        for (int i = 0; i < areaCount; i++)
         {
-            Assert.Equal(id, areas.ReadInt()); // areaID = the same map base id
-            areas.ReadBool();                  // isBuy marks karma-bought areas: unlocked is unlocked
+            areaIds.Add(areas.ReadInt());
+            areas.ReadBool();
         }
+        Assert.Equal(ids.Select(id => 5000 + id / 10 % 10 * 100).Distinct(), areaIds);
+        Assert.Contains(5000, areaIds); // the tutorial map's area is on the list for a fresh hunter
     }
 
     [Fact]

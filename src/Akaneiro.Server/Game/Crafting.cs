@@ -28,7 +28,7 @@ namespace Akaneiro.Server.Game
         public Crafting(Session session) => _s = session;
 
         private CharacterData Character => _s.Character;
-        private GameData Data => _s.World.Data;
+        private GameData Data => _s.Data;
 
         public void Craft(byte bagId, uint slot, int craftType, int moneyType, int currentAttr, bool buyMaterial)
         {

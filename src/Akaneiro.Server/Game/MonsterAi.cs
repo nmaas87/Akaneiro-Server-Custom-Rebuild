@@ -574,7 +574,7 @@ namespace Akaneiro.Server.Game
                     if (allyTarget.Hp > 0 && SceneInstance.Distance(target, allyTarget.Position) <= ProjectileHitRadius)
                     {
                         hitDamage = Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) *
-                            (1f - Combat.DamageReduction(allyTarget.Character, _s.World.Data, allyTarget.Stats))));
+                            (1f - Combat.DamageReduction(allyTarget.Character, _s.Data, allyTarget.Stats))));
                         allyTarget.Hp = Math.Max(0, allyTarget.Hp - hitDamage);
                         allyTarget.LastHitAt = _s.World.Clock.UtcNow;
                         effect.attributeChangeVec.Add(Proto.Attr(EAttributeType.ATTR_CurHP, -hitDamage));
@@ -595,7 +595,7 @@ namespace Akaneiro.Server.Game
                 if (!_s.IsDead && _s.InvulnerableUntil <= _s.World.Clock.UtcNow
                     && SceneInstance.Distance(target, _s.Position) <= ProjectileHitRadius)
                 {
-                    damage = Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(_s.Character, _s.World.Data, _s.Stats))));
+                    damage = Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(_s.Character, _s.Data, _s.Stats))));
                     _s.CurrentHp = Math.Max(0, _s.CurrentHp - damage);
                     effect.attributeChangeVec.Add(Proto.Attr(EAttributeType.ATTR_CurHP, -damage));
                 }
@@ -626,7 +626,7 @@ namespace Akaneiro.Server.Game
             // Armor takes its share of every hit (Combat.DamageReduction).
             int damage = hits
                 ? Math.Max(1, (int)Math.Round(MonsterDamage(monster, attack) * (1f - Combat.DamageReduction(
-                    allyTarget?.Character ?? _s.Character, _s.World.Data, allyTarget?.Stats ?? _s.Stats))))
+                    allyTarget?.Character ?? _s.Character, _s.Data, allyTarget?.Stats ?? _s.Stats))))
                 : 0;
             if (hits)
             {
@@ -700,7 +700,7 @@ namespace Akaneiro.Server.Game
         private void KillPlayer()
         {
             _s.InvulnerableUntil = DateTime.MinValue;
-            var attributes = Views.AttributeMap(_s.Character, _s.World.Data, _s.Stats);
+            var attributes = Views.AttributeMap(_s.Character, _s.Data, _s.Stats);
             attributes[EAttributeType.ATTR_CurHP] = 0;
             attributes[EAttributeType.ATTR_CurMP] = _s.CurrentMp;
             _s.Send(GameResponses.ChangeCharacterAttribNTF(Proto.Attrs(attributes)));

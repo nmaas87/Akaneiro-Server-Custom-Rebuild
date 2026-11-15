@@ -91,14 +91,14 @@ namespace Akaneiro.Server.Game
         {
             _s.Account = _s.World.Accounts.LoadOrCreate(account);
             // Characters created before starter gear existed get it here, so the select screen shows it.
-            if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.World.Data) || changed))
+            if (_s.Account.Characters.Aggregate(false, (changed, c) => StarterLoadout.Grant(c, _s.Data) || changed))
                 _s.SaveAccount();
-            if (_s.World.Data.NormalizePrefabIds(_s.Account))
+            if (_s.Data.NormalizePrefabIds(_s.Account))
                 _s.SaveAccount(); // items saved before they carried the client's icon index
             _s.ClaimAccount(account);
             _s.Log.LogInformation("   login: account {Account} ({Chars} characters)", account, _s.Account.Characters.Count);
 
-            _s.Send(GameResponses.UserLoginOK(reconnected, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.World.Data)));
+            _s.Send(GameResponses.UserLoginOK(reconnected, Views.AccountInfo(_s.Account), Views.CharacterList(_s.Account, _s.Data)));
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Akaneiro.Server.Game
                 AvatarTraits = new Dictionary<int, int>(createdata.avatarTraits ?? new mapIntInt()),
                 CreatedUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             };
-            StarterLoadout.Grant(character, _s.World.Data);
+            StarterLoadout.Grant(character, _s.Data);
             _s.Mail.GrantKickstarterMail(character); // the "Kickstarter Exclusives" thank-you letter
             _s.Mail.GrantStarterPackMail(character); // the "Starter Pack Gifts" letter
             _s.Mail.GrantCatalogMail(character);     // "The Complete Rare Catalog": every unique + special
@@ -180,7 +180,7 @@ namespace Akaneiro.Server.Game
             _s.SaveAccount();
             _s.Log.LogInformation("   created character #{Id} '{Name}'", character.Id, character.Name);
 
-            _s.Send(GameResponses.UserCreateCharacterOK(Views.CharacterLogin(character, _s.World.Data)));
+            _s.Send(GameResponses.UserCreateCharacterOK(Views.CharacterLogin(character, _s.Data)));
         }
 
         public override void UserDelCharacter(int characterID)
@@ -203,7 +203,7 @@ namespace Akaneiro.Server.Game
                 return;
             }
 
-            StarterLoadout.Grant(character, _s.World.Data); // characters created before starter gear existed
+            StarterLoadout.Grant(character, _s.Data); // characters created before starter gear existed
             Trainer.GrantStarterMasteries(character);
             _s.Character = character;
             _s.LastCharacterName = character.Name;
@@ -212,7 +212,7 @@ namespace Akaneiro.Server.Game
             _s.SaveAccount();
             _s.Log.LogInformation("   selected character #{Id} '{Name}'", character.Id, character.Name);
 
-            _s.Send(GameResponses.UserSelectCharacterOK(Views.CharacterBasic(character), Views.Attributes(character, _s.World.Data)));
+            _s.Send(GameResponses.UserSelectCharacterOK(Views.CharacterBasic(character), Views.Attributes(character, _s.Data)));
             // The bag info makes the client build the player model (equipment and gender).
             _s.Send(GameResponses.SendBagInfo(Views.Bags(character)));
             // Abilities and their shortcut slots; the client answers with RoleMasteryListReq.
@@ -274,7 +274,7 @@ namespace Akaneiro.Server.Game
             DateTime yesterdayDate = now.AddDays(-1);
             int yesterday = yesterdayDate.Year * 10000 + yesterdayDate.Month * 100 + yesterdayDate.Day;
             AccountData account = _s.Account;
-            IReadOnlyList<GameData.DayRewardRow> days = _s.World.Data.DayRewards;
+            IReadOnlyList<GameData.DayRewardRow> days = _s.Data.DayRewards;
 
             if (account == null || _s.Character == null || account.DayRewardLastDate == today || days.Count == 0)
             {
@@ -576,9 +576,9 @@ namespace Akaneiro.Server.Game
                 return;
 
             var list = new vectorSAcceptMissionRelate();
-            HashSet<int> unlocked = MissionMap.Unlocked(_s.Character, _s.World.Data);
+            HashSet<int> unlocked = MissionMap.Unlocked(_s.Character, _s.Data);
             long now = new DateTimeOffset(_s.World.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds();
-            foreach (IGrouping<int, MissionDefinition> map in _s.World.Data.Missions.Values
+            foreach (IGrouping<int, MissionDefinition> map in _s.Data.Missions.Values
                          .GroupBy(m => m.Id - m.Id % 10).OrderBy(g => g.Key))
             {
                 // Maps nobody has opened up yet stay dark on the map (MissionPanel: not in the list = locked).
@@ -613,18 +613,32 @@ namespace Akaneiro.Server.Game
                 });
             }
             _s.Log.LogInformation("   mission list: {Count} maps", list.Count);
-            _s.Send(GameResponses.MissionListAck(list));
 
             // 2013-era clients only bring their mission panel up when the matching area-info push
             // follows (On_MissionAreaInfoAck -> UpdateMapLockState + initMissionMap); the 2014 UI
-            // already opens on the list answer itself. areaID = the map's base id, isBuy marks
-            // karma-purchased areas (the 2013 lock check ignores it - unlocked is unlocked).
+            // already opens on the list answer itself. The April client addresses whole areas
+            // (5000 tutorial, 5100..5800) and its UpdateMapLockState matches those ids exactly,
+            // so the maps of one region collapse into one entry; the January client keeps the map
+            // base ids. isBuy marks karma-purchased areas (the lock check ignores it - unlocked
+            // is unlocked). The entries are read before the list goes out: for the April dialect
+            // that send rewrites them in place to the client's own mission id family.
             if (_s.Dialect != ClientDialect.Modern)
             {
                 var areas = new vectorSMissionAreaRelate();
+                var seen = new HashSet<int>();
                 foreach (SAcceptMissionRelate2 m in list)
-                    areas.Add(new SMissionAreaRelate { areaID = m.missionID, isBuy = false });
+                {
+                    int areaId = _s.Dialect == ClientDialect.Apr2013
+                        ? Apr2013Dialect.ToClientAreaId(m.missionID) : m.missionID;
+                    if (seen.Add(areaId))
+                        areas.Add(new SMissionAreaRelate { areaID = areaId, isBuy = false });
+                }
+                _s.Send(GameResponses.MissionListAck(list));
                 _s.Send(GameResponses.MissionAreaInfoAck(areas));
+            }
+            else
+            {
+                _s.Send(GameResponses.MissionListAck(list));
             }
         }
 
@@ -645,6 +659,10 @@ namespace Akaneiro.Server.Game
 
         public override void MissionFailReq(int missionID)
         {
+            // a 2013 client names the mission in its own id family (the MissionFailAck echo goes
+            // back through the dialect, which maps ids for that dialect as well)
+            if (_s.Dialect == ClientDialect.Apr2013)
+                missionID = Apr2013Dialect.ToServerMissionId(missionID);
             _s.Log.LogInformation("   mission {Mission} given up", missionID);
             _s.Mission = null;
             _s.Send(GameResponses.MissionFailAck(missionID, 1));
@@ -688,17 +706,22 @@ namespace Akaneiro.Server.Game
 
         public override void AcceptMission(int npcID, int missionID)
         {
+            // The 2013 client picks missions by its table id (1RM); the definitions live under
+            // the 5RTM family, threat 1 (2013 had no threat mission variants).
+            if (_s.Dialect == ClientDialect.Apr2013)
+                missionID = Apr2013Dialect.ToServerMissionId(missionID);
+
             // The client already knows which scene belongs to the mission and loads it on success
             // (On_AcceptMissionOk -> EnterScene). Everything it can pick comes from the mission
             // list, so anything outside the unlocked set is a modified client: refuse it like
             // every other progression gate.
-            if (!_s.World.Data.Missions.TryGetValue(missionID, out MissionDefinition mission))
+            if (!_s.Data.Missions.TryGetValue(missionID, out MissionDefinition mission))
             {
                 _s.Log.LogWarning("   accept mission {Mission}: no definition found", missionID);
                 _s.Send(GameResponses.AcceptMissionFail(1));
                 return;
             }
-            if (_s.Character == null || !MissionMap.Unlocked(_s.Character, _s.World.Data).Contains(missionID))
+            if (_s.Character == null || !MissionMap.Unlocked(_s.Character, _s.Data).Contains(missionID))
             {
                 _s.Log.LogWarning("   accept mission {Mission} '{Name}': not unlocked for this character",
                     missionID, mission.Name);

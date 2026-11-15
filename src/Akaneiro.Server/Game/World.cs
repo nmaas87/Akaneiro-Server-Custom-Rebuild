@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Akaneiro.Server.Data;
+using Akaneiro.Server.Protocol;
 using Microsoft.Extensions.Options;
 
 namespace Akaneiro.Server.Game
@@ -20,6 +21,16 @@ namespace Akaneiro.Server.Game
         /// gate; that is the default here, Program wires the configured file in.</summary>
         public LoginAllowlist Allowlist { get; }
         public GameData Data { get; }
+
+        /// <summary>
+        /// The April 2013 client era's own content (its item tables, level curves, missions),
+        /// null when the era's files are not installed. Program injects it.
+        /// </summary>
+        public GameData Data2013 { get; set; }
+
+        /// <summary>The content set a session on the given client dialect must be served.</summary>
+        public GameData DataFor(ClientDialect dialect) =>
+            dialect == ClientDialect.Apr2013 && Data2013 != null ? Data2013 : Data;
 
         /// <summary>Time source of all game logic (cooldowns, monster behaviour, ability objects).</summary>
         public IClock Clock { get; init; } = SystemClock.Instance;

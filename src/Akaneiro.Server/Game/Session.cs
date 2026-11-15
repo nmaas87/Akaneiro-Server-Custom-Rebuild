@@ -57,6 +57,12 @@ namespace Akaneiro.Server.Game
         /// struct layouts); Modern sends the 2014 wire unchanged.</summary>
         public ClientDialect Dialect { get; set; } = ClientDialect.Modern;
 
+        /// <summary>
+        /// The content tables this session is played on: the April 2013 build gets its era's
+        /// item/level/mission definitions, every other client the current ones.
+        /// </summary>
+        public GameData Data => World.DataFor(Dialect);
+
         public AccountData Account { get; set; }
         public CharacterData Character { get; set; }
 
@@ -165,7 +171,7 @@ namespace Akaneiro.Server.Game
                 int key = StatsKey(now);
                 if (_stats == null || key != _statsKey)
                 {
-                    _stats = PlayerStats.Compute(Character, World.Data, ActiveBuffs, now);
+                    _stats = PlayerStats.Compute(Character, Data, ActiveBuffs, now);
                     _statsKey = key;
                 }
                 return _stats;

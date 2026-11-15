@@ -46,7 +46,7 @@ namespace Akaneiro.Server.Game
             if (_s.Character == null)
                 return;
 
-            if (_s.World.Data.Scenes.TryGetValue(_s.SceneName, out GameData.SceneInfo scene))
+            if (_s.Data.Scenes.TryGetValue(_s.SceneName, out GameData.SceneInfo scene))
             {
                 _s.Position = scene.SpawnPosition;
             }
@@ -64,10 +64,10 @@ namespace Akaneiro.Server.Game
             var start = Proto.New<SCharacterStartInfo>();
             start.objectID = Session.PlayerObjectId;
             start.pos = _s.Position;
-            start.attrVec = Views.Attributes(_s.Character, _s.World.Data, full);
+            start.attrVec = Views.Attributes(_s.Character, _s.Data, full);
             _s.Send(BattleResponses.CharacterStartInfo(start));
 
-            _s.Scene = SceneInstance.Build(_s.SceneName, MissionThreat(), _s.World.Data, _s.Log, _s.World.Random);
+            _s.Scene = SceneInstance.Build(_s.SceneName, MissionThreat(), _s.Data, _s.Log, _s.World.Random);
             _s.Scene.Nav.Jumped(_s.Position); // the walkable trail starts at the spawn point
             if (scene != null)
                 SendNpcs(scene);
@@ -179,7 +179,7 @@ namespace Akaneiro.Server.Game
 
             int abilityId = (int)skillID;
             if ((!IsReviveShockwave(abilityId) && !_s.Character.Abilities.Any(a => a.Id == abilityId)) ||
-                !_s.World.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
+                !_s.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
             {
                 Fail(targetObjectID, abilityId, EServerErrorType.eGS_SkillNotExist);
                 return;
@@ -236,12 +236,12 @@ namespace Akaneiro.Server.Game
             result.pos = location;
 
             PlayerStats stats = _s.Stats;
-            var attributes = Views.AttributeMap(_s.Character, _s.World.Data, stats);
+            var attributes = Views.AttributeMap(_s.Character, _s.Data, stats);
             List<Monster> targets = AbilityTargets(ability, targetObjectID, location, _s.Position).ToList();
             for (int hit = 0; hit < ability.AttackCount; hit++)
             {
                 foreach (Monster monster in targets.Where(m => m.IsAlive))
-                    Hit(result, monster, Combat.AbilityDamage(ability, _s.Character, _s.World.Data, attributes, _s.World.Random), stats);
+                    Hit(result, monster, Combat.AbilityDamage(ability, _s.Character, _s.Data, attributes, _s.World.Random), stats);
             }
 
             // The revive slam also hits and staggers everything around the player and shields
@@ -348,12 +348,12 @@ namespace Akaneiro.Server.Game
 
             Monster target = _s.Scene?.Find((int)targetObjectID);
             if (target != null && target.IsAlive)
-                Hit(result, target, Combat.WeaponDamage(_s.Character, _s.World.Data, _s.World.Random));
+                Hit(result, target, Combat.WeaponDamage(_s.Character, _s.Data, _s.World.Random));
 
             // Baskets and chests are opened by hitting them like a monster.
             Breakable breakable = _s.Scene?.FindBreakable((int)targetObjectID);
             if (breakable != null && breakable.Hp > 0)
-                HitBreakable(result, breakable, Combat.WeaponDamage(_s.Character, _s.World.Data, _s.World.Random));
+                HitBreakable(result, breakable, Combat.WeaponDamage(_s.Character, _s.Data, _s.World.Random));
             if (target == null && breakable == null && targetObjectID != 0)
                 _s.Log.LogInformation("   attack on unknown object #{Id}", targetObjectID);
 
@@ -411,7 +411,7 @@ namespace Akaneiro.Server.Game
             if (_s.Character == null)
                 return;
             var list = new vectorFriendCharInfo();
-            foreach (SFriendCharInfo info in Friends.Roster(_s.Character, _s.World.Data))
+            foreach (SFriendCharInfo info in Friends.Roster(_s.Character, _s.Data))
                 list.Add(info);
             _s.Log.LogInformation("   friend list: {Count} companions offered", list.Count);
             _s.Send(BattleResponses.GetFriendListResult(list));
@@ -423,7 +423,7 @@ namespace Akaneiro.Server.Game
                 return;
 
             DateTime now = _s.World.Clock.UtcNow;
-            FriendAlly ally = Friends.Hire(_s.Character, _s.World.Data, friendCharID);
+            FriendAlly ally = Friends.Hire(_s.Character, _s.Data, friendCharID);
             if (ally == null)
             {
                 _s.Send(BattleResponses.SelectFriendAllyResult(friendCharID, Proto.Error(EServerErrorType.eFriendError_NoExist)));
@@ -465,7 +465,7 @@ namespace Akaneiro.Server.Game
                     itemLevel = Math.Max(1, item.Level),
                     prefabID = item.PrefabId,
                 });
-            info.attrVec = Views.Attributes(ally.Character, _s.World.Data, ally.Stats);
+            info.attrVec = Views.Attributes(ally.Character, _s.Data, ally.Stats);
             foreach (int skillId in ally.Skills)
                 info.skillVec.Add(skillId);
 
@@ -516,7 +516,7 @@ namespace Akaneiro.Server.Game
 
             Monster target = _s.Scene.Find((int)targetObjectID);
             if (target != null && target.IsAlive && SceneInstance.Distance(ally.Position, target.Position) <= AllyReach)
-                Hit(result, target, Combat.WeaponDamage(ally.Character, _s.World.Data, _s.World.Random), ally.Stats);
+                Hit(result, target, Combat.WeaponDamage(ally.Character, _s.Data, _s.World.Random), ally.Stats);
             else if (target == null)
                 _s.Log.LogInformation("   {Name} attacks unknown object #{Id}", ally.Character.Name, targetObjectID);
 
@@ -531,7 +531,7 @@ namespace Akaneiro.Server.Game
                 return;
 
             int abilityId = (int)skillID;
-            if (!ally.Skills.Contains(abilityId) || !_s.World.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
+            if (!ally.Skills.Contains(abilityId) || !_s.Data.Abilities.TryGetValue(abilityId, out GameData.AbilityRow ability))
             {
                 _s.Send(BattleResponses.UseFightSkillFailed(ally.ObjectId, (uint)abilityId, Proto.Error(EServerErrorType.eGS_SkillNotExist)));
                 return;
@@ -582,11 +582,11 @@ namespace Akaneiro.Server.Game
             result.destObejctID = (int)targetObjectID;
             result.pos = location;
 
-            var attributes = Views.AttributeMap(ally.Character, _s.World.Data, ally.Stats);
+            var attributes = Views.AttributeMap(ally.Character, _s.Data, ally.Stats);
             List<Monster> targets = AbilityTargets(ability, targetObjectID, location, ally.Position).ToList();
             for (int hit = 0; hit < ability.AttackCount; hit++)
                 foreach (Monster monster in targets.Where(m => m.IsAlive))
-                    Hit(result, monster, Combat.AbilityDamage(ability, ally.Character, _s.World.Data, attributes, _s.World.Random), ally.Stats);
+                    Hit(result, monster, Combat.AbilityDamage(ability, ally.Character, _s.Data, attributes, _s.World.Random), ally.Stats);
 
             _s.Log.LogInformation("   {Name} hit {Count} monsters", ally.Character.Name, targets.Count);
 
@@ -607,7 +607,7 @@ namespace Akaneiro.Server.Game
         private double SwingHitDelay()
         {
             ItemData weapon = _s.Character.Equipment.FirstOrDefault(e => e.Slot == Inventory.PartMainHand);
-            if (weapon == null || !_s.World.Data.Weapons.TryGetValue(weapon.ItemId, out GameData.WeaponRow row))
+            if (weapon == null || !_s.Data.Weapons.TryGetValue(weapon.ItemId, out GameData.WeaponRow row))
                 return FistHit * 100.0 / Math.Max(50, _s.Stats.AttackSpeed);
             double hit = (row.TwoHanded ? TwoHandHit : OneHandHit) * row.SwingFactor;
             return hit * 100.0 / Math.Max(50, _s.Stats.AttackSpeed);
@@ -643,7 +643,7 @@ namespace Akaneiro.Server.Game
                 _s.Scene.RemoveBreakable(breakable.ObjectId);
                 leaving.Add(breakable.ObjectId);
                 DropKarmaAt(breakable.Info.KarmaMin, breakable.Info.KarmaMax, breakable.Position);
-                DropItems(Loot.Roll(breakable.Info, _s.World.Data, _s.World.Random), breakable.Position);
+                DropItems(Loot.Roll(breakable.Info, _s.Data, _s.World.Random), breakable.Position);
                 _s.Log.LogInformation("   broke {Object} (type {Type})", breakable.Info.Name, breakable.Info.TypeId);
             }
             _s.Send(BattleResponses.ObjectLeave(leaving));
@@ -890,7 +890,7 @@ namespace Akaneiro.Server.Game
             _s.Character.TutorialDone = true; // finishing a mission ends the tutorial state
             if (!_s.Character.CompletedMissions.Contains(mission.Id))
                 _s.Character.CompletedMissions.Add(mission.Id);
-            MissionMap.Finished(_s.Character, mission.Id, new DateTimeOffset(_s.World.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds(), _s.World.Data);
+            MissionMap.Finished(_s.Character, mission.Id, new DateTimeOffset(_s.World.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds(), _s.Data);
             _s.Mission = null;
             _s.SaveAccount(); // a reached place finishes missions too, without a kill that saves
         }
@@ -916,7 +916,7 @@ namespace Akaneiro.Server.Game
         /// </summary>
         private void CheckLevelUp()
         {
-            GameData data = _s.World.Data;
+            GameData data = _s.Data;
             bool leveled = false;
 
             while (_s.Character.Level < data.Levels.Count &&
@@ -950,7 +950,7 @@ namespace Akaneiro.Server.Game
             if (_s.Character == null)
                 return;
             _s.ApplyRegeneration();
-            Dictionary<int, int> map = Views.AttributeMap(_s.Character, _s.World.Data, _s.Stats);
+            Dictionary<int, int> map = Views.AttributeMap(_s.Character, _s.Data, _s.Stats);
             map[EAttributeType.ATTR_CurHP] = Math.Max(1, _s.CurrentHp);
             map[EAttributeType.ATTR_CurMP] = _s.CurrentMp;
             vectorAttrChange attributes = Proto.Attrs(map);
@@ -1072,11 +1072,11 @@ namespace Akaneiro.Server.Game
         private void DropLoot(Monster monster)
         {
             // The tutorial is scripted: no random materials there (its pelt comes from the collect target).
-            List<ItemData> loot = Loot.Roll(monster.Type, _s.World.Data, _s.World.Random, materials: _s.SceneName != "Hub_Village_Tutorial");
+            List<ItemData> loot = Loot.Roll(monster.Type, _s.Data, _s.World.Random, materials: _s.SceneName != "Hub_Village_Tutorial");
             // Plum Wine and Awamori: now and then one more piece of equipment.
             if (monster.Type.CanDropLoot && _s.World.Random.NextDouble() * 100 < _s.Stats.LootPct)
             {
-                ItemData extra = Loot.RollEquipment(_s.World.Data, Math.Max(1, monster.Type.LootLevel), _s.World.Random);
+                ItemData extra = Loot.RollEquipment(_s.Data, Math.Max(1, monster.Type.LootLevel), _s.World.Random);
                 if (extra != null)
                     loot.Add(extra);
             }
@@ -1093,7 +1093,7 @@ namespace Akaneiro.Server.Game
                         // Quest items need the client's index 1: a COLLECT task matches on
                         // perfrab == its "recycle" (MissionLogic checks both), which is 1 in every
                         // mission, and index 0 (the world model) has no icon.
-                        _s.World.Data.EnsurePrefab(item);
+                        _s.Data.EnsurePrefab(item);
                         loot.Add(item);
                     }
                 }
@@ -1225,7 +1225,7 @@ namespace Akaneiro.Server.Game
                 return;
 
             int type = reviveType.Get();
-            int cost = type == ReviveWithKarma ? _s.World.Data.RevivalCost(_s.Character.Level, _s.Revivals) : 0;
+            int cost = type == ReviveWithKarma ? _s.Data.RevivalCost(_s.Character.Level, _s.Revivals) : 0;
 
             if (type == ReviveWithKarma && _s.Account.Karma < cost)
             {
@@ -1285,7 +1285,7 @@ namespace Akaneiro.Server.Game
             }
 
             _s.Send(BattleResponses.ReviveResult(reviveType, Proto.Error(EServerErrorType.eSuccess),
-                Views.Attributes(_s.Character, _s.World.Data, full)));
+                Views.Attributes(_s.Character, _s.Data, full)));
             _s.Send(BattleResponses.PlayerReviveNumNTF(0, _s.Revivals));
         }
 
