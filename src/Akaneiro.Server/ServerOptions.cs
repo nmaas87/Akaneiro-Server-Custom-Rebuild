@@ -32,7 +32,7 @@ namespace Akaneiro.Server
         /// ClientAssetsDir: Resources/Localization/EN). If it is not present the April 2013
         /// dialect still runs, but on the modern content.
         /// </summary>
-        public string Apr2013AssetsDir { get; set; } = "client-source-2013";
+        public string Apr2013AssetsDir { get; set; } = "../../client-source-2013";
 
         /// <summary>Log every packet (name only) in both directions.</summary>
         public bool LogPackets { get; set; } = true;

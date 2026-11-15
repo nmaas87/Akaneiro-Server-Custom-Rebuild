@@ -27,6 +27,8 @@ summon window; no shipped client build runs that window - the whole ally chain i
 client-side, in the Steam build as much as the web one - see KNOWN-ISSUES), the mailbox with the
 welcome letters, daily rewards and crafting. The 2013 Chinese and April 2013 English standalone
 builds also play over the web login; the server answers each in its own older packet dialect
+and plays April 2013 sessions on that era's own content tables - items, level curve and daily
+rewards from the client's own bundle, with its mission id family translated on the wire
 (see HOSTING.txt).
 
 Every player gets their own single-player world. Several players can use one server at the same
