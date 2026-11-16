@@ -317,6 +317,17 @@ public sealed class BattleGuardTests
         Assert.Contains(skills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
         Assert.Contains(skills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.RevivePrayerShockwave);
 
+        // The January build stands up through ReviveState.Execute ->
+        // FSM.ChangeState(GetAbilityByID(12001)); its menu has no scroll/Prayer path and its
+        // AbilityIDs table has no 12002, so it gets exactly the plain shockwave.
+        using var zh = new TestPlayer(_output).LoginNewCharacter();
+        zh.Session.Dialect = ClientDialect.Zh2013;
+        zh.ClearInbox();
+        zh.Send(ProtocolGame_SendRequest.UserSelectCharacter(zh.Character.Id));
+        var zhSkills = zh.Take<SPlayerSkillInfo>("On_SendSkillInfo");
+        Assert.Contains(zhSkills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.ReviveShockwave);
+        Assert.DoesNotContain(zhSkills.skillInfoVec.Cast<SSkillInfo>(), s => s.skillID == BattleHandler.RevivePrayerShockwave);
+
         using var modern = new TestPlayer(_output).LoginNewCharacter();
         modern.ClearInbox();
         modern.Send(ProtocolGame_SendRequest.UserSelectCharacter(modern.Character.Id));

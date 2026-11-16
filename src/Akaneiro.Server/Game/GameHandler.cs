@@ -224,16 +224,24 @@ namespace Akaneiro.Server.Game
             _s.Send(GameResponses.SendBagInfo(Views.Bags(character)));
             // Abilities and their shortcut slots; the client answers with RoleMasteryListReq.
             SPlayerSkillInfo skills = Views.Skills(character);
-            if (_s.Dialect == ClientDialect.Apr2013)
+            if (_s.Dialect != ClientDialect.Modern)
             {
-                // The 2013 get-up animations are the revive shockwaves themselves: On_ReviveResult
-                // launches 12001 (plain revive) or 12002 (ReviveEX, the scroll/Prayer path) via
-                // UseAbilityFromID, which only works when the state is registered, and registration
-                // follows exactly this skill list. The original server carried both as innate
-                // entries; the incoming slams were already accepted unmapped
+                // The 2013 get-up animations are the revive shockwaves themselves: the January
+                // ReviveState.Execute chains FSM.ChangeState(GetAbilityByID(12001)) and April's
+                // On_ReviveResult launches 12001 (plain revive) or 12002 (ReviveEX, the
+                // scroll/Prayer path) via UseAbilityFromID. Both only work when the state is
+                // registered, and registration follows exactly this skill list - without the
+                // entry the chain lands on a null state, the dead state never Exit()s, and the
+                // hunter lies there forever while the revived server keeps spawning monsters
+                // onto the corpse. The January menu has no scroll/Prayer button, so that cut
+                // only ever chains 12001; its AbilityIDs table has no 12002 either. The
+                // incoming slams were already accepted unmapped
                 // (BattleHandler.IsReviveShockwave).
-                foreach (int innate in new[] { BattleHandler.ReviveShockwave, BattleHandler.RevivePrayerShockwave })
-                    skills.skillInfoVec.Add(new SSkillInfo { skillID = innate, level = 1, skillExp = 0, coldTime = 0 });
+                var innate = new List<int> { BattleHandler.ReviveShockwave };
+                if (_s.Dialect == ClientDialect.Apr2013)
+                    innate.Add(BattleHandler.RevivePrayerShockwave);
+                foreach (int id in innate)
+                    skills.skillInfoVec.Add(new SSkillInfo { skillID = id, level = 1, skillExp = 0, coldTime = 0 });
             }
             _s.Send(GameResponses.SendSkillInfo(skills));
             _s.Trainer.SendTimers();
