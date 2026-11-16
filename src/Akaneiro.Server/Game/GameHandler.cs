@@ -723,7 +723,7 @@ namespace Akaneiro.Server.Game
                 return;
 
             var list = new vectorSAcceptMissionRelate();
-            HashSet<int> unlocked = MissionMap.Unlocked(_s.Character, _s.Data);
+            HashSet<int> unlocked = MissionMap.Unlocked(_s.Character, _s.Data, _s.Dialect);
             long now = new DateTimeOffset(_s.World.Clock.UtcNow, TimeSpan.Zero).ToUnixTimeSeconds();
             foreach (IGrouping<int, MissionDefinition> map in _s.Data.Missions.Values
                          .GroupBy(m => m.Id - m.Id % 10).OrderBy(g => g.Key))
@@ -916,7 +916,7 @@ namespace Akaneiro.Server.Game
                 _s.Send(GameResponses.AcceptMissionFail(1));
                 return;
             }
-            if (_s.Character == null || !MissionMap.Unlocked(_s.Character, _s.Data).Contains(missionID))
+            if (_s.Character == null || !MissionMap.Unlocked(_s.Character, _s.Data, _s.Dialect).Contains(missionID))
             {
                 _s.Log.LogWarning("   accept mission {Mission} '{Name}': not unlocked for this character",
                     missionID, mission.Name);

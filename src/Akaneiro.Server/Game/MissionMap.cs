@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Akaneiro.Server.Data;
+using Akaneiro.Server.Protocol;
 
 namespace Akaneiro.Server.Game
 {
@@ -28,7 +29,8 @@ namespace Akaneiro.Server.Game
         public static int BaseId(int missionId) => missionId - missionId % 10;
 
         /// <summary>Mission ids (map + threat) the character may play.</summary>
-        public static HashSet<int> Unlocked(CharacterData character, GameData data)
+        public static HashSet<int> Unlocked(CharacterData character, GameData data,
+                                          ClientDialect dialect = ClientDialect.Modern)
         {
             var open = new HashSet<int> { FirstMission, TutorialMission };
             foreach (int done in character.CompletedMissions)
@@ -61,12 +63,20 @@ namespace Akaneiro.Server.Game
                 open.Add(BaseId(id) + 1);
             // Maps the shipped client has no level for never open (see ClientMaps).
             open.RemoveWhere(id => !data.Missions.TryGetValue(id, out MissionDefinition mission)
-                                   || !ClientHasMap(mission.MapName));
+                                   || !ClientHasMap(mission.MapName, dialect));
             return open;
         }
 
-        /// <summary>Whether the shipped client can load this mission map at all.</summary>
-        public static bool ClientHasMap(string mapName) => ClientMaps.Contains(mapName);
+        /// <summary>Whether this client build can load this mission map at all.</summary>
+        public static bool ClientHasMap(string mapName, ClientDialect dialect = ClientDialect.Modern) =>
+            MapsOf(dialect).Contains(mapName);
+
+        /// <summary>The mission maps this client build ships a level for.</summary>
+        private static HashSet<string> MapsOf(ClientDialect dialect) => dialect switch
+        {
+            ClientDialect.Zh2013 => Zh2013Maps,
+            _ => ClientMaps,
+        };
 
         /// <summary>
         /// The mission maps the shipped client has a level for: its assetbundles/Scenes folder
@@ -87,6 +97,25 @@ namespace Akaneiro.Server.Game
             "A5_M1", "A5_M2", "A5_M3",
             "A6_M1", "A6_M2", "A6_M3",
             "A7_M1", "A7_M2", "A7_M3",
+        };
+
+        /// <summary>
+        /// The mission maps the January 2013 Chinese build ships a level for: its assetbundles
+        /// folder holds exactly these 15 maps as <c>mapName.unity3d</c> + a matching
+        /// <c>mapNameRelation.assetbundle</c> (the same pair the load screen downloads when
+        /// DoExist misses: WiteOneFrame_Goto + CS_SceneInfo.DownloadMonsterBundle). The fourth
+        /// mission of every region and Acts 6-8 came after this build's content: presenting them
+        /// would hang its loading screen on the retired download URL, exactly like Act 8 on the
+        /// 2014 client. Verified against the untouched archive.org build (2026-11).
+        /// </summary>
+        private static readonly HashSet<string> Zh2013Maps = new(StringComparer.Ordinal)
+        {
+            "Hub_Village_Tutorial",
+            "A1_M1", "A1_M2", "A1_M3",
+            "A2_M1", "A2_M2", "A2_M3",
+            "A3_M1", "A3_M2", "A3_M3",
+            "A4_M1", "A4_M2", "A4_M3",
+            "A5_M1", "A5_M2", "A5_M3",
         };
 
         /// <summary>Seconds until the map can be played again (0 = now).</summary>

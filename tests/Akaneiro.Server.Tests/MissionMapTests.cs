@@ -80,6 +80,28 @@ public sealed class MissionMapTests
     }
 
     [Fact]
+    public void The2013ChineseClientOnlyGetsTheFifteenMapsItBundles()
+    {
+        // The untouched ZH build bundles exactly A1_M1..A5_M3 as .unity3d + Relation pairs: no
+        // M4 map, no Act 6/7/8. A fully finished hunter still never sees a map it would hang on.
+        var hunter = new CharacterData();
+        foreach (int id in TestData.Data.Missions.Keys)
+            hunter.CompletedMissions.Add(id);
+
+        var open = MissionMap.Unlocked(hunter, TestData.Data, Akaneiro.Server.Protocol.ClientDialect.Zh2013);
+
+        Assert.Contains(5534, open); // Act 5's last threat stays playable ("Wicked Beasts" of Act 5)
+        Assert.DoesNotContain(5141, open); // A1_M4 - fourth-mission content this build never shipped
+        Assert.DoesNotContain(5611, open); // A6_M1
+        Assert.DoesNotContain(5711, open); // A7_M1
+        Assert.DoesNotContain(5811, open); // A8_M1
+        foreach (int id in open)
+            Assert.True(MissionMap.ClientHasMap(TestData.Data.Missions[id].MapName,
+                Akaneiro.Server.Protocol.ClientDialect.Zh2013),
+                $"mission {id} sits on the map '{TestData.Data.Missions[id].MapName}' the 2013 client cannot load");
+    }
+
+    [Fact]
     public void AFinishedMapRestsLongerWithEveryRun()
     {
         var hunter = new CharacterData();

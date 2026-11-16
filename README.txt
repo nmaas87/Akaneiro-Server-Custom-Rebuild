@@ -34,7 +34,9 @@ SUPPORTED CLIENT VERSIONS
         from the 2014 content tables and nobody has played it end to end - expect rough edges.
         Verified against an untouched build: even though the Chinese service shipped this client
         as late as August 2014, its protocol classes never picked up the April 2013 or 2014
-        additions - it needs its own dialect, not the April 2013 one.
+        additions - it needs its own dialect, not the April 2013 one. Its mission map is limited
+        to the fifteen maps that build bundles (Act 1-5, three per region): the fourth-mission
+        maps and Acts 6-8 stay dark, so it never offers a level its client cannot load.
 
 Downloads of the retired standalone clients (unofficial community archives on archive.org):
 
