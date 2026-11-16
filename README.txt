@@ -29,9 +29,12 @@ SUPPORTED CLIENT VERSIONS
 
     20130130 Chinese (ZH) - the oldest fat client
         Barely tested. The server speaks its January 2013 protocol cut (dropping messages it
-        has no parser for and rewriting structs to its older field lists), and login plus core
-        gameplay work at packet level, but this client is served from the 2014 content tables
-        and nobody has played it end to end - expect rough edges.
+        has no parser for, rewriting structs to its older field lists, and renumbering error
+        codes), and login plus core gameplay work at packet level, but this client is served
+        from the 2014 content tables and nobody has played it end to end - expect rough edges.
+        Verified against an untouched build: even though the Chinese service shipped this client
+        as late as August 2014, its protocol classes never picked up the April 2013 or 2014
+        additions - it needs its own dialect, not the April 2013 one.
 
 Downloads of the retired standalone clients (unofficial community archives on archive.org):
 

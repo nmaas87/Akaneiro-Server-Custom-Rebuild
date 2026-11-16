@@ -270,10 +270,32 @@ public sealed class Zh2013DialectTests
         Assert.False(Zh2013Dialect.Supports(GameResponses.GetPlayerMailResult(new vectorMailInfos())));
         Assert.False(Zh2013Dialect.Supports(GameResponses.RecvNewMail(new vectorMailInfos())));
         Assert.False(Zh2013Dialect.Supports(GameResponses.GetWellDataResult(new SWellData(), 0)));
+        // the one battle method newer than this build (its battle table has 74 of the 2014 75)
+        Assert.False(Zh2013Dialect.Supports(BattleResponses.SkillObjectActive(7)));
         // and everything the client can answer to must survive
         Assert.True(Zh2013Dialect.Supports(GameResponses.UserLoginOK(false,
             Views.AccountInfo(Account()), Views.CharacterList(Account(), TestData.Data))));
         Assert.True(Zh2013Dialect.Supports(GameResponses.SendShopIteminfo(false, new vectorShopItemInfos())));
+        Assert.True(Zh2013Dialect.Supports(BattleResponses.PickupItemSuccAck(7, Proto.Error(EServerErrorType.eSuccess))));
+        // the 2013 revive notice shape the January build also reads must pass the filter
+        Assert.True(Zh2013Dialect.Supports(Apr2013Dialect.PlayerReviveNumNTF2013(2)));
+    }
+
+    [Fact]
+    public void ErrorCodesReachThe2013ClientInThe2013Numbering()
+    {
+        // EServerErrorType table of the shipped Assembly-CSharp.dll: the January build counts the
+        // shared names under lower numbers than 2014 (its On_ReviveResult checks for raw 51 for
+        // "not enough karma", which is where eGS_LessMoney_karma sits in both tables).
+        Assert.Equal(51, Zh2013Dialect.ToClientError(51));  // less karma: same number in both
+        Assert.Equal(51, Zh2013Dialect.ToClientError((int)EServerErrorType.eGS_LessMoney_fk));
+        Assert.Equal(56, Zh2013Dialect.ToClientError(60));   // character name already taken
+        Assert.Equal(89, Zh2013Dialect.ToClientError(94));   // bag full
+        Assert.Equal(104, Zh2013Dialect.ToClientError(109)); // day reward already got
+        Assert.Equal(110, Zh2013Dialect.ToClientError(115)); // mission/area not in the table
+        Assert.Equal(117, Zh2013Dialect.ToClientError(123)); // unassigned talent points
+        // codes this build never had pass through: no 2013 message exists for them anyway
+        Assert.Equal(148, Zh2013Dialect.ToClientError(148)); // mail error: dropped upstream
     }
 
     [Fact]

@@ -1318,8 +1318,9 @@ namespace Akaneiro.Server.Game
                 Views.Attributes(_s.Character, _s.Data, full)));
             // The 2013 single-int revive notice feeds GetRevivalKarma: how often the hunter has
             // already stood up, the column index into RevivalCost.Costs for the next prayer.
-            // (Scroll counts ride UpdateReviveNum / accountInfo.reviveNum instead.)
-            if (_s.Dialect == ClientDialect.Apr2013)
+            // (Scroll counts ride UpdateReviveNum / accountInfo.reviveNum instead; the January
+            // Chinese build reads the same single int - the 2014 pair makes its counter stick at 0.)
+            if (_s.Dialect != ClientDialect.Modern)
                 _s.Send(Apr2013Dialect.PlayerReviveNumNTF2013(_s.Revivals));
             else
                 _s.Send(BattleResponses.PlayerReviveNumNTF(0, _s.Revivals));
