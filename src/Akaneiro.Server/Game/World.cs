@@ -32,6 +32,24 @@ namespace Akaneiro.Server.Game
         public GameData DataFor(ClientDialect dialect) =>
             dialect == ClientDialect.Apr2013 && Data2013 != null ? Data2013 : Data;
 
+        /// <summary>The tutorial's scene ("Welcome, Red Hunter").</summary>
+        public const string TutorialScene = "Hub_Village_Tutorial";
+
+        /// <summary>
+        /// The content a session's scene (re)build must read. DataFor, with one exception: the
+        /// January 2013 Chinese build plays on the 2014 content, but its tutorial is still the
+        /// old one - TutorialLogic.UpdateTutrialLogicByHunt closes the village doors at kill
+        /// counts 2/10/21 and nothing repopulates the wolves, so the 2014 layout's 17 can never
+        /// open the last door and the tutorial cannot be finished (the identical failure the
+        /// April build had). Its tutorial therefore spawns from the 2013 wolf waves (29, same
+        /// spawn points, same prefabs) exactly like April's session; every other scene stays
+        /// 2014 content. Needs the April era's files (Data2013), which any server that offers
+        /// the 2013 clients has.
+        /// </summary>
+        public GameData SceneDataFor(ClientDialect dialect, string sceneName) =>
+            dialect == ClientDialect.Zh2013 && sceneName == TutorialScene && Data2013 != null
+                ? Data2013 : DataFor(dialect);
+
         /// <summary>Time source of all game logic (cooldowns, monster behaviour, ability objects).</summary>
         public IClock Clock { get; init; } = SystemClock.Instance;
 

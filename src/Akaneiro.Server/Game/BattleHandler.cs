@@ -67,7 +67,8 @@ namespace Akaneiro.Server.Game
             start.attrVec = Views.Attributes(_s.Character, _s.Data, full);
             _s.Send(BattleResponses.CharacterStartInfo(start));
 
-            _s.Scene = SceneInstance.Build(_s.SceneName, MissionThreat(), _s.Data, _s.Log, _s.World.Random);
+            _s.Scene = SceneInstance.Build(_s.SceneName, MissionThreat(),
+                _s.World.SceneDataFor(_s.Dialect, _s.SceneName), _s.Log, _s.World.Random);
             _s.Scene.Nav.Jumped(_s.Position); // the walkable trail starts at the spawn point
             if (scene != null)
                 SendNpcs(scene);

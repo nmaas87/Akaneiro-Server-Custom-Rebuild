@@ -846,6 +846,32 @@ public sealed class Apr2013DialectTests
     }
 
     [Fact]
+    public void TheJanuaryTutorialIsSpawnedFromThe2013WolfWavesToo()
+    {
+        // The January Chinese build runs on the 2014 content set, but its tutorial is the same
+        // doors-and-wolves build as April's (UpdateTutrialLogicByHunt closes the doors at kill
+        // counts 2/10/21, nothing repopulates): the scene build alone reads the 2013 wolf waves
+        // for a Zh2013 session - 29 spawns, same spawn points - and every other scene stays 2014.
+        using var player = new TestPlayer();
+        player.World.Data2013 = TestData2013.Data; // Program injects it wherever the era's files exist
+
+        static int Kills(GameData data) =>
+            data.Spawners["Hub_Village_Tutorial"].Sum(sp => sp.Groups.Sum(g => g.Count));
+
+        Assert.Same(TestData2013.Data, player.World.SceneDataFor(ClientDialect.Zh2013, "Hub_Village_Tutorial"));
+        Assert.Equal(29, Kills(player.World.SceneDataFor(ClientDialect.Zh2013, "Hub_Village_Tutorial")));
+        Assert.Same(TestData.Data, player.World.SceneDataFor(ClientDialect.Zh2013, "A1_M1"));
+        Assert.Equal(17, Kills(player.World.SceneDataFor(ClientDialect.Modern, "Hub_Village_Tutorial")));
+        Assert.Same(TestData.Data, player.World.SceneDataFor(ClientDialect.Modern, "Hub_Village_Tutorial"));
+        // April already runs on the era set for everything; the fork must not change that
+        Assert.Same(TestData2013.Data, player.World.SceneDataFor(ClientDialect.Apr2013, "Hub_Village_Tutorial"));
+        Assert.Same(TestData2013.Data, player.World.SceneDataFor(ClientDialect.Apr2013, "A1_M1"));
+        // without the era's files installed the tutorial falls back to the (unfinished) 2014 layout
+        player.World.Data2013 = null;
+        Assert.Same(TestData.Data, player.World.SceneDataFor(ClientDialect.Zh2013, "Hub_Village_Tutorial"));
+    }
+
+    [Fact]
     public void The2013ReviveNumPacketCarriesASingleLadderIndex()
     {
         // The 2014 PlayerReviveNumNTF carries two counters (crystal/karma revivals); the April

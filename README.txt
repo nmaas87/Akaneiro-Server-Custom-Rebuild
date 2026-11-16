@@ -36,7 +36,9 @@ SUPPORTED CLIENT VERSIONS
         as late as August 2014, its protocol classes never picked up the April 2013 or 2014
         additions - it needs its own dialect, not the April 2013 one. Its mission map is limited
         to the fifteen maps that build bundles (Act 1-5, three per region): the fourth-mission
-        maps and Acts 6-8 stay dark, so it never offers a level its client cannot load.
+        maps and Acts 6-8 stay dark, so it never offers a level its client cannot load. Like the
+        April build it opens its tutorial doors by wolf-kill milestones, so its tutorial spawns
+        the era's 29-wolf waves instead of the 2014 layout's 17 (which can never finish).
 
 Downloads of the retired standalone clients (unofficial community archives on archive.org):
 
