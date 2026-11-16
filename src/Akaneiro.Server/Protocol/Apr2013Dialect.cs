@@ -96,7 +96,8 @@ namespace Akaneiro.Server.Protocol
         // 5RTM map ids - the shipped region-level prefabs' 1RM table ids (111..183) only appear
         // where the client fills CurrentMissionID from its own prefab data, so mission ids cross
         // inbound through ToServerMissionId and stay untouched going out. World map regions are
-        // addressed as 5R00 areas (5100..5800, tutorial 5000), which the area push rewrites.
+        // addressed as 5R00 areas (5100..5800, tutorial 5000), which the region-area collapse
+        // in GameHandler.MissionListReq sends for both 2013 dialects.
 
         /// <summary>A 2013 table id (1RM, tutorial 101) back to the server mission (threat 1
         /// variant); the server's own 5RTM ids pass through.</summary>
@@ -108,9 +109,6 @@ namespace Akaneiro.Server.Protocol
             return region is < 0 or > 8 || mission is < 1 or > 4 ? clientMissionId
                 : 5000 + region * 100 + mission * 10 + 1;
         }
-
-        /// <summary>Server mission or map-base id to the 2013 area id the world map regions use.</summary>
-        public static int ToClientAreaId(int serverId) => 5000 + serverId / 100 % 10 * 100;
 
         // ---- error code eras -----------------------------------------------------------------
         //

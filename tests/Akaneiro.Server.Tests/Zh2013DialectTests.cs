@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Akaneiro.Server.Data;
 using Akaneiro.Server.Game;
 using Akaneiro.Server.Protocol;
 using Akaneiro.Server.Tests.Harness;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -328,6 +330,113 @@ public sealed class Zh2013DialectTests
         Packet ins = Reader(recording.Packets[0]);
         Assert.Equal(1, ins.ReadInt()); // character id
         Assert.Equal("Balance", ins.ReadString()); // 2013 basic block starts
+    }
+
+    [Fact]
+    public void TheJanuaryBountyPanelGetsThreatSuffixedEntriesAndWholeRegionAreas()
+    {
+        // MissionLevelToID arms a mission slot only on an exact match against the threat-suffixed
+        // ids (5xy1..5xy4); the map base ids the 2014 client takes never open one, and
+        // UpdateMapLockState lights a region icon only when the push carries its baked 5R00 id
+        // (the UnlockArea button computes (map + 5) * 1000 + region * 100). Read the raw wire:
+        // the 2014 decode cannot tell these id families apart.
+        using var player = new Akaneiro.Server.Tests.Harness.TestPlayer(_output, webLogin: true).LoginNewCharacter();
+        var recording = new RecordingSink();
+        var zh = new Session(player.World, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Zh2013,
+            Character = player.Character,
+        };
+
+        zh.HandlePacket(ProtocolGame_SendRequest.MissionListReq().GetByteStream()[6..]);
+        Assert.Equal(2, recording.Packets.Count); // list, then area push (the 2013 UI opens on that)
+
+        Packet list = Reader(recording.Packets[0]);
+        var ids = new List<int>();
+        int count = list.ReadInt();
+        for (int i = 0; i < count; i++)
+        {
+            ids.Add(list.ReadInt());
+            list.ReadInt(); list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt(); list.ReadInt();
+            // coolDownTime, IsHaveCompleted, IsHaveTriggered, star, lastPassTime, canAcceptMaxLvl,
+            // lastPassLvl - the January build shares the 2014 entry field list
+        }
+        // a fresh character: act 1 map 1 at threat 1, and nothing else; the tutorial is not
+        // listed (its 0-region has no slot) and no entry carries the 2014 map base suffix
+        Assert.Equal(new[] { 5111 }, ids);
+
+        Packet areas = Reader(recording.Packets[1]);
+        var areaIds = new List<int>();
+        int areaCount = areas.ReadInt();
+        for (int i = 0; i < areaCount; i++)
+        {
+            areaIds.Add(areas.ReadInt());
+            areas.ReadBool();
+        }
+        Assert.Equal(new[] { 5100 }, areaIds); // whole act 1 region; no tutorial area, no map bases
+    }
+
+    [Fact]
+    public void TheJanuaryUnlockChargesThePriceItsPanelShows()
+    {
+        // the January client displays its bundled MissionArea.Area ladder (raw karma before the
+        // shard reform): Jawbone is 2400 there, not the shipped table's 50; the unlock must not
+        // contradict the number the player clicked
+        string dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "aka-zharea-" + Guid.NewGuid().ToString("N"));
+        var world = new World(Options.Create(new ServerOptions { AutoSaveSeconds = 0 }),
+            new AccountStore(dir), TestData.Data, new WebUserStore(dir),
+            new LoginAllowlist(System.IO.Path.Combine(dir, "allowlist.txt")));
+        var account = Account();
+        account.Karma = 2399; // one karma under what the panel shows for Jawbone
+        var character = Character();
+        var recording = new RecordingSink();
+        var zh = new Session(world, recording, NullLogger.Instance)
+        {
+            Dialect = ClientDialect.Zh2013,
+            Account = account,
+            Character = character,
+        };
+
+        zh.HandlePacket(ProtocolGame_SendRequest.unLockAreaReq(5200).GetByteStream()[6..]);
+        Packet ack = Reader(recording.Packets[0]);
+        Assert.Equal(5200, ack.ReadInt());
+        Assert.Equal(Zh2013Dialect.ToClientError((int)EServerErrorType.eGS_LessMoney_karma), ack.ReadInt());
+        Assert.Equal(2399, account.Karma);
+        Assert.Empty(character.UnlockedAreas);
+
+        // the same click with the shown price: charged exactly that, and the re-push arms the
+        // region - threat-suffixed entry plus the 5R00 area flagged as bought
+        account.Karma = 2400;
+        recording.Packets.Clear();
+        zh.HandlePacket(ProtocolGame_SendRequest.unLockAreaReq(5200).GetByteStream()[6..]);
+        ack = Reader(recording.Packets[0]);
+        Assert.Equal(5200, ack.ReadInt());
+        Assert.Equal(0, ack.ReadInt());
+        Assert.Equal(0, account.Karma);
+        Assert.Equal(new[] { 5200 }, character.UnlockedAreas);
+
+        Packet areas = Reader(recording.Packets.Single(p =>
+            BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_MissionAreaInfoAck));
+        var bought = new Dictionary<int, bool>();
+        int areaCount = areas.ReadInt();
+        for (int i = 0; i < areaCount; i++)
+        {
+            int areaId = areas.ReadInt();
+            bought[areaId] = areas.ReadBool();
+        }
+        Assert.Equal(new[] { 5100, 5200 }, bought.Keys.OrderBy(id => id));
+        Assert.True(bought[5200]);
+
+        Packet list = Reader(recording.Packets.Single(p =>
+            BitConverter.ToInt32(p.GetByteStream(), 6) == (int)ProtocolGame_METHOD.uMethodID_MissionListAck));
+        var ids = new List<int>();
+        int count = list.ReadInt();
+        for (int i = 0; i < count; i++)
+        {
+            ids.Add(list.ReadInt());
+            list.ReadInt(); list.ReadInt(); list.ReadBool(); list.ReadInt(); list.ReadInt(); list.ReadInt(); list.ReadInt();
+        }
+        Assert.Contains(5211, ids); // act 2's first map, threat-1 id, arms the new region's slot
     }
 
     private sealed class RecordingSink : Akaneiro.Server.Net.IPacketSink

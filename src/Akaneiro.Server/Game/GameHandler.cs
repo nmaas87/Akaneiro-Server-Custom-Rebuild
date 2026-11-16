@@ -759,27 +759,40 @@ namespace Akaneiro.Server.Game
                     lastPassLvl = highest,
                 });
             }
+            // The January client arms its mission slots by matching whole ids: MissionLevelToID
+            // searches each map's threat-suffixed ids (5xy1..5xy4, x = slot 1..3, y = threat),
+            // never the map base the 2014 client takes, so the entries get the threat-1 suffix
+            // (the client's threat slider then steps CurrentMissionID up or down itself and
+            // AcceptMission carries the threat variant back; the server sets ThreatLevel from
+            // the suffix). The tutorial region (0) has no slot on its bounty map and stays
+            // NPC-started. April's slots arm the same way - that dialect rewrites the suffix
+            // in its own list writer instead of here.
+            if (_s.Dialect == ClientDialect.Zh2013)
+            {
+                for (int i = list.Count - 1; i >= 0; i--)
+                    if (((SAcceptMissionRelate2)list[i]).missionID / 100 % 10 == 0)
+                        list.RemoveAt(i);
+                foreach (SAcceptMissionRelate2 m in list)
+                    m.missionID += 1;
+            }
             _s.Log.LogInformation("   mission list: {Count} maps", list.Count);
 
             // 2013-era clients only bring their mission panel up when the matching area-info push
             // follows (On_MissionAreaInfoAck -> UpdateMapLockState + initMissionMap); the 2014 UI
-            // already opens on the list answer itself. The April client addresses whole areas
-            // (5000 tutorial, 5100..5800) and its UpdateMapLockState matches those ids exactly,
-            // so the maps of one region collapse into one entry; the January client keeps the map
-            // base ids. isBuy marks karma-purchased areas (the lock check ignores it - unlocked
-            // is unlocked). The entries are read before the list goes out: for the April dialect
-            // that send rewrites them in place to the client's own mission id family.
+            // already opens on the list answer itself. Both 2013 clients address whole regions
+            // (UpdateMapLockState matches the region icons' baked RegionIDs 5100..5800, and
+            // UnlockArea computes (map + 5) * 1000 + region * 100 for its unlock button), so the
+            // maps of one region collapse into one entry. The tutorial's area (region 0) has no
+            // icon on either world map. isBuy marks karma-purchased areas (the lock check ignores
+            // it - unlocked is unlocked).
             if (_s.Dialect != ClientDialect.Modern)
             {
                 var areas = new vectorSMissionAreaRelate();
                 var seen = new HashSet<int>();
                 foreach (SAcceptMissionRelate2 m in list)
                 {
-                    int areaId = _s.Dialect == ClientDialect.Apr2013
-                        ? Apr2013Dialect.ToClientAreaId(m.missionID) : m.missionID;
-                    // the tutorial's area (5000) has no region icon on the April world map;
-                    // the January client's push keeps its entries untouched
-                    if (_s.Dialect == ClientDialect.Apr2013 && areaId / 100 % 10 == 0)
+                    int areaId = 5000 + (m.missionID / 100 % 10) * 100;
+                    if (areaId / 100 % 10 == 0)
                         continue;
                     if (seen.Add(areaId))
                         areas.Add(new SMissionAreaRelate { areaID = areaId, isBuy = _s.Character.UnlockedAreas.Contains(areaId) });
@@ -819,14 +832,22 @@ namespace Akaneiro.Server.Game
                 return;
             }
 
-            if (!area.IsFree && _s.Account.Karma < area.BuyKarma)
+            // Charge what the panel shows: April's session carries its era's MissionArea.Area
+            // table through GameData2013, Modern uses the shipped one, and the January client
+            // displays its bundled table (pre-shard-reform karma prices) via
+            // UnlockArea.ReadUnlockValue - the Zh2013 dialect carries the same ladder.
+            int price = area.BuyKarma;
+            if (_s.Dialect == ClientDialect.Zh2013 && Zh2013Dialect.BuyKarmaByArea.TryGetValue(areaID, out int zhPrice))
+                price = zhPrice;
+
+            if (!area.IsFree && _s.Account.Karma < price)
             {
                 _s.Send(GameResponses.unLockAreaAck(areaID, _s.Err((int)EServerErrorType.eGS_LessMoney_karma)));
                 _s.SendMoney();
                 return;
             }
 
-            int cost = area.IsFree ? 0 : area.BuyKarma;
+            int cost = area.IsFree ? 0 : price;
             _s.Account.Karma -= cost;
             _s.Character.UnlockedAreas.Add(areaID);
             _s.SaveAccount();

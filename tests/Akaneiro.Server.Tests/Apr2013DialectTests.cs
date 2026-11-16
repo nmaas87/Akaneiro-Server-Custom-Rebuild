@@ -331,8 +331,8 @@ public sealed class Apr2013DialectTests
         Assert.Equal(5141, Apr2013Dialect.ToServerMissionId(114)); // an id the tables lack stays mappable anyway
         Assert.Equal(5110, Apr2013Dialect.ToServerMissionId(5110)); // map bases
         Assert.Equal(5112, Apr2013Dialect.ToServerMissionId(5112)); // threat variants too
-        Assert.Equal(5100, Apr2013Dialect.ToClientAreaId(5112));   // areas are whole regions
-        Assert.Equal(5000, Apr2013Dialect.ToClientAreaId(5011));
+        // (regions as 5R00 areas are the shared 2013 collapse, asserted on the wire in
+        // A2013ClientGetsTheAreaPushThatOpensItsBountyPanel)
     }
 
     [Fact]

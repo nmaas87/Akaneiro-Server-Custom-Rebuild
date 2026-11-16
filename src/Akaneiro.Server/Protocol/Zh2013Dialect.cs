@@ -105,6 +105,19 @@ namespace Akaneiro.Server.Protocol
 
         private static int MethodId(Packet packet) => BitConverter.ToInt32(packet.GetByteStream(), 6);
 
+        /// <summary>
+        /// Region unlock prices exactly as the January client's own MissionArea.Area table shows
+        /// them on the bounty map (UnlockArea.ReadUnlockValue): raw karma, before the 2014 shard
+        /// reform. Region 5100 (and the 5000 tutorial) are free; the rest cost these. The server
+        /// charges what the panel displays, so the unlock never contradicts the number the
+        /// player clicked.
+        /// </summary>
+        public static readonly IReadOnlyDictionary<int, int> BuyKarmaByArea = new Dictionary<int, int>
+        {
+            [5200] = 2400, [5300] = 6300, [5400] = 12000, [5500] = 22500,
+            [5600] = 45000, [5700] = 77700, [5800] = 122400,
+        };
+
         private static HashSet<int> UnknownIds() => _unknownIds ??= new HashSet<int>(
             GameResponses.Names.Keys.Where(id => !Known.Contains(GameResponses.Names[id])));
 
