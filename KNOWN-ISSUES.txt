@@ -96,6 +96,11 @@ server (the summon window's friend ally is covered under ASSUMPTIONS):
   themselves are the same geometry (2013 spawn coordinates match to the metre). April sessions
   do only know the 2013 monster set (92 of the 134 types): a 2014-only monster a spawner
   references simply never appears there, which is what the April client could draw anyway.
+  The 2013 Chinese sessions stay on the modern tables but are gated and priced to their build:
+  only the fifteen maps it bundles (Acts 1-5, three per region) ever light up on its bounty
+  map, its region unlocks and in-place revivals charge the price ladders of the tables bundled
+  inside that client, its tutorial runs the era's 29-wolf waves, and its daily gifts land in
+  the bag without a gift screen (that cut's reward handlers are empty stubs).
   Characters mixed across eras also keep their old ids: an item created under 2014 content can
   be a row the 2013 client cannot draw (pictureless) until it is replaced.
 
@@ -124,7 +129,11 @@ server uses these rules. They are the first place to look when something feels o
 
 - Revival with an item (the Shinigami Scroll option) spends one scroll from the active
   character's bag; the counter on the account screen counts the scrolls in every bag of the
-  account. Without a scroll the revive is refused, like on the original.
+  account. Without a scroll the revive is refused, like on the original. The 2013 builds have
+  no scroll items: April's death menu pays an account charge instead (or crystals when the
+  counter is empty), and the January build only offers its shard revival at all. Each era is
+  charged the ladder its own client shows: April uses the 2014 shard ladder (assumption), the
+  January build its bundled RevivalCost.Costs table (fact - the panel displays it).
 - Summoning a companion as an ally works, with stand-ins: the original took real other-player
   characters from the friend network, and that network is long gone. The summon button offers
   three invented companions - one per discipline (Kenshin, Benkei and Koga) - at your character's

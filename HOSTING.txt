@@ -180,6 +180,12 @@ DataDir (default ../../data)
     Where save games go.
 ClientAssetsDir (default ../../client-source)
     Where the client's data tables are (the repository's client-source folder).
+Apr2013AssetsDir (default ../../client-source-2013)
+    The April 2013 build's own tables (the repository's client-source-2013 folder). April
+    clients play on them when the folder is there; without it they play on the modern content.
+WebLogin (default true)
+    Serves the old email/password login (client.php) and the /register.html page next to the
+    Steam login. See "WEB LOGIN" below.
 LogPackets (default true)
     Logs the name of every message between game and server. Set to false for a quieter log.
 AutoSaveSeconds (default 180)
@@ -226,7 +232,8 @@ That login path is implemented here as well; the Steam login is not affected by 
 
 How it works:
 
-1. Turn it on in appsettings.json (or on the command line with --Akaneiro:WebLogin=true):
+1. It is on by default ("WebLogin": true in appsettings.json); turn it off with
+   --Akaneiro:WebLogin=false if you do not want the extra login endpoints.
 
        "WebLogin": true
 
@@ -270,6 +277,16 @@ Everything else plays. The 2013 build has no mailbox, no stash and no well windo
 features simply stay invisible on it (the account itself is a normal web account and looks
 complete again from a 2014 client).
 
+It is served from the 2014 content tables, but gated and priced to its own client: it is only
+offered the fifteen maps its build bundles (Acts 1-5, three per region - the fourth-mission
+maps and Acts 6-8 never light up), its bounty panel and death menu charge the price ladders of
+the tables bundled inside the build itself (MissionArea.Area for region unlocks,
+RevivalCost.Costs for in-place revivals), its tutorial spawns the era's 29-wolf waves, and its
+threat slider is free because that build shows no prices for it. Daily gifts arrive without a
+gift screen - the January cut's reward handlers are empty stubs, the items simply land in the
+bag. Like the April build it stands up through the innate 12001 shockwave state, which the
+server carries in its skill list for both 2013 dialects.
+
 Its game text (item names, tooltips, ability names, quest dialogue) can be switched to the
 2014 English tables without touching the executable: run
 
@@ -306,9 +323,9 @@ do not exist there and show up as pictureless items), a different level/XP curve
 832 exp, not 166), lower revival costs, and missions in another id family: the 2014 server
 numbers them 5RTM (region, mission, threat variant; tutorial 5011), the 2013 client's tables
 only know 1RM rows (111..183, three missions per region, threat bought on the map) and
-address whole areas as 5000/5100..5800. So the repo carries the client's own tables (folder
-client-source-2013, extracted from its resources.assets with
-tools/win2013-client-tables/dump_tables.py) and April-dialect sessions are played on them:
+address as 5000/5100..5800. So the repo carries the client's own tables (folder
+client-source-2013, extracted once from its resources.assets; the folder is the shipped
+snapshot) and April-dialect sessions are played on them:
 its level curve, its daily rewards, its prices. The dialect translates mission and area ids
 between the two families in both directions. Everything the 2013 bundle never had (crafting
 recipes, threat cycle, and the whole monster/breakable PLACEMENT - the 2013 client ships none,
