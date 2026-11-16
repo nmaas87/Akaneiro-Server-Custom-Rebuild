@@ -95,10 +95,11 @@ namespace Akaneiro.Server.Game
         {
             foreach (GameData.NpcPlacement npc in scene.Npcs)
             {
-                // The 2014 hub also places the stash keeper (1011), an NPC the April cut never
-                // shipped: its NpcInfo registry ends at WELL and calls 1011 NOTHING, so placing
-                // it only makes the client log "On_npcEnter npcID null" once. April has no stash.
-                if (_s.Dialect == ClientDialect.Apr2013 && npc.NpcId == 1011)
+                // The 2014 hub also places the stash keeper (1011), an NPC neither 2013 cut ever
+                // shipped: their NpcInfo registries stop at NOTHING (April's names it, the
+                // January enum only numbers it), so placing it only makes the client log
+                // "On_npcEnter npcID null" once. Neither era has a stash.
+                if (_s.Dialect != ClientDialect.Modern && npc.NpcId == 1011)
                     continue;
                 var info = Proto.New<SNpcEnter>();
                 info.objectID = _s.Scene.NewObjectId();
@@ -1232,6 +1233,7 @@ namespace Akaneiro.Server.Game
 
             int type = reviveType.Get();
             bool apr = _s.Dialect == ClientDialect.Apr2013;
+            bool zh = _s.Dialect == ClientDialect.Zh2013;
 
             // April death menu economics: "Escape Prayer" never reaches the server (the button
             // sends EnterScene itself), "Revival Prayer" (type 1) stands the hunter up where they
@@ -1239,8 +1241,12 @@ namespace Akaneiro.Server.Game
             // the "Shinigami Scroll" buttons (types 4 and 3) pay with one scroll charge off the
             // account's counter - the 2013 model has no scroll items in the bag - or, when the
             // counter is at zero, with three crystals.
-            int cost = type == ReviveWithKarma || (apr && type == ReviveFree)
-                ? _s.Data.RevivalCost(_s.Character.Level, _s.Revivals)
+            // The January menu has the same shape: its "Village" button stays client-side
+            // (EnterScene, free), and its "Revival" button (type 1) prices itself through the
+            // RevivalCost.Costs table bundled in that build - so the charge follows that ladder.
+            int cost = (type == ReviveWithKarma || ((apr || zh) && type == ReviveFree))
+                ? zh ? _s.Data.RevivalCostZh2013(_s.Character.Level, _s.Revivals)
+                     : _s.Data.RevivalCost(_s.Character.Level, _s.Revivals)
                 : 0;
             const int AprilScrollCrystalCost = 3;
             bool scrollButton = apr ? type == 3 || type == 4 : type == ReviveWithItem;

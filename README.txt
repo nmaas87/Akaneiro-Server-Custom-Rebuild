@@ -37,7 +37,8 @@ SUPPORTED CLIENT VERSIONS
         additions - it needs its own dialect, not the April 2013 one. Its bounty panel speaks
         its own id families: the mission list carries threat-suffixed ids (5xy1) that arm its
         slots, the region push carries whole-region ids (5R00) that light its map icons, and
-        unlocking a region charges the price ladder of its bundled MissionArea.Area table. Its
+        unlocking a region charges the price ladder of its bundled MissionArea.Area table, and
+        its death menu revives on the ladder of its bundled RevivalCost.Costs table. Its
         mission map is limited
         to the fifteen maps that build bundles (Act 1-5, three per region): the fourth-mission
         maps and Acts 6-8 stay dark, so it never offers a level its client cannot load. Like the

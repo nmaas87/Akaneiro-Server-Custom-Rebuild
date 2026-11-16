@@ -442,6 +442,16 @@ namespace Akaneiro.Server.Game
         /// <summary>Karma cost of the 1st..7th revival of a mission, per character level.</summary>
         public IReadOnlyDictionary<int, int[]> RevivalCosts { get; }
 
+        /// <summary>
+        /// The revival ladder of the January 2013 (Chinese) client: its death panel prices
+        /// through its bundled RevivalCost.Costs table, so the charge must follow that ladder.
+        /// Eight columns: index 0 is the level column itself (its GetRevivalKarma returns
+        /// array2[revivals], and that counter is still 0 at the first death), 1..7 are the
+        /// FirstRevive..SeventhRevive columns. The bundle is not vendored, so the table lives
+        /// as zh2013-revivalcosts.json in the GameData folder.
+        /// </summary>
+        public IReadOnlyDictionary<int, int[]> RevivalCostsZh2013 { get; }
+
         /// <summary>MissionsThreatCycle.CoolDown: minutes a map rests after its n-th run within a day.</summary>
         public IReadOnlyList<int> MissionCooldownMinutes { get; }
 
@@ -730,6 +740,14 @@ namespace Akaneiro.Server.Game
         public int RevivalCost(int characterLevel, int revivalsSoFar)
         {
             if (!RevivalCosts.TryGetValue(characterLevel, out int[] costs) || costs.Length == 0)
+                return 0;
+            return costs[Math.Clamp(revivalsSoFar, 0, costs.Length - 1)];
+        }
+
+        /// <summary>Same for the January ladder; levels past its table revive for free.</summary>
+        public int RevivalCostZh2013(int characterLevel, int revivalsSoFar)
+        {
+            if (!RevivalCostsZh2013.TryGetValue(characterLevel, out int[] costs) || costs.Length == 0)
                 return 0;
             return costs[Math.Clamp(revivalsSoFar, 0, costs.Length - 1)];
         }
@@ -1097,6 +1115,14 @@ namespace Akaneiro.Server.Game
                     g.First().Int("FourthRevive"), g.First().Int("FifthRevive"), g.First().Int("SixthRevive"),
                     g.First().Int("SeventhRevive"),
                 });
+
+            // The January client's death-menu ladder (its bundle is not vendored; the table was
+            // read out of its resources.assets and carries the level column first - see
+            // RevivalCostsZh2013). Only ZH sessions charge it, everyone else ignores the file.
+            string zhRevival = Pick(dataDir, fallbackData, "zh2013-revivalcosts.json");
+            RevivalCostsZh2013 = File.Exists(zhRevival)
+                ? JsonSerializer.Deserialize<Dictionary<int, int[]>>(File.ReadAllText(zhRevival))
+                : new Dictionary<int, int[]>();
         }
 
         private void LoadItemEffects(string tables)

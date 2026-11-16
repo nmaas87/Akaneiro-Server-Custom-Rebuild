@@ -224,6 +224,47 @@ public sealed class BattleGuardTests
     }
 
     [Fact]
+    public void TheJanuaryRevivalPrayerCostsTheLadderItsPanelShows()
+    {
+        // the January menu's only paid button (type 1) prices itself through the RevivalCost.Costs
+        // table bundled in that build; the charge must follow the number the panel displays, not
+        // the 2014 shard ladder
+        using var player = DieNextToMonsters();
+        player.Session.Dialect = ClientDialect.Zh2013;
+        player.Session.Account.Karma = 5000;
+        player.ClearInbox();
+
+        int cost = TestData.Data.RevivalCostZh2013(player.Character.Level, player.Session.Revivals);
+        Assert.True(cost > 0); // the bundled ladder covers the fixture's level
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+
+        Assert.Equal(EServerErrorType.eSuccess, player.Take("On_ReviveResult").Arg<EServerErrorType>(1).Get());
+        Assert.False(player.Session.IsDead);
+        Assert.Equal(5000 - cost, player.Session.Account.Karma);
+
+        // and the next death's panel column follows the same single-int revive notice
+        byte[] ntf = Assert.Single(player.RawPackets((int)ProtocolBattle_METHOD.uMethodID_PlayerReviveNumNTF));
+        Assert.Equal(8, ntf.Length);
+    }
+
+    [Fact]
+    public void TheJanuaryRevivalPrayerIsRefusedWithoutEnoughKarma()
+    {
+        using var player = DieNextToMonsters();
+        player.Session.Dialect = ClientDialect.Zh2013;
+        player.Session.Account.Karma = 0;
+        player.ClearInbox();
+
+        player.Send(ProtocolBattle_SendRequest.ReviveReq(new EReviveType(1)));
+        var result = player.Take("On_ReviveResult");
+
+        // the build's On_ReviveResult literally checks for 51 = "not enough karma"
+        Assert.Equal(51, result.Arg<EServerErrorType>(1).Get());
+        Assert.True(player.Session.IsDead, "a refused revive leaves the player lying there");
+        Assert.Equal(0, player.Session.Account.Karma);
+    }
+
+    [Fact]
     public void TheAprilScrollButtonFallsBackToCrystalsWithoutTouchingTheBalance()
     {
         using var player = DieNextToMonsters();
